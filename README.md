@@ -27,7 +27,7 @@ Node 20 or newer. The build uses relative paths, so `dist/` can be hosted from a
 | Teams | Eleven slanted "garage doors" that swing open in the team's colours while the car rolls in and brakes |
 | Drivers | Cards that tilt toward the pointer, flood with colour and flip over |
 | Records | A line chart that plots itself, bars that run out to their values, CSS-only counters |
-| Team pages | Per-team colours, type and pattern; a scroll-geared hero car; a pinned "flat out" scene where scrolling is the throttle (0 to 340 km/h); a panning shot with the background in motion blur; a round-by-round result strip |
+| Team pages | Per-team colours, type and pattern; a scroll-geared hero car; a pinned "flat out" scene where scrolling is the throttle (0 to 340 km/h); a panning shot with the background in motion blur; "Through the corner", a real three-frame burst of the car that scrolling plays as one shot (five teams); a round-by-round result strip |
 
 ## How the car animation works
 
@@ -42,6 +42,7 @@ Each photo also has a **depth map**, estimated offline with Depth Anything V2 Sm
 - **heat haze** over the engine cover, **brake glow** through the rims, and a soft contact shadow
 - **blueprint**: Sobel edges and depth contours, wiped away by a scan line
 - on the on-track photos: a **camera push** (dolly) and **panning blur** applied only to what is behind the car
+- on the burst sequences (`seq` program, `GLSequence`): a **crossfade** from frame to frame with **motion blur** along the way the car is moving in each frame (a streak across the picture, or a zoom blur centred on the car when it comes at the camera), and a slow push-in on the car
 
 All scenes share one WebGL context: each `<canvas>` on the page is a 2D canvas that the renderer copies its finished view into, so there is no limit on how many scenes a page has and they stay in the normal stacking order. Textures are shared and released when unused. If WebGL2 is not available, or `prefers-reduced-motion` is set, the plain photographs are shown instead.
 
@@ -67,17 +68,17 @@ Lenis smooths wheel and trackpad scrolling (touch keeps the native feel). GSAP's
 
 ```
 src/
-  components/   GLCar, GLPhoto, PhotoCar, Photo, SplitText, Numbers, Cursor, Nav, Preloader, Transition, Footer
+  components/   GLCar, GLPhoto, GLSequence, PhotoCar, Photo, SplitText, Numbers, Cursor, Nav, Preloader, Transition, Footer
   gl/           the shared WebGL2 renderer and the car and photo shaders
   sections/     Hero, History, Weekend, Machine, Teams, Drivers, Stats
   pages/        Home, TeamPage
   hooks/        useInView, useProgress, usePointer (parallax and tilt), useReducedMotion
   lib/          smooth scrolling, scroll tracking, points maths, team styling helpers
-  data/         teams, drivers, season results, records, history, tech, photo credits
+  data/         teams, drivers, season results, records, history, tech, photo credits, burst sequences
   router/       a small hash router with animated page transitions
   styles/       tokens, base, motion primitives, team identities
-public/photos/  prepared images (cars, action, eras) and their depth maps (depth)
-scripts/        the photo and depth pipeline and a data consistency check
+public/photos/  prepared images (cars, action, eras, seq) and their depth maps (depth)
+scripts/        the photo, depth and sequence pipelines and a data consistency check
 ```
 
 ## Data
@@ -99,6 +100,18 @@ It recomputes every driver's and team's points from the race results and fails i
 5. `python scripts/make-depth.py <model.onnx> <raw> <wheels.json> public/photos` writes the depth maps. It needs `onnxruntime`, `opencv-python`, `numpy` and `pillow`, and the Depth Anything V2 Small ONNX model from [onnx-community/depth-anything-v2-small](https://huggingface.co/onnx-community/depth-anything-v2-small) (`onnx/model_quantized.onnx` was used here).
 6. Add the credit to `src/data/credits.js`.
 
+## Burst sequences
+
+"Through the corner" on the team pages uses real bursts: one car photographed three times in a second or three, from the same spot on the outside of a slow corner at Zandvoort (Steffen Prößdorf, Friday 21 August 2026). Each car comes in heading right, turns towards the camera and leaves heading left. The sets are listed in `scripts/sequences.json`.
+
+```bash
+python scripts/fetch-sequences.py <raw>                       # originals from Commons as <team>-<n>.jpg, with their author and licence
+node scripts/cut-out.mjs <raw> <masks> ferrari-1 ferrari-2 …   # car masks (see above)
+python scripts/prepare-sequences.py <raw> <masks> public/photos src/data/sequences.json
+```
+
+`prepare-sequences.py` frames every shot the same way (the car centred, its tyres on one ground line, scaled to a fixed safe area without the crop leaving the original), grades frames taken from the same spot to the same background brightness, contrast and white balance across all sets, and writes 1600 x 900 webp frames (about 1.8 MB for all fifteen) plus `src/data/sequences.json` with each car's position and the shooting times. Only teams with a full burst get the section; the photographer's uploads cover Ferrari (Hamilton), McLaren, Red Bull, Mercedes and Audi. Without WebGL, or with reduced motion, the three frames are shown side by side as stills.
+
 Driver cards and profiles show each driver's own car. To add portraits you have the rights to, place them in `public/photos/drivers/` and extend `DriverCard`.
 
 Team logos are trademarks and are not included; each team has a typographic mark instead.
@@ -108,12 +121,13 @@ Team logos are trademarks and are not included; each team has a typographic mark
 All photographs come from Wikimedia Commons under Creative Commons licences. The full list, with a link to each original, is in `src/data/credits.js` and on the site's credits section.
 
 - 2026 cars: Lukas Raich, 2026 Austrian Grand Prix series, CC BY-SA 4.0
+- 2026 burst sequences: Steffen Prößdorf, 2026 Dutch Grand Prix series (STP 2292–2294, 2303–2305, 2311–2313, 2323–2325, 2330–2332), CC BY-SA 4.0
 - Alfa Romeo 159: Zairon, CC BY-SA 4.0
 - Lotus 79: Legends Of Motorsports, CC BY-SA 2.0
 - McLaren MP4/4: Nic Redhead, CC BY-SA 2.0
 - Ferrari F2004 and Mercedes W05: emperornie, CC BY-SA 2.0
 
-The images were resized and cropped; the 2026 car photos were also given depth maps, and the side-on ones were cut out and levelled. Because the licences are ShareAlike, the adapted images and depth maps in `public/photos/` are offered under the same licence as their originals. If you publish the site, keep the credits section.
+The images were resized and cropped; the 2026 car photos were also given depth maps, the side-on ones were cut out and levelled, and the burst frames were aligned on the car and matched for exposure and colour. Because the licences are ShareAlike, the adapted images and depth maps in `public/photos/` are offered under the same licence as their originals. If you publish the site, keep the credits section.
 
 The typeface is Archivo (SIL Open Font License).
 

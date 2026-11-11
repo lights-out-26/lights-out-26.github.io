@@ -1,0 +1,14 @@
+{
+  "about": "Burst sequences for the team pages. Each set is one car photographed three times in about two seconds from the same spot on the outside of a slow corner at Zandvoort, Friday 21 August 2026 (Dutch Grand Prix weekend), by Steffen Prößdorf, CC BY-SA 4.0. The car comes in heading right, turns towards the camera and leaves heading left.",
+  "author": "Steffen Prößdorf",
+  "licence": "CC BY-SA 4.0",
+  "motion": ["right", "toward", "left"],
+  "sets": {
+    "ferrari": { "driver": "Hamilton", "no": 44, "stp": [2303, 2304, 2305] },
+    "mclaren": { "driver": "Norris", "no": 1, "stp": [2292, 2293, 2294] },
+    "redbull": { "driver": "Verstappen", "no": 3, "stp": [2330, 2331, 2332] },
+    "mercedes": { "driver": "Antonelli", "no": 12, "stp": [2311, 2312, 2313] },
+    "audi": { "driver": "Bortoleto", "no": 5, "stp": [2323, 2324, 2325] }
+  },
+  "file": "2026-08-21 Motorsport, Formel 1, Großer Preis der Niederlande 2026 STP {stp}.jpg"
+}

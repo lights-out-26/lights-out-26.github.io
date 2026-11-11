@@ -5,9 +5,12 @@
  *
  * Changes made here: photos were resized and cropped; the side-on car shots
  * were also cut out from their backgrounds, levelled, and split into separate
- * wheel layers. Under the ShareAlike terms, these adapted images are offered
- * under the same licence as the originals.
+ * wheel layers; the frames of each burst sequence were aligned on the car and
+ * matched for exposure and colour. Under the ShareAlike terms, these adapted
+ * images are offered under the same licence as the originals.
  */
+import SEQUENCES from './sequences.json';
+
 const BY_SA_4 = { name: 'CC BY-SA 4.0', url: 'https://creativecommons.org/licenses/by-sa/4.0/' };
 const BY_SA_2 = { name: 'CC BY-SA 2.0', url: 'https://creativecommons.org/licenses/by-sa/2.0/' };
 
@@ -45,6 +48,16 @@ export const CREDITS = {
   ),
   ...Object.fromEntries(
     ARCHIVE.map(([key, file, author, licence, subject]) => [key, { file, author, licence, url: page(file), subject }])
+  ),
+  // Steffen Prößdorf's bursts from the 2026 Dutch Grand Prix (scripts/sequences.json): aligned on the car and colour-matched.
+  ...Object.fromEntries(
+    Object.values(SEQUENCES.sets).flatMap((s) =>
+      s.frames.map((f, i) => {
+        const file = `2026-08-21 Motorsport, Formel 1, Großer Preis der Niederlande 2026 STP ${f.stp}.jpg`;
+        const subject = `No. ${s.no}, ${s.driver}`;
+        return [f.src, { file, author: 'Steffen Prößdorf', licence: BY_SA_4, url: page(file), subject, note: `${subject}, frame ${i + 1} of ${s.frames.length}` }];
+      })
+    )
   ),
 };
 

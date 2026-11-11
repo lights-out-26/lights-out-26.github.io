@@ -25,8 +25,8 @@ export default function Footer() {
           </h2>
           <p className="footer__p">
             Every photograph here comes from Wikimedia Commons under a Creative Commons licence. Each has been resized and cropped; the 2026 car photos also have depth
-            maps estimated from them, and the side-on ones were cut out of their backgrounds and levelled. These adapted versions, depth maps included, are shared under
-            the same licences as the originals.
+            maps estimated from them, the side-on ones were cut out of their backgrounds and levelled, and the frames of each burst sequence were aligned on the car
+            and matched for exposure and colour. These adapted versions, depth maps included, are shared under the same licences as the originals.
           </p>
           {CREDIT_GROUPS.map((g) => (
             <div key={`${g.author}-${g.licence.name}`} className="footer__group">
@@ -40,8 +40,8 @@ export default function Footer() {
                 {g.items.map((item) => (
                   <li key={item.key}>
                     <a className="link" href={item.url} target="_blank" rel="noreferrer">
-                      {item.subject}
-                      {g.items.length > 5 ? ` (${item.key.startsWith('action/') ? 'on track' : 'side'})` : ''}
+                      {item.note || item.subject}
+                      {!item.note && g.items.length > 5 ? ` (${item.key.startsWith('action/') ? 'on track' : 'side'})` : ''}
                     </a>
                   </li>
                 ))}
@@ -64,8 +64,8 @@ export default function Footer() {
           </p>
           <p className="footer__p">
             Built with React, GSAP and WebGL, with smooth scrolling by Lenis. The cars are the original photographs, drawn by small shaders that use each photo’s depth
-            map for parallax, relighting, wheel spin, motion blur and heat haze. The depth maps were made with Depth Anything V2 Small (Apache License 2.0). Type is set
-            in Archivo (SIL Open Font License).
+            map for parallax, relighting, wheel spin, motion blur and heat haze. The burst sequences on the team pages are real consecutive frames, blended by a shader
+            with motion blur between them. The depth maps were made with Depth Anything V2 Small (Apache License 2.0). Type is set in Archivo (SIL Open Font License).
           </p>
         </section>
       </div>

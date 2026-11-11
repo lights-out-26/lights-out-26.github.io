@@ -410,6 +410,150 @@
   color: var(--silver);
 }
 
+/* ============ through the corner ============ */
+
+.tpq {
+  position: relative;
+  height: 300vh;
+  height: 300svh;
+}
+
+.tpq__pin {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: clamp(14px, 3vh, 32px);
+  height: 100vh;
+  height: 100svh;
+  padding-block: calc(var(--nav-h) + 2vh) 3vh;
+  overflow: hidden;
+}
+
+.tpq__head {
+  display: grid;
+  gap: 10px;
+}
+
+.tpq__head p {
+  max-width: 44em;
+  color: var(--silver);
+}
+
+.tpq__stage {
+  display: grid;
+  justify-items: center;
+}
+
+/* As wide as the column allows, but never taller than the screen has room for. */
+.tpq__frame {
+  width: min(100%, calc((100vh - var(--nav-h) - 40vh) * 16 / 9));
+  width: min(100%, calc((100svh - var(--nav-h) - 40svh) * 16 / 9));
+}
+
+.tpq__frame .photo__frame {
+  box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.85);
+}
+
+.tpq__hud {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: 8px clamp(16px, 3vw, 40px);
+  margin-top: 14px;
+}
+
+.tpq__count {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3em;
+}
+
+.tpq__count b {
+  min-width: 1ch;
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-weight: 900;
+  font-stretch: 118%;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  line-height: 0.85;
+  color: var(--team);
+}
+
+.tpq__count span {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* The steps of the corner, with a bar that follows the scroll from the first frame to the last. */
+.tpq__ticks {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 12px;
+  font-size: var(--fs-small);
+  font-stretch: 82%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.tpq__ticks::before,
+.tpq__ticks::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+}
+
+.tpq__ticks::before {
+  background: var(--line);
+}
+
+.tpq__ticks::after {
+  background: linear-gradient(90deg, var(--white), var(--team));
+  transform: scaleX(var(--seq, 0));
+  transform-origin: 0 50%;
+}
+
+.tpq__credit {
+  min-height: 1.4em;
+}
+
+/* Without WebGL, or with reduced motion: the frames side by side. */
+.tpq--still {
+  height: auto;
+  padding-block: clamp(40px, 6vw, 96px) clamp(48px, 7vw, 110px);
+}
+
+.tpq--still .tpq__head {
+  margin-bottom: clamp(18px, 3vw, 36px);
+}
+
+.tpq__strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(8px, 1.4vw, 20px);
+}
+
+.tpq__label {
+  margin-top: 8px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.tpq__label .t-num {
+  margin-right: 0.4em;
+  color: var(--team);
+}
+
+.tpq--still .tpq__credit {
+  margin-top: 12px;
+}
+
 /* ============ drivers ============ */
 
 .tpds__head {
@@ -948,6 +1092,10 @@ html.js [data-inview='true'] .strip__cell {
   .tpv__mode {
     grid-column: 1 / -1;
     justify-self: start;
+  }
+
+  .tpq__strip {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .tpd {

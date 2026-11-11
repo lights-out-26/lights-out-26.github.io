@@ -1,9 +1,11 @@
-import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import PhotoCar from '../components/PhotoCar';
 import GLCar from '../components/GLCar';
 import GLPhoto from '../components/GLPhoto';
-import { Credit } from '../components/Photo';
+import GLSequence from '../components/GLSequence';
+import Photo, { Credit, Credits } from '../components/Photo';
+import SEQUENCES from '../data/sequences.json';
 import SplitText from '../components/SplitText';
 import { Count, Odometer } from '../components/Numbers';
 import Footer from '../components/Footer';
@@ -301,6 +303,116 @@ function TeamAction({ team }) {
   );
 }
 
+const SEQ_STEPS = { right: 'Turning in', toward: 'At the apex', left: 'Away' };
+
+/**
+ * Through the corner. Identity: a real burst. Three photographs of one car
+ * taken a second or so apart from the same spot; scrolling plays them as one
+ * shot, with motion blur between the frames. Without WebGL, or with reduced
+ * motion, the frames sit side by side as stills.
+ */
+function TeamSequence({ team, set }) {
+  const d = DRIVER_BY_CODE[team.drivers.find((code) => DRIVER_BY_CODE[code].no === set.no)] || { first: '', last: set.driver, no: set.no };
+  const n = set.frames.length;
+  const ids = useMemo(() => set.frames.map((f) => f.src), [set]);
+  const [gl, setGl] = useState(() => glAvailable());
+  const seq = useRef(null);
+  const countEl = useRef(null);
+  const ticksEl = useRef(null);
+  const [nearRef, near] = useInView({ margin: '100% 0px 100% 0px', threshold: 0 });
+
+  const onScroll = useCallback(
+    (p) => {
+      const pos = Math.min(1, Math.max(0, (p - 0.08) / 0.8)) * (n - 1);
+      if (seq.current) seq.current.s.pos = pos;
+      if (countEl.current) countEl.current.textContent = String(Math.round(pos) + 1);
+      if (ticksEl.current) ticksEl.current.style.setProperty('--seq', (pos / (n - 1)).toFixed(4));
+    },
+    [n]
+  );
+  const ref = useProgress('contain', gl ? onScroll : undefined);
+  const alt = `${d.first} ${d.last}’s ${team.chassis}, car ${set.no}, photographed ${n} times from one spot as it comes through a corner at Zandvoort`;
+  const span = set.seconds ? `${set.seconds.toFixed(1)} seconds` : 'a few seconds';
+
+  const head = (
+    <div className="tpq__head wrap">
+      <h2 id="tpq-title" className="t-h2" data-skew="">
+        Through the corner
+      </h2>
+      <p>
+        {d.first} {d.last} at Zandvoort on 21 August 2026, photographed {n} times from one spot in {span}. The car arrives heading right, swings round towards the
+        lens and leaves heading left.{gl ? ' Scroll to take it round.' : ''}
+      </p>
+    </div>
+  );
+
+  if (!gl) {
+    return (
+      <section className="tpq tpq--still" aria-labelledby="tpq-title">
+        {head}
+        <ol className="tpq__strip wrap">
+          {set.frames.map((f, i) => (
+            <li key={f.src}>
+              <Photo id={f.src} alt={`${alt}: frame ${i + 1} of ${n}`} ratio="16 / 9" />
+              <p className="tpq__label">
+                <span className="t-num">{i + 1}</span> {SEQ_STEPS[SEQUENCES.motion[i]]}
+              </p>
+            </li>
+          ))}
+        </ol>
+        <p className="tpq__credit wrap">
+          <Credits ids={ids} />
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section
+      className="tpq"
+      ref={(el) => {
+        ref.current = el;
+        nearRef.current = el;
+      }}
+      data-timeline="contain"
+      aria-labelledby="tpq-title"
+    >
+      <div className="tpq__pin">
+        {head}
+        <div className="tpq__stage wrap">
+          <div className="tpq__frame">
+            <GLSequence
+              ref={seq}
+              frames={set.frames}
+              motion={SEQUENCES.motion}
+              size={SEQUENCES.size}
+              alt={alt}
+              active={near}
+              onFail={() => setGl(false)}
+            />
+            <div className="tpq__hud" aria-hidden="true">
+              <p className="tpq__count">
+                <b className="t-num" ref={countEl}>
+                  1
+                </b>
+                <span className="t-num">/ {n}</span>
+              </p>
+              <ol className="tpq__ticks" ref={ticksEl}>
+                {set.frames.map((f, i) => (
+                  <li key={f.src}>{SEQ_STEPS[SEQUENCES.motion[i]]}</li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+        <p className="tpq__credit wrap">
+          <Credits ids={ids} />
+        </p>
+      </div>
+    </section>
+  );
+}
+
 function DriverRow({ code, team, flip }) {
   const d = DRIVER_BY_CODE[code];
   const s = useMemo(() => driverSeason(code), [code]);
@@ -532,6 +644,7 @@ export default function TeamPage({ id }) {
       <TeamStory team={team} />
       <TeamSpeed team={team} />
       <TeamAction team={team} />
+      {SEQUENCES.sets[team.id] && <TeamSequence key={team.id} team={team} set={SEQUENCES.sets[team.id]} />}
       <section className="tpds" aria-labelledby="tpds-title">
         <Reveal className="tpds__head wrap">
           <h2 id="tpds-title" className="t-display" data-skew="">
