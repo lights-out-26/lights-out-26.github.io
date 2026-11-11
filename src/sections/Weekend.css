@@ -3,6 +3,9 @@
   height: 460vh;
   height: 460svh;
   background: var(--carbon);
+  /* timing-screen colours (the start-light red stays reserved for the gantry) */
+  --knock: #f2554a;
+  --gain: #39d98a;
 }
 
 .weekend__pin {
@@ -177,9 +180,14 @@ html.js .wstep:not([data-state='on']) .split__ch {
   transition: transform 0.6s var(--ease-out);
 }
 
-.weekend__dot[data-done] i::after,
-.weekend__dot[aria-current] i::after {
+.weekend__dot[data-done] i::after {
   transform: none;
+}
+
+/* The current stage fills as its session clock runs down. */
+.weekend__dot[aria-current] i::after {
+  transform: translate3d(calc((var(--fill, 1) - 1) * 100%), 0, 0);
+  transition-duration: 0.2s;
 }
 
 .weekend__dot[aria-current],
@@ -187,15 +195,257 @@ html.js .wstep:not([data-state='on']) .split__ch {
   color: var(--white);
 }
 
-/* ---- the grid ---- */
+/* ---- the visual: a timing screen, then the grid ---- */
 
 .weekend__visual {
   position: relative;
   display: grid;
+  justify-items: center;
+  min-height: 0;
+}
+
+.weekend__visual > * {
+  grid-area: 1 / 1;
+}
+
+/* ---- timing tower ---- */
+
+.tower {
+  --row: min(3vh, 30px);
+  display: grid;
+  align-content: center;
+  gap: 1.4vh;
+  width: min(100%, 25rem);
+  min-height: 0;
+  animation: tower-in 0.6s var(--ease-out);
+}
+
+@keyframes tower-in {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+}
+
+.tower__head {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #050506;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.tower__session {
+  font-weight: 800;
+  font-stretch: 118%;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.tower__clock {
+  min-width: 4.5ch;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* A chequered flag that waves in when the clock runs out. */
+.tower__flag {
+  width: 22px;
+  height: 16px;
+  background: repeating-conic-gradient(var(--white) 0 25%, #050506 0 50%) 0 0 / 8px 8px;
+  border-radius: 2px;
+  opacity: 0.12;
+  transition: opacity 0.3s linear;
+}
+
+.tower[data-done] .tower__flag {
+  opacity: 1;
+  animation: flag 0.9s var(--ease-in-out) 2;
+}
+
+@keyframes flag {
+  0%, 100% { transform: none; }
+  30% { transform: skewY(-10deg) scaleX(0.92); }
+  65% { transform: skewY(8deg); }
+}
+
+.tower[data-done] .tower__clock {
+  color: var(--muted);
+}
+
+.tower__list {
+  position: relative;
+  height: calc(var(--row) * var(--count, 22));
+}
+
+.tower__row {
+  position: absolute;
+  inset: 0 0 auto;
+  display: grid;
+  grid-template-columns: 2.1em 4px 3.2em 1fr 1em;
+  align-items: center;
+  gap: 10px;
+  height: var(--row);
+  padding-inline: 10px 6px;
+  font-size: clamp(0.7rem, 1.55vh, 0.9rem);
+  transform: translate3d(0, calc(var(--slot) * var(--row)), 0);
+  transition: transform 0.55s var(--ease-out), opacity 0.4s linear, background-color 0.35s linear;
+}
+
+.tower__row[data-alt] {
+  background: rgb(255 255 255 / 0.03);
+}
+
+.tower__pos {
+  color: var(--muted);
+  text-align: right;
+}
+
+.tower__bar {
+  height: 70%;
+  background: var(--team-c);
+}
+
+.tower__code {
+  font-weight: 800;
+  font-stretch: 108%;
+  letter-spacing: 0.04em;
+}
+
+.tower__time {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--silver);
+}
+
+.tower__row[data-state='wait'] .tower__time {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Knocked out as the flag falls: the row flushes red, then stays marked. */
+.tower__row[data-state='out'] {
+  background: color-mix(in srgb, var(--knock) 16%, transparent);
+  animation: knocked 0.7s var(--ease-out);
+}
+
+.tower__row[data-state='out'] .tower__time,
+.tower__row[data-state='out'] .tower__code {
+  color: var(--knock);
+}
+
+@keyframes knocked {
+  from { background: color-mix(in srgb, var(--knock) 55%, transparent); }
+}
+
+/* Out in an earlier part of qualifying: kept on the screen, greyed. */
+.tower__row[data-state='gone'] {
+  opacity: 0.3;
+}
+
+.tower__row[data-state='gone'] .tower__bar {
+  filter: grayscale(1);
+}
+
+/* Pole: the top row lights up once Q3 is over. */
+.tower__row[data-pole] {
+  background: var(--white);
+  color: #000;
+  animation: pole 1.6s var(--ease-out);
+}
+
+.tower__row[data-pole] :is(.tower__pos, .tower__time) {
+  color: #000;
+}
+
+.tower__row[data-pole] .tower__time::after {
+  content: '  POLE';
+  font-weight: 800;
+}
+
+@keyframes pole {
+  0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.9); }
+  100% { box-shadow: 0 0 0 14px rgb(255 255 255 / 0); }
+}
+
+/* A change of place: a small arrow that fades. */
+.tower__arrow {
+  width: 0;
+  height: 0;
+  justify-self: center;
+  border-inline: 4px solid transparent;
+  animation: arrow 1.6s linear forwards;
+}
+
+.tower__arrow[data-dir='up'] {
+  border-bottom: 6px solid var(--gain);
+}
+
+.tower__arrow[data-dir='down'] {
+  border-top: 6px solid var(--knock);
+}
+
+@keyframes arrow {
+  0%, 60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* The knock-out line under the last place that goes through. */
+.tower__cut {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0;
+  border-top: 2px solid var(--knock);
+  transform: translate3d(0, calc(var(--slot) * var(--row)), 0);
+}
+
+/* The label sits on the line, in the empty middle of the rows, so it covers no name or time. */
+.tower__cut span {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  translate: -50% -50%;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  font-stretch: 82%;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #000;
+  background: var(--knock);
+}
+
+.tower__note {
+  font-size: var(--fs-micro);
+  font-stretch: 82%;
+  color: var(--muted);
+}
+
+/* ---- race: the grid in qualifying order, then the start ---- */
+
+.weekend__race {
+  display: grid;
   grid-template-rows: auto 1fr;
   justify-items: center;
   gap: 2.5vh;
+  width: 100%;
   min-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, 24px, 0);
+  transition: opacity 0.4s linear, transform 0.6s var(--ease-out), visibility 0s linear 0.4s;
+}
+
+.weekend__pin[data-stage='race'] .weekend__race {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.5s linear 0.1s, transform 0.8s var(--ease-out) 0.1s, visibility 0s;
 }
 
 .gantry {
@@ -205,8 +455,6 @@ html.js .wstep:not([data-state='on']) .split__ch {
   border-radius: 999px;
   background: #050506;
   box-shadow: inset 0 0 0 1px var(--line);
-  opacity: 0.35;
-  transition: opacity 0.4s linear;
 }
 
 .gantry span {
@@ -214,10 +462,6 @@ html.js .wstep:not([data-state='on']) .split__ch {
   aspect-ratio: 1;
   border-radius: 50%;
   background: #240808;
-}
-
-.weekend__pin[data-stage='race'] .gantry {
-  opacity: 1;
 }
 
 /* Each lamp comes on a beat after the last, then all five go dark together. */
@@ -251,8 +495,6 @@ html.js .wstep:not([data-state='on']) .split__ch {
 .grid22__slot {
   position: relative;
   height: clamp(18px, 5.6vh, 52px);
-  transition: opacity 0.5s linear, transform 0.7s var(--ease-out), filter 0.5s linear;
-  transition-delay: calc((22 - var(--n)) * 22ms);
 }
 
 /* Even-numbered places sit half a row back, as on a real grid. */
@@ -268,6 +510,7 @@ html.js .wstep:not([data-state='on']) .split__ch {
   border-bottom: 0;
 }
 
+/* Cars line up in qualifying order, each in its team colour, rolling in from the back. */
 .grid22__car {
   position: absolute;
   left: 50%;
@@ -276,9 +519,8 @@ html.js .wstep:not([data-state='on']) .split__ch {
   height: 62%;
   translate: -50% 0;
   border-radius: 40% 40% 18% 18% / 60% 60% 12% 12%;
-  background: linear-gradient(var(--white), var(--silver));
+  background: linear-gradient(var(--car, var(--white)), color-mix(in srgb, var(--car, var(--silver)) 65%, #000));
   clip-path: polygon(38% 0, 62% 0, 66% 22%, 100% 26%, 100% 44%, 70% 46%, 72% 70%, 100% 72%, 100% 96%, 0 96%, 0 72%, 28% 70%, 30% 46%, 0 44%, 0 26%, 34% 22%);
-  transition: background-color 0.4s linear, transform 0.6s var(--ease-out);
 }
 
 .grid22__no {
@@ -296,44 +538,14 @@ html.js .wstep:not([data-state='on']) .split__ch {
   left: calc(100% + 6px);
 }
 
-/* Knocked out: the car drops back and goes dark. */
-.grid22__slot[data-out] {
-  opacity: 0.22;
-  filter: grayscale(1);
-  transform: translate3d(0, 10px, 0) scale(0.92);
-}
-
-.grid22__slot[data-pole] .grid22__car {
-  background: var(--white);
-  box-shadow: 0 0 0 0 var(--white);
-  animation: pole 1.4s var(--ease-out) infinite;
-}
-
-.grid22__slot[data-pole] .grid22__box {
-  border-color: var(--white);
-}
-
-@keyframes pole {
-  0% { filter: drop-shadow(0 0 0 rgb(255 255 255 / 0.9)); }
-  100% { filter: drop-shadow(0 0 22px rgb(255 255 255 / 0)); }
-}
-
-/* Practice: cars shuffle about as lap times change. */
-.weekend__pin[data-stage='practice'] .grid22__car {
-  animation: shuffle 2.6s var(--ease-in-out) infinite;
-  animation-delay: calc(var(--n) * -0.37s);
-}
-
-@keyframes shuffle {
-  0%, 100% { transform: none; }
-  30% { transform: translate3d(0, -14%, 0); }
-  62% { transform: translate3d(0, 10%, 0); }
-}
-
-/* Race: when the lights go out, the whole grid launches, front rows first. */
+/* Race: the cars form up (back of the grid first), then launch when the lights go out, front rows first. */
 .weekend__pin[data-stage='race'] .grid22__car {
-  animation: launch 4.4s linear infinite;
-  animation-delay: calc(var(--n) * 0.012s);
+  animation: form-up 0.7s var(--ease-out) backwards, launch 4.4s linear 0.9s infinite;
+  animation-delay: calc((22 - var(--n)) * 25ms), calc(0.9s + var(--n) * 0.012s);
+}
+
+@keyframes form-up {
+  from { transform: translate3d(0, 260%, 0); opacity: 0; }
 }
 
 @keyframes launch {
@@ -347,14 +559,57 @@ html.js .wstep:not([data-state='on']) .split__ch {
 @media (max-width: 860px) {
   .weekend__inner {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 34%) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 38%) minmax(0, 1fr);
     gap: 2vh;
   }
 
   .weekend__visual {
     order: -1;
-    grid-template-rows: auto minmax(0, 1fr);
-    gap: 1vh;
+  }
+
+  /* The timing screen folds into two columns of eleven. */
+  .tower {
+    --row: clamp(13px, 2.3vh, 20px);
+    gap: 0.8vh;
+    width: 100%;
+  }
+
+  .tower__head {
+    padding: 6px 10px;
+  }
+
+  .tower__clock {
+    font-size: 1rem;
+  }
+
+  .tower__list {
+    height: calc(var(--row) * 11);
+  }
+
+  .tower__row,
+  .tower__cut {
+    width: calc(50% - 6px);
+    transform: translate3d(calc(var(--col) * (100% + 12px)), calc(var(--r) * var(--row)), 0);
+  }
+
+  .tower__row {
+    grid-template-columns: 1.6em 3px 1fr auto 0.8em;
+    gap: 6px;
+    padding-inline: 4px;
+    font-size: 0.66rem;
+  }
+
+  .tower__time {
+    font-size: 0.6rem;
+  }
+
+  /* No room for the label in a half-width column: the red line and rows say it. */
+  .tower__cut span {
+    display: none;
+  }
+
+  .tower__note {
+    display: none;
   }
 
   .grid22 {
@@ -384,12 +639,20 @@ html.js .wstep:not([data-state='on']) .split__ch {
 
 @media (prefers-reduced-motion: reduce) {
   .weekend__pin[data-stage] .gantry span,
-  .weekend__pin[data-stage] .grid22__car {
-    animation: none;
+  .weekend__pin[data-stage] .grid22__car,
+  .tower,
+  .tower__row,
+  .tower__flag {
+    animation: none !important;
+  }
+
+  .tower__arrow {
+    display: none;
   }
 
   .wstep :is(.wstep__day, .wstep__lead, .wstep__body, .wstep__stat),
-  .grid22__slot {
+  .tower__row,
+  .weekend__race {
     transition: none;
   }
 }
