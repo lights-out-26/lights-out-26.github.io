@@ -1,0 +1,416 @@
+.drivers {
+  position: relative;
+  padding-bottom: var(--section-y);
+  background: var(--carbon);
+  overflow: hidden;
+}
+
+.drivers__head {
+  display: grid;
+  gap: clamp(18px, 2.4vw, 32px);
+  padding-block: var(--section-y) clamp(28px, 4vw, 56px);
+}
+
+.drivers__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px 40px;
+}
+
+.drivers__tools {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.drivers__seg {
+  --team: var(--white);
+  --team-ink: #000;
+}
+
+.drivers__arrows {
+  display: flex;
+  gap: 6px;
+}
+
+.drivers__arrows button {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  transition: background-color 0.3s linear, color 0.3s linear, transform 0.4s var(--ease-back);
+}
+
+.drivers__arrows button:hover,
+.drivers__arrows button:focus-visible {
+  background: var(--white);
+  color: #000;
+}
+
+.drivers__arrows button:active {
+  transform: scale(0.9);
+}
+
+.drivers__arrows svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+/* ---- the rail ---- */
+
+.drivers__rail {
+  display: flex;
+  gap: clamp(12px, 1.4vw, 22px);
+  padding: 30px max(var(--gutter), env(safe-area-inset-right, 0px)) 40px max(var(--gutter), env(safe-area-inset-left, 0px));
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--gutter);
+  scrollbar-width: none;
+  perspective: 1600px;
+  outline-offset: -4px;
+}
+
+.drivers__rail::-webkit-scrollbar {
+  display: none;
+}
+
+.drivers__rail[data-dragging] {
+  scroll-snap-type: none;
+  cursor: grabbing;
+}
+
+.drivers__rail[data-dragging] .dcard {
+  pointer-events: none;
+}
+
+/* ---- one card ---- */
+
+.dcard {
+  position: relative;
+  flex: 0 0 clamp(248px, 21vw, 330px);
+  aspect-ratio: 5 / 7;
+  scroll-snap-align: start;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.dcard[data-tilting] {
+  transition-duration: 0.12s;
+}
+
+/* Cards are dealt in from the right, one after another. */
+html.js .drivers[data-inview='false'] .dcard {
+  opacity: 0;
+}
+
+html.js .drivers[data-inview='true'] .dcard {
+  animation: dcard-deal 0.9s var(--ease-out) calc(min(var(--i), 8) * 60ms) backwards;
+}
+
+@keyframes dcard-deal {
+  from {
+    opacity: 0;
+    transform: translate3d(90px, 0, -120px) rotateY(-38deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  }
+}
+
+.dcard__inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.9s var(--ease-in-out);
+}
+
+.dcard[data-flipped] .dcard__inner {
+  transform: rotateY(180deg);
+}
+
+.dcard__toggle {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 14px;
+}
+
+.dcard__face {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background: linear-gradient(165deg, #1d2024, #0a0b0d 70%);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* ---- front ---- */
+
+/* The team's colour rises from the bottom edge on hover. */
+.dcard__face--front::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(170deg, var(--team-deep), color-mix(in srgb, var(--team) 72%, #000));
+  clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
+  transition: clip-path 0.7s var(--ease-out);
+}
+
+.dcard:hover .dcard__face--front::before,
+.dcard:focus-within .dcard__face--front::before {
+  clip-path: polygon(0 18%, 100% 0, 100% 100%, 0 100%);
+}
+
+.dcard__no {
+  position: absolute;
+  right: -0.04em;
+  top: 0.06em;
+  font-size: clamp(7rem, 13.5vw, 13rem);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-style: italic;
+  line-height: 0.8;
+  letter-spacing: -0.08em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--team) 75%, transparent);
+  transform: translate3d(calc(var(--tx, 0) * -10px), calc(var(--ty, 0) * -8px), 0);
+  transition: color 0.5s linear, -webkit-text-stroke-color 0.5s linear, transform 0.5s var(--ease-out);
+}
+
+.dcard:hover .dcard__no,
+.dcard:focus-within .dcard__no {
+  color: var(--team-ink);
+  -webkit-text-stroke-color: transparent;
+}
+
+/* The driver's own car, much wider than the card; hovering slides it along. */
+.dcard__car {
+  position: absolute;
+  left: 0;
+  top: 26%;
+  width: 245%;
+  transform: translate3d(calc(-46% + var(--tx, 0) * -3%), 0, 0);
+  transition: transform 0.9s var(--ease-out);
+  filter: drop-shadow(0 18px 14px rgb(0 0 0 / 0.55));
+}
+
+.dcard:hover .dcard__car,
+.dcard:focus-within .dcard__car {
+  transform: translate3d(calc(-30% + var(--tx, 0) * -3%), 0, 0) scale(1.06);
+}
+
+.dcard__top {
+  position: absolute;
+  inset: 16px 18px auto;
+  display: flex;
+  gap: 12px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  font-stretch: 84%;
+}
+
+.dcard__top span:last-child {
+  color: var(--silver);
+  font-weight: 600;
+}
+
+.dcard__id {
+  position: absolute;
+  inset: auto 18px 18px;
+  display: grid;
+  gap: 2px;
+  container-type: inline-size;
+}
+
+.dcard__first {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--silver);
+  transition: color 0.4s linear;
+}
+
+/* --fit is the size at which this surname fills the card's width exactly. */
+.dcard__last {
+  font-size: min(2.6rem, var(--fit, 2rem));
+  line-height: 0.95;
+  white-space: nowrap;
+}
+
+.dcard__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: var(--fs-micro);
+  line-height: 1.3;
+  color: var(--silver);
+  transition: color 0.4s linear;
+}
+
+.dcard__meta .mark {
+  --mark-size: 0.62rem;
+  flex: none;
+  transition: background-color 0.4s linear, color 0.4s linear;
+}
+
+.dcard:hover :is(.dcard__first, .dcard__meta),
+.dcard:focus-within :is(.dcard__first, .dcard__meta) {
+  color: var(--white);
+}
+
+.dcard:hover .dcard__meta .mark,
+.dcard:focus-within .dcard__meta .mark {
+  background: var(--team-ink);
+  color: var(--team);
+}
+
+.dcard__glare {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 50% at var(--gx, 50%) var(--gy, 0%), rgb(255 255 255 / 0.22), transparent 70%);
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity 0.3s linear;
+}
+
+.dcard[data-tilting] .dcard__glare {
+  opacity: 1;
+}
+
+/* ---- back ---- */
+
+.dcard__face--back {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 18px;
+  transform: rotateY(180deg);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--team-deep) 80%, #000), #08090b 80%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--team) 50%, transparent);
+}
+
+.dcard__backname {
+  font-size: 1rem;
+  font-weight: 800;
+  font-stretch: 110%;
+}
+
+.dcard__backname span {
+  color: var(--team);
+  margin-right: 0.3em;
+}
+
+.dcard__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 8px;
+  margin: 0;
+  padding-block: 12px;
+  border-block: 1px solid var(--line);
+}
+
+.dcard__stats dt {
+  font-size: 0.6875rem;
+  font-stretch: 76%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.dcard__stats dd {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-stretch: 105%;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.dcard__titles {
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  color: var(--team);
+}
+
+.dcard__note {
+  font-size: var(--fs-small);
+  line-height: 1.4;
+  color: var(--silver);
+}
+
+.dcard__spark {
+  display: grid;
+  gap: 6px;
+  margin: auto 0 0;
+  align-self: end;
+}
+
+.dcard__face--back {
+  grid-template-rows: auto auto auto 1fr;
+}
+
+.dcard__spark svg {
+  width: 100%;
+  height: 44px;
+  overflow: visible;
+}
+
+.dcard__spark path {
+  fill: none;
+  stroke: var(--team);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0s linear 0.9s;
+}
+
+/* The season's points line draws itself once the card has turned. */
+.dcard[data-flipped] .dcard__spark path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1.4s var(--ease-in-out) 0.5s;
+}
+
+.dcard__spark figcaption {
+  font-size: 0.6875rem;
+  font-stretch: 80%;
+  color: var(--muted);
+}
+
+@media (max-width: 760px) {
+  .dcard {
+    flex-basis: min(74vw, 300px);
+  }
+
+  .drivers__tools {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js .drivers[data-inview] .dcard {
+    opacity: 1;
+    animation: none;
+  }
+
+  .dcard,
+  .dcard__inner,
+  .dcard__car,
+  .dcard__face--front::before,
+  .dcard__spark path {
+    transition: none !important;
+  }
+}

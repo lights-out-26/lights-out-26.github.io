@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="An unofficial, animation-led tour of the 2026 Formula 1 grid: eleven teams, twenty-two cars, one set of new rules." />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Lights Out 26</title>
+    <script>
+      /* Run before first paint: mark that scripts work (so reveal animations may hide content)
+         and note which scroll features the browser has. */
+      (function (d) {
+        var c = d.documentElement.classList;
+        c.add('js');
+        if (!(window.CSS && CSS.supports && CSS.supports('animation-timeline: view()'))) c.add('no-sda');
+        if (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches) c.add('fine-pointer');
+      })(document);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <p style="padding: 2rem; font: 1rem/1.5 system-ui, sans-serif; color: #fff; background: #000">
+        Lights Out 26 needs JavaScript to run.
+      </p>
+    </noscript>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

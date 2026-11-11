@@ -1,0 +1,575 @@
+/* Chart colours are the teams' own, because here the colour is the identity.
+   They are not an even-lightness palette, so nothing relies on colour alone:
+   team-mates differ by dash, every line is labelled at its end, there is a
+   legend, and the same figures are available as a table. */
+
+.stats {
+  position: relative;
+  padding-bottom: var(--section-y);
+  background: var(--black);
+}
+
+.stats__head {
+  display: grid;
+  gap: clamp(16px, 2vw, 28px);
+  padding-block: var(--section-y) clamp(36px, 5vw, 72px);
+}
+
+.stats__h3 {
+  font-size: var(--fs-h3);
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.stats__foot {
+  margin-top: 16px;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.stats__pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(40px, 6vw, 112px);
+  margin-top: clamp(64px, 9vw, 140px);
+}
+
+/* ---- line chart ---- */
+
+.fight {
+  margin: 0;
+}
+
+.fight__cap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px 32px;
+  margin-bottom: 22px;
+}
+
+.fight__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  font-size: var(--fs-small);
+  color: var(--silver);
+}
+
+.fight__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fight__legend line {
+  stroke: var(--team);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.fight__plot {
+  position: relative;
+}
+
+.fight__plot svg {
+  display: block;
+  max-width: none;
+  touch-action: pan-y;
+  border-radius: 2px;
+}
+
+.fight__grid line {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.fight__grid text {
+  fill: var(--muted);
+  font-size: 11px;
+  font-stretch: 78%;
+  font-variant-numeric: tabular-nums;
+}
+
+.fight__line {
+  fill: none;
+  stroke: var(--team);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* The lines are uncovered left to right, like a trace being plotted. */
+.fight__reveal {
+  transform-origin: 0 0;
+}
+
+html.js .fight[data-inview='false'] .fight__reveal {
+  transform: scaleX(0);
+}
+
+html.js .fight[data-inview='true'] .fight__reveal {
+  transform: none;
+  transition: transform 2.4s var(--ease-in-out) 0.1s;
+}
+
+html.js .fight[data-inview='false'] .fight__ends {
+  opacity: 0;
+}
+
+html.js .fight[data-inview='true'] .fight__ends {
+  opacity: 1;
+  transition: opacity 0.5s linear 2.2s;
+}
+
+.fight__dot {
+  fill: var(--team);
+  stroke: var(--black);
+  stroke-width: 2;
+}
+
+.fight__leader {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.fight__ends text {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.fight__code {
+  fill: var(--white);
+  font-weight: 700;
+}
+
+.fight__val {
+  fill: var(--silver);
+}
+
+.fight__cross line {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.fight__cross circle {
+  fill: var(--team);
+  stroke: var(--black);
+  stroke-width: 2;
+}
+
+.tip {
+  position: absolute;
+  z-index: 2;
+  min-width: 13.5rem;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgb(22 24 28 / 0.94);
+  box-shadow: 0 0 0 1px var(--line-strong), 0 20px 50px rgb(0 0 0 / 0.7);
+  transform: translate3d(14px, 0, 0);
+  pointer-events: none;
+}
+
+.tip[data-flip] {
+  transform: translate3d(calc(-100% - 14px), 0, 0);
+}
+
+.tip__title {
+  margin-bottom: 8px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.tip ul {
+  display: grid;
+  gap: 4px;
+}
+
+.tip li {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-small);
+  color: var(--silver);
+}
+
+.tip i {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--team);
+}
+
+.tip i[data-dashed] {
+  background: linear-gradient(90deg, var(--team) 0 6px, transparent 6px 11px, var(--team) 11px);
+}
+
+.tip b {
+  color: var(--white);
+  font-weight: 700;
+}
+
+/* ---- table view ---- */
+
+.table {
+  margin-top: 26px;
+  border-block: 1px solid var(--line);
+}
+
+.table summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+html.has-cursor .table summary {
+  cursor: none;
+}
+
+.table summary::-webkit-details-marker {
+  display: none;
+}
+
+.table summary::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid var(--white);
+  border-bottom: 2px solid var(--white);
+  transform: translateY(-3px) rotate(45deg);
+  transition: transform 0.4s var(--ease-out);
+}
+
+.table[open] summary::after {
+  transform: translateY(3px) rotate(-135deg);
+}
+
+.table__scroll {
+  overflow-x: auto;
+  padding-bottom: 20px;
+  animation: table-in 0.6s var(--ease-out) both;
+}
+
+@keyframes table-in {
+  from { opacity: 0; transform: translate3d(0, -10px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+.table table {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+}
+
+.table th,
+.table td {
+  padding: 9px 12px 9px 0;
+  text-align: left;
+  font-weight: 500;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.table thead th {
+  font-size: var(--fs-micro);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.table tbody th {
+  font-weight: 700;
+}
+
+.table .num {
+  text-align: right;
+  padding-right: 0;
+  padding-left: 12px;
+}
+
+.table td:first-child {
+  width: 3em;
+  color: var(--muted);
+}
+
+.table__chip {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 2px;
+  background: var(--team);
+}
+
+/* ---- constructors ---- */
+
+.cons__list {
+  display: grid;
+  margin-top: 22px;
+}
+
+.cons__row {
+  display: grid;
+  grid-template-columns: 1.6em minmax(0, 9.5em) minmax(0, 1fr) 3.2em;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.3s linear, padding 0.4s var(--ease-out);
+}
+
+.cons__row:hover,
+.cons__row:focus-visible {
+  background: color-mix(in srgb, var(--team) 14%, transparent);
+  padding-inline: 10px;
+}
+
+.cons__pos {
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.cons__name {
+  font-weight: 700;
+  font-stretch: 96%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cons__track {
+  display: block;
+  height: 12px;
+}
+
+.cons__track i {
+  display: block;
+  width: max(3px, calc(var(--share) * 100%));
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background: var(--team);
+  transform-origin: 0 50%;
+}
+
+html.js [data-inview='false'] .cons__track i {
+  transform: scaleX(0);
+}
+
+html.js [data-inview='true'] .cons__track i {
+  transform: none;
+  transition: transform 1.3s var(--ease-out) calc(0.2s + var(--i) * 0.07s);
+}
+
+.cons__pts {
+  text-align: right;
+  font-weight: 700;
+}
+
+/* ---- records ---- */
+
+.recs__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.recs__tabs button {
+  min-height: 38px;
+  padding: 0 1em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  transition: background-color 0.3s linear, color 0.3s linear, border-color 0.3s linear;
+}
+
+.recs__tabs button:hover {
+  border-color: var(--white);
+}
+
+.recs__tabs button[aria-selected='true'] {
+  background: var(--white);
+  border-color: var(--white);
+  color: #000;
+}
+
+.recs__list {
+  display: grid;
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.recs__list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 14px;
+  align-items: baseline;
+  animation: rec-in 0.6s var(--ease-out) calc(var(--i) * 0.06s) both;
+}
+
+@keyframes rec-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+.recs__name {
+  font-weight: 700;
+}
+
+.recs__val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.recs__track {
+  grid-column: 1 / -1;
+  display: block;
+  height: 8px;
+}
+
+.recs__track i {
+  display: block;
+  width: calc(var(--share) * 100%);
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background: var(--alloy);
+  transform-origin: 0 50%;
+  animation: rec-bar 1.1s var(--ease-out) calc(0.1s + var(--i) * 0.06s) both;
+}
+
+.recs__list li[data-current] .recs__track i {
+  background: var(--team);
+}
+
+@keyframes rec-bar {
+  from { transform: scaleX(0); }
+  to { transform: none; }
+}
+
+html.js .recs[data-inview='false'] .recs__list * {
+  animation-play-state: paused;
+}
+
+/* ---- single-figure records ---- */
+
+.miles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(24px, 3vw, 56px);
+  margin-top: clamp(64px, 9vw, 140px);
+  padding-block: clamp(32px, 4vw, 56px);
+  border-block: 1px solid var(--line);
+}
+
+.miles__value {
+  display: block;
+  font-size: clamp(3.4rem, 8.2vw, 9rem);
+  font-weight: 900;
+  font-stretch: 122%;
+  font-style: italic;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+}
+
+.miles__label {
+  margin-top: 12px;
+  font-weight: 700;
+}
+
+.miles__who {
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+/* ---- ages and firsts ---- */
+
+.ages,
+.firsts {
+  display: grid;
+  margin: 18px 0 0;
+}
+
+.ages > div,
+.firsts li {
+  display: grid;
+  grid-template-columns: minmax(0, 11em) minmax(0, 1fr);
+  gap: 4px 20px;
+  padding-block: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ages dt,
+.firsts b {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.ages dd {
+  display: grid;
+}
+
+.ages dd b {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.ages dd span {
+  font-size: var(--fs-small);
+  color: var(--silver);
+}
+
+.firsts span {
+  color: var(--silver);
+}
+
+@media (max-width: 900px) {
+  .stats__pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .miles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .cons__row {
+    grid-template-columns: 1.4em minmax(0, 7em) minmax(0, 1fr) 2.8em;
+    gap: 8px;
+  }
+
+  .ages > div,
+  .firsts li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fight__reveal,
+  .fight__ends,
+  .cons__track i,
+  .cons__row {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .recs__list li,
+  .recs__track i,
+  .table__scroll {
+    animation: none;
+  }
+}

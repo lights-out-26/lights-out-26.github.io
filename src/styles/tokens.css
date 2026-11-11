@@ -1,0 +1,128 @@
+/* ------------------------------------------------------------------
+   Lights Out 26 — design tokens
+   Layout: full-bleed stages; type and cars break the frame, copy sits
+   on a 12-column fluid grid aligned left.
+   Colour: a monochrome world of carbon and metal. Colour only ever
+   arrives with a team (--team), never from the chrome itself.
+   Type: one variable family. Width is the expressive axis: display
+   type is stretched wide, data and labels are set narrow.
+   ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('../assets/fonts/archivo-var.woff2') format('woff2-variations'), url('../assets/fonts/archivo-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('../assets/fonts/archivo-var-italic.woff2') format('woff2-variations'), url('../assets/fonts/archivo-var-italic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* palette */
+  --black: #000;
+  --carbon: #0b0c0e;
+  --graphite: #16181c;
+  --steel: #2b2e34;
+  --alloy: #8a9099;
+  --silver: #c8cdd4;
+  --white: #f5f6f7;
+  --signal: #ff1e1e; /* start-light red: used for the five lights only */
+
+  /* the current team; components override these three */
+  --team: var(--silver);
+  --team-deep: var(--graphite);
+  --team-ink: #000;
+
+  --bg: var(--black);
+  --fg: var(--white);
+  --muted: var(--alloy);
+  --line: rgb(255 255 255 / 0.14);
+  --line-strong: rgb(255 255 255 / 0.3);
+
+  /* type */
+  --font: 'Archivo', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --fs-mega: clamp(5rem, 22vw, 26rem);
+  --fs-display: clamp(2.75rem, 8.4vw, 9.5rem);
+  --fs-h2: clamp(2.1rem, 5.2vw, 5.25rem);
+  --fs-h3: clamp(1.3rem, 2.2vw, 2rem);
+  --fs-lead: clamp(1.1rem, 1.55vw, 1.5rem);
+  --fs-body: clamp(1rem, 1.05vw, 1.125rem);
+  --fs-small: 0.875rem;
+  --fs-micro: 0.75rem;
+
+  /* space */
+  --gutter: clamp(16px, 4vw, 64px);
+  --section-y: clamp(96px, 14vw, 220px);
+  --max: 1680px;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.83, 0, 0.17, 1);
+  --ease-back: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ease-brake: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-launch: cubic-bezier(0.6, 0, 0.9, 0.2);
+
+  --nav-h: 64px;
+}
+
+/* Typed custom properties so they can be animated and transitioned. */
+@property --p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --n {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --sweep {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --wheel-blur {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --x {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --speed {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+/* Registered as colours so a change of team can fade rather than snap. */
+@property --team {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #c8cdd4;
+}
+
+@property --team-deep {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #16181c;
+}

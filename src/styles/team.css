@@ -1,0 +1,88 @@
+/* ------------------------------------------------------------------
+   What makes each team look like itself: a display type setting and a
+   background motif. Both read the --team / --t-* properties set by
+   teamVars(), so they work wherever a team is on stage.
+   ------------------------------------------------------------------ */
+
+.t-team {
+  font-stretch: var(--t-wdth, 110%);
+  font-weight: var(--t-wght, 800);
+  font-style: var(--t-style, normal);
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.88;
+}
+
+/* The typographic team mark that stands in for a logo. */
+.mark {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.6em;
+  height: 2.6em;
+  padding-inline: 0.5em;
+  background: var(--team);
+  color: var(--team-ink);
+  font-size: var(--mark-size, 0.8rem);
+  font-stretch: var(--t-wdth, 110%);
+  font-weight: 900;
+  font-style: var(--t-style, normal);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  clip-path: polygon(0.5em 0, 100% 0, calc(100% - 0.5em) 100%, 0 100%);
+}
+
+.motif {
+  --m: color-mix(in srgb, var(--team) 16%, transparent);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(160deg, #000, transparent 72%);
+  mask-image: linear-gradient(160deg, #000, transparent 72%);
+}
+
+.motif[data-motif='stars'] {
+  background: radial-gradient(var(--m) 1.6px, transparent 2.2px) 0 0 / 46px 46px,
+    radial-gradient(var(--m) 1px, transparent 1.6px) 23px 23px / 46px 46px;
+}
+
+.motif[data-motif='pinstripe'] {
+  background: repeating-linear-gradient(90deg, var(--m) 0 1px, transparent 1px 13px);
+}
+
+.motif[data-motif='chevron'] {
+  background: linear-gradient(135deg, var(--m) 25%, transparent 25%) -24px 0 / 48px 48px,
+    linear-gradient(225deg, var(--m) 25%, transparent 25%) -24px 0 / 48px 48px;
+}
+
+.motif[data-motif='slash'] {
+  background: repeating-linear-gradient(112deg, var(--m) 0 34px, transparent 34px 120px);
+}
+
+.motif[data-motif='dots'] {
+  background: radial-gradient(var(--m) 2px, transparent 2.6px) 0 0 / 18px 18px;
+}
+
+.motif[data-motif='wave'] {
+  background: repeating-radial-gradient(circle at 0 100%, transparent 0 26px, var(--m) 26px 28px);
+}
+
+.motif[data-motif='blocks'] {
+  background: conic-gradient(var(--m) 25%, transparent 0 50%, var(--m) 0 75%, transparent 0) 0 0 / 72px 72px;
+}
+
+.motif[data-motif='rings'] {
+  background: repeating-radial-gradient(circle at 78% 46%, transparent 0 42px, var(--m) 42px 44px);
+}
+
+.motif[data-motif='grid'] {
+  background: linear-gradient(var(--m) 1px, transparent 1px) 0 0 / 44px 44px,
+    linear-gradient(90deg, var(--m) 1px, transparent 1px) 0 0 / 44px 44px;
+}
+
+.motif[data-motif='hatch'] {
+  background: repeating-linear-gradient(45deg, var(--m) 0 1px, transparent 1px 9px);
+}
+
+.motif[data-motif='split'] {
+  background: linear-gradient(104deg, var(--m) 0 46%, transparent 46% 48%, var(--m) 48% 49%, transparent 49%);
+}

@@ -1,0 +1,54 @@
+.num {
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+
+/* ---- odometer ---- */
+
+.odo {
+  display: inline-block;
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1;
+}
+
+.odo__row {
+  display: inline-flex;
+  align-items: flex-start;
+}
+
+.odo__col {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.odo__strip {
+  display: block;
+  transform: translate3d(0, calc(var(--d) * -1em), 0);
+}
+
+.odo__strip > span {
+  display: block;
+  height: 1em;
+}
+
+.odo__sep {
+  display: inline-block;
+  height: 1em;
+}
+
+html.js .odo__strip {
+  transform: translate3d(0, 0, 0);
+}
+
+html.js [data-inview='true'] .odo__strip {
+  transform: translate3d(0, calc(var(--d) * -1em), 0);
+  transition: transform calc(1.1s + var(--i) * 0.22s) var(--ease-out) var(--delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js .odo__strip {
+    transform: translate3d(0, calc(var(--d) * -1em), 0) !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,117 @@
+.pre {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  color: var(--white);
+}
+
+/* Two shutters that part along a diagonal when the lights go out. */
+.pre__half {
+  position: absolute;
+  inset: 0;
+  background: var(--black);
+  transition: transform 1.1s var(--ease-in-out) 0.12s;
+}
+
+.pre__half--top {
+  clip-path: polygon(0 0, 100% 0, 100% 42%, 0 58%);
+}
+
+.pre__half--bottom {
+  clip-path: polygon(0 57.8%, 100% 41.8%, 100% 100%, 0 100%);
+}
+
+.pre[data-phase='out'] {
+  pointer-events: none;
+}
+
+.pre[data-phase='out'] .pre__half--top {
+  transform: translate3d(0, -101%, 0);
+}
+
+.pre[data-phase='out'] .pre__half--bottom {
+  transform: translate3d(0, 101%, 0);
+}
+
+.pre__core {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: clamp(18px, 3vh, 32px);
+  transition: opacity 0.25s linear, transform 0.5s var(--ease-in);
+}
+
+.pre[data-phase='out'] .pre__core {
+  opacity: 0;
+  transform: scale(1.12);
+}
+
+.pre__gantry {
+  display: flex;
+  gap: clamp(8px, 1.4vw, 18px);
+  padding: clamp(10px, 1.4vw, 18px);
+  border-radius: 14px;
+  background: linear-gradient(#17191d, #0c0d0f);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 30px 80px rgb(0 0 0 / 0.8);
+}
+
+.pre__lamp {
+  display: grid;
+  gap: clamp(6px, 0.8vw, 10px);
+  padding: clamp(6px, 0.8vw, 10px);
+  border-radius: 999px;
+  background: #050506;
+}
+
+.pre__lamp i {
+  width: clamp(26px, 4.6vw, 54px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #1a0606;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
+}
+
+/* Each column switches on in turn, as the real ones do, a beat apart. */
+.pre[data-phase='lights'] .pre__lamp i {
+  animation: lamp-on 0.01s linear calc(0.35s + var(--i) * 0.4s) forwards;
+}
+
+@keyframes lamp-on {
+  to {
+    background: var(--signal);
+    box-shadow: 0 0 28px 6px rgb(255 30 30 / 0.55), 0 0 90px 20px rgb(255 30 30 / 0.25), inset 0 0 8px rgb(255 190 190 / 0.9);
+  }
+}
+
+.pre__name {
+  font-size: clamp(1.1rem, 2.2vw, 1.75rem);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.pre__hint {
+  font-size: var(--fs-small);
+  font-stretch: 78%;
+  color: var(--muted);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pre__half,
+  .pre__core {
+    transition: none;
+  }
+
+  .pre[data-phase='lights'] .pre__lamp i {
+    animation-delay: 0s;
+  }
+
+  .pre__hint {
+    animation: none;
+  }
+}

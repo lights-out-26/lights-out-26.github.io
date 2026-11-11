@@ -1,0 +1,73 @@
+.tr {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+.tr[data-phase='idle'] {
+  visibility: hidden;
+}
+
+.tr__panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -12%;
+  width: 124%;
+  clip-path: polygon(9% 0, 100% 0, 91% 100%, 0 100%);
+  transform: translate3d(101%, 0, 0);
+}
+
+.tr__panel--a { background: var(--team); }
+.tr__panel--b { background: var(--team-deep); }
+
+.tr__panel--c {
+  display: grid;
+  place-items: center;
+  background: var(--black);
+  clip-path: polygon(9% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.tr[data-phase='cover'] {
+  pointer-events: auto;
+}
+
+.tr[data-phase='cover'] .tr__panel {
+  transform: none;
+  transition: transform 0.5s var(--ease-in-out);
+}
+
+.tr[data-phase='cover'] .tr__panel--b { transition-delay: 0.09s; }
+.tr[data-phase='cover'] .tr__panel--c { transition-delay: 0.2s; }
+
+.tr[data-phase='reveal'] .tr__panel {
+  transform: translate3d(-101%, 0, 0);
+  transition: transform 0.6s var(--ease-in-out);
+}
+
+.tr[data-phase='reveal'] .tr__panel--c { transition-delay: 0.08s; }
+.tr[data-phase='reveal'] .tr__panel--b { transition-delay: 0.17s; }
+.tr[data-phase='reveal'] .tr__panel--a { transition-delay: 0.26s; }
+
+.tr__label {
+  max-width: 80vw;
+  font-size: clamp(2.5rem, 11vw, 12rem);
+  color: var(--team);
+  text-align: center;
+  opacity: 0;
+  transform: translate3d(8vw, 0, 0) skewX(-12deg);
+}
+
+.tr[data-phase='cover'] .tr__label {
+  opacity: 1;
+  transform: none;
+  transition: transform 0.6s var(--ease-brake) 0.28s, opacity 0.2s linear 0.28s;
+}
+
+.tr[data-phase='reveal'] .tr__label {
+  opacity: 1;
+  transform: none;
+}

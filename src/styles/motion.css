@@ -1,0 +1,259 @@
+/* ------------------------------------------------------------------
+   Motion primitives shared across sections.
+
+   Scroll-linked animation works two ways from the same keyframes:
+   - where the browser has CSS scroll-driven animations, `.scrub` binds
+     its animation to the nearest ancestor timeline (`[data-timeline]`);
+   - elsewhere, a small script writes scroll progress to `--p` on that
+     ancestor and the animation is scrubbed with a negative delay.
+   ------------------------------------------------------------------ */
+
+[data-timeline] {
+  view-timeline-name: --tl;
+  view-timeline-axis: block;
+}
+
+[data-timeline='cover'] { --range: cover 0% cover 100%; }
+[data-timeline='contain'] { --range: contain 0% contain 100%; }
+[data-timeline='entry'] { --range: entry 0% entry 100%; }
+[data-timeline='exit'] { --range: exit 0% exit 100%; }
+
+.scrub {
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+@supports (animation-timeline: view()) {
+  .scrub {
+    animation-timeline: --tl;
+    animation-range: var(--range, cover 0% cover 100%);
+  }
+}
+
+/* Drives --p itself from the scroll position, for effects written as
+   calc(var(--p) ...) rather than as keyframes. Put it on the element that
+   carries data-timeline. */
+@keyframes p-drive {
+  from { --p: 0; }
+  to { --p: 1; }
+}
+
+@supports (animation-timeline: view()) {
+  .p-drive {
+    animation: p-drive 1s linear both;
+    animation-timeline: --tl;
+    animation-range: var(--range, cover 0% cover 100%);
+  }
+}
+
+html.no-sda .scrub {
+  animation-play-state: paused;
+  animation-delay: calc(var(--p, 0) * -1s);
+}
+
+/* ---- text revealed character by character ---- */
+
+.split {
+  display: inline;
+}
+
+.split__word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.split__ch {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Variant: characters rise out of a mask. */
+html.js .split[data-style='rise'] .split__word {
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+  padding-inline: 0.06em;
+  margin-inline: -0.06em;
+}
+
+html.js .split[data-style='rise'] .split__ch {
+  transform: translate3d(0, 110%, 0) rotate(8deg);
+  transform-origin: 0 100%;
+}
+
+html.js [data-inview='true'] .split[data-style='rise'] .split__ch,
+html.js .split[data-style='rise'][data-inview='true'] .split__ch {
+  transform: none;
+  transition: transform 0.9s var(--ease-out) calc(var(--delay, 0ms) + var(--i) * var(--stagger, 22ms));
+}
+
+/* Variant: characters slam in from the right and widen, like a car braking. */
+html.js .split[data-style='brake'] .split__ch {
+  opacity: 0;
+  transform: translate3d(0.9em, 0, 0) skewX(-18deg) scaleX(1.5);
+  transform-origin: 0 50%;
+  filter: blur(6px);
+}
+
+html.js [data-inview='true'] .split[data-style='brake'] .split__ch,
+html.js .split[data-style='brake'][data-inview='true'] .split__ch {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: transform 0.7s var(--ease-brake) calc(var(--delay, 0ms) + var(--i) * var(--stagger, 26ms)),
+    opacity 0.25s linear calc(var(--delay, 0ms) + var(--i) * var(--stagger, 26ms)),
+    filter 0.5s linear calc(var(--delay, 0ms) + var(--i) * var(--stagger, 26ms));
+}
+
+/* Variant: characters fade up through a soft focus pull. */
+html.js .split[data-style='focus'] .split__ch {
+  opacity: 0;
+  transform: translate3d(0, 0.35em, 0);
+  filter: blur(8px);
+}
+
+html.js [data-inview='true'] .split[data-style='focus'] .split__ch,
+html.js .split[data-style='focus'][data-inview='true'] .split__ch {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: opacity 0.6s var(--ease-out) calc(var(--delay, 0ms) + var(--i) * var(--stagger, 14ms)),
+    transform 0.8s var(--ease-out) calc(var(--delay, 0ms) + var(--i) * var(--stagger, 14ms)),
+    filter 0.6s var(--ease-out) calc(var(--delay, 0ms) + var(--i) * var(--stagger, 14ms));
+}
+
+/* ---- block reveals ---- */
+
+/* A line of text sliding up out of a mask. */
+html.js .mask-up {
+  display: block;
+  overflow: hidden;
+}
+
+html.js .mask-up > * {
+  display: block;
+  transform: translate3d(0, 105%, 0);
+}
+
+html.js [data-inview='true'] .mask-up > *,
+html.js .mask-up[data-inview='true'] > * {
+  transform: none;
+  transition: transform 1s var(--ease-out) var(--delay, 0ms);
+}
+
+/* A soft rise for supporting copy. */
+html.js .rise {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+}
+
+html.js [data-inview='true'] .rise,
+html.js .rise[data-inview='true'] {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.8s var(--ease-out) var(--delay, 0ms), transform 1s var(--ease-out) var(--delay, 0ms);
+}
+
+/* A hairline that draws itself from the left. */
+html.js .draw-x {
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+html.js [data-inview='true'] .draw-x,
+html.js .draw-x[data-inview='true'] {
+  transform: none;
+  transition: transform 1.2s var(--ease-in-out) var(--delay, 0ms);
+}
+
+/* An image uncovered by a moving edge. */
+html.js .wipe {
+  clip-path: inset(0 100% 0 0);
+}
+
+html.js [data-inview='true'] .wipe,
+html.js .wipe[data-inview='true'] {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1.2s var(--ease-in-out) var(--delay, 0ms);
+}
+
+/* ---- numbers that count up in pure CSS ---- */
+
+.count {
+  --to: 0;
+  counter-reset: n var(--n);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.count::after {
+  content: counter(n);
+}
+
+html.js .count {
+  --n: 0;
+}
+
+html.js [data-inview='true'] .count,
+html.js .count[data-inview='true'] {
+  --n: var(--to);
+  transition: --n var(--dur, 1.8s) var(--ease-out) var(--delay, 0ms);
+}
+
+/* Without @property support the counter cannot interpolate, so it simply shows the final value. */
+
+/* ---- shared keyframes ---- */
+
+@keyframes spin {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes marquee {
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes pulse {
+  50% { opacity: 0.35; }
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+@keyframes streak {
+  from { transform: translate3d(110vw, 0, 0); }
+  to { transform: translate3d(-110vw, 0, 0); }
+}
+
+/* ---- reduced motion: show everything, move nothing ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  html.js .split .split__ch,
+  html.js .mask-up > *,
+  html.js .rise,
+  html.js .draw-x,
+  html.js .wipe {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+
+  html.js .count {
+    --n: var(--to);
+    transition: none !important;
+  }
+
+  .scrub,
+  .p-drive {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}

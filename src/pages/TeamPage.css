@@ -1,0 +1,1029 @@
+/* ------------------------------------------------------------------
+   Team page. Everything inherits --team, --team-deep and the team's
+   type setting, so one stylesheet gives eleven different atmospheres.
+   ------------------------------------------------------------------ */
+
+.tp {
+  background: var(--black);
+}
+
+.tp .t-h2 {
+  font-size: clamp(1.9rem, 4.4vw, 4.4rem);
+}
+
+/* ============ hero ============ */
+
+.tph {
+  position: relative;
+  height: 175vh;
+  height: 175svh;
+}
+
+.tph__stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--team-deep) 92%, #000), #000 88%);
+}
+
+.tph__glow {
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(48% 36% at 52% 70%, color-mix(in srgb, var(--team) 42%, transparent), transparent 72%);
+  transform: translate3d(calc(var(--mx, 0) * -2%), calc(var(--my, 0) * -1.5%), 0);
+}
+
+.tph .motif {
+  -webkit-mask-image: linear-gradient(200deg, #000, transparent 60%);
+  mask-image: linear-gradient(200deg, #000, transparent 60%);
+  animation: tph-fade 1.2s linear 0.5s both;
+}
+
+@keyframes tph-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* The chassis name is the backdrop: huge, tinted, and the car parks across it. */
+.tph__chassis {
+  position: absolute;
+  inset: 20% 0 auto;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  /* sized so the name spans the stage whatever its length */
+  font-size: min(calc(96vw / (var(--len, 4) * 0.7)), 56vh);
+  color: color-mix(in srgb, var(--team) 18%, transparent);
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--team) 75%, transparent);
+  white-space: nowrap;
+  pointer-events: none;
+  animation-name: tph-chassis-scroll;
+}
+
+.tph__chassis > span {
+  display: inline-block;
+  transform: translate3d(calc(var(--mx, 0) * -1.2vw), calc(var(--my, 0) * -0.6vw), 0);
+}
+
+@keyframes tph-chassis-scroll {
+  to { transform: translate3d(18vw, 0, 0) scale(1.1); opacity: 0.2; }
+}
+
+.tph__carscroll {
+  position: absolute;
+  left: 50%;
+  bottom: max(19vh, 150px);
+  width: min(96vw, 150vh);
+  translate: -50% 0;
+  animation-name: tph-car-scroll;
+}
+
+/* Scrolling drives the car away: it accelerates off to the left, blurring as it goes. */
+@keyframes tph-car-scroll {
+  0% { transform: none; --speed: 0; --wheel-blur: 0; }
+  100% { transform: translate3d(-128vw, 0, 0) skewX(-9deg); --speed: 1; --wheel-blur: 1; }
+}
+
+.tph__car {
+  transform: translate3d(calc(var(--mx, 0) * 1vw), calc(var(--my, 0) * 0.4vw), 0);
+  animation: tph-car-in 1.6s var(--ease-brake) 0.35s backwards;
+}
+
+@keyframes tph-car-in {
+  0% { transform: translate3d(120vw, 0, 0) skewX(12deg) scaleX(1.1); --speed: 1; --wheel-blur: 1; }
+  60% { --speed: 0.6; }
+  100% { transform: none; --speed: 0; --wheel-blur: 0; }
+}
+
+.tph__car .pcar__slice {
+  animation: hero-part-in 1.6s var(--ease-brake) 0.35s backwards;
+}
+
+.tph__car .pcar__wheel {
+  animation: hero-wheel-in 1.6s var(--ease-brake) 0.35s backwards;
+}
+
+/* The wheels are geared to the scroll: as the car moves off, they turn. */
+.tph .pcar__tyre {
+  animation: tph-wheel 1s linear both paused;
+  animation-delay: calc(var(--p, 0) * -1s);
+}
+
+@supports (animation-timeline: view()) {
+  .tph .pcar__tyre {
+    animation: tph-wheel 1s linear both;
+    animation-timeline: --tl;
+    animation-range: contain 0% contain 100%;
+  }
+}
+
+@keyframes tph-wheel {
+  to { transform: rotate(-1800deg); }
+}
+
+.tph__top {
+  position: absolute;
+  inset: calc(var(--nav-h) + 2vh) 0 auto;
+  display: grid;
+  justify-items: start;
+  gap: clamp(6px, 1.2vh, 14px);
+  animation-name: tph-top-scroll;
+}
+
+@keyframes tph-top-scroll {
+  0% { opacity: 1; transform: none; }
+  45%, 100% { opacity: 0; transform: translate3d(0, -40px, 0); }
+}
+
+.tph__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-left: -6px;
+  padding-right: 10px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  animation: tph-rise 0.8s var(--ease-out) 0.3s both;
+}
+
+.tph__back svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.tph__back:hover svg,
+.tph__back:focus-visible svg {
+  transform: translate3d(-5px, 0, 0);
+}
+
+.tph__place {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--team);
+  animation: tph-rise 0.8s var(--ease-out) 0.4s both;
+}
+
+.tph__name {
+  font-size: min(9.4vw, 10rem, var(--name-fit, 9vw));
+  padding-block: 0.05em;
+}
+
+.tph__entrant {
+  color: var(--silver);
+  animation: tph-rise 0.8s var(--ease-out) 0.75s both;
+}
+
+@keyframes tph-rise {
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+.tph__facts {
+  position: absolute;
+  inset: auto 0 clamp(18px, 3.4vh, 40px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px clamp(16px, 3vw, 56px);
+  margin: 0 auto;
+  animation-name: tph-facts-scroll;
+}
+
+@keyframes tph-facts-scroll {
+  0% { opacity: 1; }
+  35%, 100% { opacity: 0; }
+}
+
+.tph__facts > div {
+  padding-top: 12px;
+  border-top: 1px solid var(--line-strong);
+  animation: tph-rise 0.8s var(--ease-out) calc(1s + var(--i) * 0.09s) both;
+}
+
+.tph__facts dt {
+  font-size: var(--fs-micro);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.tph__facts dd {
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* ============ story ============ */
+
+.tps {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: clamp(28px, 6vw, 112px);
+  align-items: start;
+  padding-block: var(--section-y);
+}
+
+.tps__intro {
+  font-size: clamp(1.5rem, 3.3vw, 3.4rem);
+  font-weight: 700;
+  font-stretch: 108%;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.tps__story {
+  display: grid;
+  gap: 1.2em;
+  color: var(--silver);
+  padding-top: 0.6em;
+}
+
+/* ============ the car, taken apart ============ */
+
+.tpc {
+  position: relative;
+  height: 330vh;
+  height: 330svh;
+}
+
+.tpc__pin {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100vh;
+  height: 100svh;
+  padding-block: calc(var(--nav-h) + 2vh) 3vh;
+  overflow: hidden;
+  background: radial-gradient(60% 44% at 50% 60%, color-mix(in srgb, var(--team-deep) 90%, transparent), transparent 75%);
+}
+
+.tpc__head {
+  display: grid;
+  gap: 10px;
+}
+
+.tpc__head p {
+  max-width: 40em;
+  color: var(--silver);
+}
+
+.tpc__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  perspective: 1500px;
+}
+
+.tpc__ghost {
+  position: absolute;
+  font-size: min(calc(96vw / (var(--len, 4) * 0.7)), 54vh);
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--team) 40%, transparent);
+  white-space: nowrap;
+  pointer-events: none;
+  animation-name: tpc-ghost;
+}
+
+@keyframes tpc-ghost {
+  from { transform: translate3d(10vw, 0, 0) scale(0.92); }
+  to { transform: translate3d(-10vw, 0, 0) scale(1.08); }
+}
+
+.tpc__car {
+  position: relative;
+  width: min(80vw, 108vh, 1380px);
+  transform-style: preserve-3d;
+  /* Tilting the whole stack as it separates turns the layer depths into real parallax. */
+  transform: rotateX(calc(var(--x) * 10deg)) rotateY(calc(var(--x) * -16deg));
+  animation-name: tpc-explode;
+}
+
+@keyframes tpc-explode {
+  0%, 12% { --x: 0; --wheel-blur: 0; }
+  42%, 62% { --x: 1; --wheel-blur: 0.5; }
+  90%, 100% { --x: 0; --wheel-blur: 0; }
+}
+
+.tpc__labels {
+  position: absolute;
+  inset: 0;
+  animation-name: tpc-labels;
+  transform: translateZ(180px);
+}
+
+@keyframes tpc-labels {
+  0%, 30% { opacity: 0; }
+  42%, 62% { opacity: 1; }
+  72%, 100% { opacity: 0; }
+}
+
+.tpc__labels [data-part='nose'] { left: 9%; top: 22%; }
+.tpc__labels [data-part='cell'] { left: 37%; top: -16%; }
+.tpc__labels [data-part='pu'] { left: 64%; top: -24%; }
+.tpc__labels [data-part='tail'] { left: 89%; top: -6%; }
+.tpc__labels [data-part='wheels'] { left: 58%; top: 122%; }
+
+.tpc__labels li {
+  position: absolute;
+  translate: -50% -50%;
+  padding: 0.35em 0.85em;
+  border-radius: 999px;
+  background: var(--team);
+  color: var(--team-ink);
+  font-size: var(--fs-small);
+  font-stretch: 86%;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tpc__credit {
+  min-height: 1.4em;
+}
+
+/* ============ on track ============ */
+
+.tpa {
+  position: relative;
+  padding-block: clamp(40px, 6vw, 96px) var(--section-y);
+}
+
+.tpa__frame {
+  position: relative;
+  overflow: hidden;
+  animation-name: tpa-frame;
+}
+
+/* The picture opens out to full width as it rises into view. */
+@keyframes tpa-frame {
+  0% { clip-path: inset(14% 16% 14% 16%); }
+  42%, 100% { clip-path: inset(0 0 0 0); }
+}
+
+.tpa__img {
+  animation-name: tpa-img;
+}
+
+@keyframes tpa-img {
+  from { transform: scale(1.28) translate3d(0, -5%, 0); }
+  to { transform: scale(1.04) translate3d(0, 4%, 0); }
+}
+
+.tpa__word {
+  position: absolute;
+  left: 0;
+  bottom: -0.12em;
+  font-size: min(22vw, 40vh);
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.7);
+  mix-blend-mode: overlay;
+  white-space: nowrap;
+  pointer-events: none;
+  animation-name: tpa-word;
+}
+
+@keyframes tpa-word {
+  from { transform: translate3d(24vw, 0, 0); }
+  to { transform: translate3d(-30vw, 0, 0); }
+}
+
+.tpa__cap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 12px;
+  font-size: var(--fs-small);
+  color: var(--silver);
+}
+
+/* ============ drivers ============ */
+
+.tpds__head {
+  padding-bottom: clamp(16px, 3vw, 40px);
+}
+
+.tpd {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: min(92vh, 900px);
+  padding-block: clamp(48px, 7vw, 110px);
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+}
+
+.tpd__no {
+  position: absolute;
+  right: 2vw;
+  top: 50%;
+  font-size: min(44vw, 80vh);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-style: italic;
+  line-height: 0.74;
+  letter-spacing: -0.08em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--team) 55%, transparent);
+  translate: 0 -50%;
+  pointer-events: none;
+  animation-name: tpd-no;
+}
+
+@keyframes tpd-no {
+  from { transform: translate3d(0, 22%, 0); }
+  to { transform: translate3d(0, -22%, 0); }
+}
+
+.tpd__car {
+  position: absolute;
+  right: -30vw;
+  top: 50%;
+  width: min(86vw, 1500px);
+  translate: 0 -42%;
+  filter: drop-shadow(0 30px 24px rgb(0 0 0 / 0.6));
+  animation-name: tpd-car;
+}
+
+/* Each driver's car crosses behind their name as the row scrolls past. */
+@keyframes tpd-car {
+  from { transform: translate3d(46vw, 0, 0); }
+  to { transform: translate3d(-22vw, 0, 0); }
+}
+
+.tpd[data-flip] .tpd__no {
+  right: auto;
+  left: 2vw;
+}
+
+.tpd[data-flip] .tpd__car {
+  right: auto;
+  left: -34vw;
+  animation-name: tpd-car-flip;
+}
+
+@keyframes tpd-car-flip {
+  from { transform: translate3d(34vw, 0, 0); }
+  to { transform: translate3d(-18vw, 0, 0); }
+}
+
+.tpd__copy {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  container-type: inline-size;
+}
+
+.tpd__copy > * {
+  max-width: min(100%, 34rem);
+}
+
+.tpd[data-flip] .tpd__copy {
+  justify-items: end;
+  text-align: right;
+}
+
+.tpd__first {
+  font-size: var(--fs-lead);
+  color: var(--silver);
+}
+
+.tpd__last {
+  max-width: none;
+  font-size: min(9vw, 9.5rem, var(--fit, 9vw));
+  white-space: nowrap;
+  padding-block: 0.04em;
+  text-shadow: 0 0 40px rgb(0 0 0 / 0.6);
+}
+
+.tpd__meta {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--team);
+}
+
+.tpd__note {
+  color: var(--silver);
+  text-shadow: 0 0 12px #000, 0 0 30px #000;
+}
+
+.tpd__stats {
+  display: grid;
+  gap: 16px;
+  width: min(100%, 34rem);
+  margin: 10px 0 0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: rgb(8 9 11 / 0.72);
+  box-shadow: inset 0 0 0 1px var(--line);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  text-align: left;
+}
+
+.tpd__group dt {
+  margin-bottom: 6px;
+  font-size: var(--fs-micro);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.tpd__group dd {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tpd__group dd span {
+  display: grid;
+  font-size: 0.6875rem;
+  font-stretch: 78%;
+  color: var(--silver);
+}
+
+.tpd__group dd b {
+  font-size: clamp(1.1rem, 1.7vw, 1.6rem);
+  font-weight: 800;
+  font-stretch: 105%;
+  letter-spacing: -0.02em;
+  color: var(--white);
+}
+
+/* ============ honours and results ============ */
+
+.tpr {
+  padding-block: var(--section-y);
+}
+
+.tpr__head {
+  display: grid;
+  gap: 14px;
+  margin-bottom: clamp(32px, 5vw, 72px);
+}
+
+.tpr__head p {
+  color: var(--silver);
+  max-width: 44em;
+}
+
+.tpr__honours {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(16px, 2.4vw, 40px);
+  padding-block: clamp(24px, 3vw, 44px);
+  border-block: 1px solid var(--line);
+}
+
+.tpr__big {
+  font-size: clamp(2.6rem, 6.4vw, 7rem);
+  font-weight: 900;
+  font-stretch: 120%;
+  font-style: italic;
+  letter-spacing: -0.06em;
+  color: var(--team);
+}
+
+.tpr__honour p {
+  margin-top: 8px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.tpr__season {
+  margin-top: clamp(48px, 7vw, 110px);
+}
+
+.tpr__h3 {
+  font-size: var(--fs-h3);
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+}
+
+.tpr__figs {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 16px;
+  margin: 22px 0 30px;
+}
+
+.tpr__figs dd {
+  font-size: clamp(1.4rem, 2.4vw, 2.3rem);
+  font-weight: 800;
+  font-stretch: 108%;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.tpr__figs dt {
+  font-size: var(--fs-micro);
+  font-stretch: 80%;
+  color: var(--muted);
+}
+
+/* The season strip: one cell per car per race, shaded by result. */
+.strip {
+  display: grid;
+  gap: 3px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.strip__row {
+  display: grid;
+  grid-template-columns: 7.2em repeat(20, minmax(30px, 1fr));
+  gap: 3px;
+  min-width: 46rem;
+}
+
+.strip__row > span {
+  display: grid;
+  place-items: center;
+  min-height: 36px;
+  font-size: var(--fs-micro);
+}
+
+.strip__row--head > span {
+  min-height: 24px;
+  font-stretch: 76%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.strip__who {
+  justify-items: start !important;
+  font-size: var(--fs-small) !important;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.strip__cell {
+  position: relative;
+  border-radius: 3px;
+  font-weight: 700;
+  background: var(--graphite);
+  color: var(--muted);
+}
+
+.strip__cell[data-kind='win'] { background: var(--team); color: var(--team-ink); }
+.strip__cell[data-kind='podium'] { background: color-mix(in srgb, var(--team) 58%, #000); color: var(--white); }
+.strip__cell[data-kind='points'] { background: color-mix(in srgb, var(--team) 26%, #0a0b0d); color: var(--white); }
+.strip__cell[data-kind='out'] { background: var(--graphite); color: var(--silver); }
+.strip__cell[data-kind='dnf'],
+.strip__cell[data-kind='dns'] { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
+.strip__cell[data-kind='none'] { background: transparent; }
+
+.strip__cell[data-standin]::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--white);
+}
+
+html.js [data-inview='false'] .strip__cell {
+  opacity: 0;
+  transform: scale(0.4);
+}
+
+html.js [data-inview='true'] .strip__cell {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.3s linear calc(0.3s + var(--i) * 0.035s), transform 0.5s var(--ease-back) calc(0.3s + var(--i) * 0.035s);
+}
+
+.strip__cell[data-tip]:hover::after,
+.strip__cell[data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  translate: -50% 0;
+  padding: 0.5em 0.8em;
+  border-radius: 6px;
+  background: var(--white);
+  color: #000;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.strip {
+  padding-top: 40px;
+  margin-top: -40px;
+}
+
+.strip__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 14px;
+  font-size: var(--fs-micro);
+  color: var(--silver);
+}
+
+.strip__key li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.strip__key li::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--graphite);
+}
+
+.strip__key li[data-kind='win']::before { background: var(--team); }
+.strip__key li[data-kind='podium']::before { background: color-mix(in srgb, var(--team) 58%, #000); }
+.strip__key li[data-kind='points']::before { background: color-mix(in srgb, var(--team) 26%, #0a0b0d); }
+.strip__key li[data-kind='dnf']::before { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
+.strip__key li[data-kind='standin']::before { width: 6px; height: 6px; border-radius: 50%; background: var(--white); }
+
+/* ============ strengths ============ */
+
+.tpt {
+  padding-bottom: var(--section-y);
+}
+
+.tpt__head {
+  margin-bottom: clamp(24px, 4vw, 56px);
+}
+
+.tpt__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px clamp(24px, 5vw, 96px);
+  align-items: baseline;
+  padding: clamp(22px, 3vw, 44px) 0;
+  isolation: isolate;
+  transition: padding 0.6s var(--ease-out), color 0.3s linear;
+}
+
+.tpt__rule {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+/* Hover floods the row with the team's colour from the left edge. */
+.tpt__item::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(var(--gutter) * -0.5);
+  background: var(--team);
+  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  transition: clip-path 0.7s var(--ease-out);
+}
+
+.tpt__item:hover {
+  padding-inline: clamp(8px, 1.4vw, 24px);
+  color: var(--team-ink);
+}
+
+.tpt__item:hover::before {
+  clip-path: polygon(0 0, 100% 0, calc(100% - 3vw) 100%, 0 100%);
+}
+
+.tpt__title {
+  font-size: clamp(1.8rem, 4.6vw, 4.8rem);
+}
+
+.tpt__title .mask-up {
+  padding-block: 0.06em;
+}
+
+.tpt__body {
+  font-size: var(--fs-lead);
+  line-height: 1.35;
+  color: var(--silver);
+  transition: color 0.3s linear;
+}
+
+.tpt__item:hover .tpt__body {
+  color: var(--team-ink);
+}
+
+/* ============ next team ============ */
+
+.tpn {
+  display: grid;
+  gap: 28px;
+  padding-bottom: var(--section-y);
+}
+
+.tpn__next {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  min-height: clamp(320px, 62vh, 620px);
+  padding: 40px max(var(--gutter), env(safe-area-inset-right, 0px)) 40px max(var(--gutter), env(safe-area-inset-left, 0px));
+  overflow: hidden;
+  isolation: isolate;
+  border-block: 1px solid var(--line);
+}
+
+.tpn__flood {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(70% 90% at 80% 100%, color-mix(in srgb, var(--team) 45%, transparent), transparent 70%), linear-gradient(120deg, var(--team-deep), #000 80%);
+  clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+  transition: clip-path 0.9s var(--ease-out);
+}
+
+.tpn__next:hover .tpn__flood,
+.tpn__next:focus-visible .tpn__flood {
+  clip-path: polygon(-12% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.tpn__label {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--team);
+}
+
+.tpn__name {
+  font-size: clamp(3rem, 13vw, 14rem);
+  transition: transform 0.9s var(--ease-out), font-stretch 0.9s var(--ease-out);
+}
+
+.tpn__next:hover .tpn__name,
+.tpn__next:focus-visible .tpn__name {
+  transform: translate3d(1.5vw, 0, 0);
+}
+
+.tpn__car {
+  position: absolute;
+  z-index: -1;
+  right: -8vw;
+  bottom: 6%;
+  width: min(74vw, 1200px);
+  opacity: 0.5;
+  transform: translate3d(46%, 0, 0);
+  filter: grayscale(1) brightness(0.7);
+  transition: transform 1.1s var(--ease-brake), opacity 0.5s linear, filter 0.5s linear;
+}
+
+.tpn__next:hover .tpn__car,
+.tpn__next:focus-visible .tpn__car {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.tpn__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ============ smaller screens ============ */
+
+@media (max-width: 900px) {
+  .tph__carscroll {
+    left: 4vw;
+    bottom: 34vh;
+    width: 160vw;
+    translate: 0 0;
+  }
+
+  .tph__chassis {
+    inset: 30% 0 auto;
+  }
+
+  .tph__name {
+    font-size: clamp(2.4rem, 12.5vw, 5rem);
+  }
+
+  .tpd__last {
+    font-size: min(15vw, var(--fit, 15vw));
+  }
+
+  .tph__facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tpc__car {
+    width: 92vw;
+  }
+
+  .tpc__labels li {
+    font-size: 0.6875rem;
+    padding: 0.3em 0.6em;
+  }
+
+  .tpc__labels [data-part='nose'] { left: 20%; top: 150%; }
+  .tpc__labels [data-part='cell'] { left: 26%; top: -42%; }
+  .tpc__labels [data-part='pu'] { left: 56%; top: -84%; }
+  .tpc__labels [data-part='tail'] { left: 80%; top: -42%; }
+  .tpc__labels [data-part='wheels'] { left: 72%; top: 150%; }
+
+  .tpd {
+    align-items: end;
+    min-height: 0;
+    padding-top: 62vw;
+  }
+
+  .tpd__no {
+    top: 4vw;
+    translate: 0 0;
+    font-size: 58vw;
+  }
+
+  .tpd__car,
+  .tpd[data-flip] .tpd__car {
+    top: 14vw;
+    right: -60vw;
+    left: auto;
+    width: 150vw;
+    translate: 0 0;
+    animation-name: tpd-car;
+  }
+
+  .tpd[data-flip] .tpd__copy {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .tpd[data-flip] .tpd__no {
+    left: auto;
+    right: 2vw;
+  }
+
+  .tpr__honours {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tpr__figs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .tpt__item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tph__car,
+  .tph__car .pcar__slice,
+  .tph__car .pcar__wheel,
+  .tph .pcar__tyre,
+  .tph .motif,
+  .tph__back,
+  .tph__place,
+  .tph__entrant,
+  .tph__facts > div {
+    animation: none !important;
+  }
+
+  .tpc__car {
+    transform: none;
+  }
+
+  .tpc__labels {
+    display: none;
+  }
+
+  .strip__cell {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .tpt__item,
+  .tpt__item::before,
+  .tpn__flood,
+  .tpn__car,
+  .tpn__name {
+    transition: none;
+  }
+}

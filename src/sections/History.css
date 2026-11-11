@@ -1,0 +1,256 @@
+.history {
+  position: relative;
+  /* one screen, plus the distance the strip has to travel */
+  height: calc(100vh + 470vw);
+  height: calc(100svh + 470vw);
+  background: var(--black);
+}
+
+.history__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.history__track {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  height: 100%;
+  padding-inline: max(var(--gutter), env(safe-area-inset-left, 0px)) 14vw;
+  animation-name: history-track;
+  will-change: transform;
+}
+
+@keyframes history-track {
+  to { transform: translate3d(calc(-100% + 100vw), 0, 0); }
+}
+
+.history__head {
+  display: grid;
+  align-content: center;
+  gap: clamp(18px, 2.4vw, 32px);
+  width: min(88vw, 84rem);
+  padding-right: 10vw;
+}
+
+.history__title {
+  font-size: min(7.2vw, 15vh);
+}
+
+.history__hint {
+  font-size: var(--fs-small);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ---- one era ---- */
+
+.era {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 50vw) minmax(0, 28rem);
+  align-items: end;
+  gap: clamp(24px, 3.2vw, 56px);
+  width: 86vw;
+  max-width: 1500px;
+  padding-block: calc(var(--nav-h) + 4vh) 16vh;
+  margin-right: 6vw;
+}
+
+/* The year is scenery: enormous, outlined, and drifting slower than the photo. */
+.era__year {
+  position: absolute;
+  left: -3vw;
+  top: calc(var(--nav-h) + 1vh);
+  font-size: min(27vw, 46vh);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-style: italic;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.34);
+  white-space: nowrap;
+  pointer-events: none;
+  /* --p runs 0..1 over the whole strip; each era is centred at a different point */
+  transform: translate3d(calc((var(--p, 0) * 6.4 - var(--i) - 1.2) * -9vw), 0, 0);
+}
+
+.era__photo {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  align-self: end;
+}
+
+.era__photo .photo__frame {
+  box-shadow: 0 40px 80px -20px rgb(0 0 0 / 0.9);
+}
+
+/* The picture eases back inside its frame as the frame is uncovered. */
+html.js .era .photo__frame > img {
+  transform: scale(1.18);
+  transition: opacity 0.6s linear, transform 1.8s var(--ease-out);
+}
+
+html.js .era[data-inview='true'] .photo__frame > img {
+  transform: none;
+}
+
+.era__copy {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 28px;
+}
+
+.era__car {
+  font-size: var(--fs-small);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.era__car .t-num {
+  color: var(--fg);
+  margin-right: 0.5em;
+}
+
+.era__title {
+  font-size: clamp(1.6rem, 2.9vw, 3rem);
+  font-stretch: 116%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.era__body {
+  color: var(--silver);
+  max-width: 34em;
+}
+
+.era__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.era__facts li {
+  padding: 0.4em 0.9em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: var(--fs-small);
+  font-stretch: 82%;
+  font-weight: 600;
+}
+
+/* ---- ruler ---- */
+
+.history__ruler {
+  position: absolute;
+  inset: auto max(var(--gutter), env(safe-area-inset-right, 0px)) clamp(20px, 4vh, 44px) max(var(--gutter), env(safe-area-inset-left, 0px));
+  display: grid;
+  gap: 10px;
+}
+
+.history__ticks {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 16%;
+  font-size: var(--fs-micro);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.history__bar {
+  height: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.history__bar i {
+  display: block;
+  height: 100%;
+  background: var(--white);
+  transform-origin: 0 50%;
+  animation-name: history-bar;
+}
+
+@keyframes history-bar {
+  from { transform: scaleX(0); }
+  to { transform: none; }
+}
+
+/* ---- narrow screens, or reduced motion: a plain vertical list ---- */
+
+@media (max-width: 860px), (prefers-reduced-motion: reduce) {
+  .history {
+    height: auto;
+  }
+
+  .history__pin {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .history__track {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 72px;
+    width: auto;
+    height: auto;
+    padding: var(--section-y) max(var(--gutter), env(safe-area-inset-right, 0px)) 72px max(var(--gutter), env(safe-area-inset-left, 0px));
+    animation: none !important;
+    transform: none;
+  }
+
+  .history__head {
+    width: auto;
+    padding-right: 0;
+  }
+
+  .history__hint,
+  .history__ruler {
+    display: none;
+  }
+
+  .era {
+    width: auto;
+    max-width: none;
+    margin-right: 0;
+    padding-block: 15vw 0;
+  }
+
+  .era__year {
+    left: -1vw;
+    top: 0;
+    transform: none;
+  }
+
+  html.js .era .photo__frame > img {
+    transform: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .history__title {
+    font-size: clamp(2.1rem, 10.4vw, 5rem);
+  }
+
+  .era {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .era__year {
+    font-size: 30vw;
+  }
+
+  .era__copy {
+    padding-bottom: 0;
+  }
+}

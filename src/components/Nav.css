@@ -1,0 +1,231 @@
+.skip {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 300;
+  padding: 0.7em 1em;
+  background: var(--white);
+  color: #000;
+  font-weight: 700;
+  transform: translateY(-200%);
+}
+
+.skip:focus-visible {
+  transform: none;
+}
+
+.nav {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 60;
+  padding-top: env(safe-area-inset-top, 0px);
+  transition: transform 0.5s var(--ease-out);
+}
+
+.nav::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 -24px;
+  background: linear-gradient(rgb(0 0 0 / 0.82), transparent);
+  opacity: 0;
+  transition: opacity 0.4s linear;
+  pointer-events: none;
+}
+
+.nav[data-solid]::before {
+  opacity: 1;
+}
+
+.nav[data-hidden] {
+  transform: translate3d(0, -110%, 0);
+}
+
+.nav__bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: var(--nav-h);
+}
+
+.nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  min-height: 44px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  font-stretch: 125%;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.nav__lights {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.nav__lights i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--white);
+  transition: background-color 0.2s linear calc(var(--k, 0) * 60ms), box-shadow 0.2s linear calc(var(--k, 0) * 60ms);
+}
+
+.nav__lights i:nth-child(2) { --k: 1; }
+.nav__lights i:nth-child(3) { --k: 2; }
+.nav__lights i:nth-child(4) { --k: 3; }
+.nav__lights i:nth-child(5) { --k: 4; }
+
+/* Hovering the wordmark runs the start-light sequence in miniature. */
+.nav__brand:hover .nav__lights i,
+.nav__brand:focus-visible .nav__lights i {
+  background: var(--signal);
+  box-shadow: 0 0 8px var(--signal);
+}
+
+.nav__year {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--white);
+}
+
+.nav__links {
+  display: flex;
+  gap: clamp(18px, 2.4vw, 40px);
+}
+
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  font-stretch: 105%;
+}
+
+/* The label rolls up and its twin rolls in from below. */
+.nav__clip {
+  display: block;
+  height: 1.4em;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+.nav__clip > span {
+  position: relative;
+  display: block;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.nav__clip > span::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  font-style: italic;
+  font-weight: 800;
+}
+
+.nav__link:hover .nav__clip > span,
+.nav__link:focus-visible .nav__clip > span {
+  transform: translate3d(0, -100%, 0);
+}
+
+.nav__toggle {
+  display: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-right: -10px;
+}
+
+.nav__burger {
+  display: grid;
+  gap: 7px;
+  width: 26px;
+}
+
+.nav__burger i {
+  height: 2px;
+  background: var(--white);
+  transition: transform 0.45s var(--ease-out);
+}
+
+.nav[data-open] .nav__burger i:first-child { transform: translateY(4.5px) rotate(45deg); }
+.nav[data-open] .nav__burger i:last-child { transform: translateY(-4.5px) rotate(-45deg); }
+
+/* ---- full-screen menu (small screens) ---- */
+
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  background: var(--black);
+  animation: menu-in 0.5s var(--ease-out) both;
+}
+
+@keyframes menu-in {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+.menu__list {
+  display: grid;
+  gap: 0.2em;
+}
+
+.menu__link,
+.menu__small {
+  display: block;
+  overflow: hidden;
+}
+
+.menu__link {
+  font-size: clamp(2.6rem, 13vw, 5rem);
+  font-weight: 900;
+  font-stretch: 118%;
+  font-style: italic;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.menu__small {
+  margin-top: 1.5rem;
+  color: var(--muted);
+}
+
+.menu__link span,
+.menu__small span {
+  display: block;
+  animation: menu-rise 0.7s var(--ease-out) calc(0.12s + var(--i) * 0.06s) both;
+}
+
+@keyframes menu-rise {
+  from { transform: translate3d(0, 110%, 0); }
+  to { transform: none; }
+}
+
+@media (max-width: 760px) {
+  .nav__links { display: none; }
+  .nav__toggle { display: grid; }
+}
+
+@media (min-width: 761px) {
+  .menu { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu,
+  .menu__link span,
+  .menu__small span {
+    animation: none;
+  }
+}

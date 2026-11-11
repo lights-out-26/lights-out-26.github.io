@@ -1,0 +1,570 @@
+.machine {
+  position: relative;
+  height: 400vh;
+  height: 400svh;
+  background: var(--black);
+  transition: --team 0.6s linear, --team-deep 0.6s linear;
+}
+
+.machine__pin {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100vh;
+  height: 100svh;
+  padding-block: calc(var(--nav-h) + 1.5vh) clamp(14px, 2.4vh, 28px);
+  overflow: hidden;
+  background: radial-gradient(50% 36% at 50% 62%, color-mix(in srgb, var(--team) 20%, transparent), transparent 75%), var(--black);
+}
+
+/* ---- top row ---- */
+
+.machine__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: clamp(20px, 5vw, 96px);
+  align-items: start;
+}
+
+.machine__head {
+  display: grid;
+  gap: 12px;
+}
+
+.machine__head .t-h2 {
+  font-size: clamp(1.8rem, 4vw, 4rem);
+}
+
+.machine__lead {
+  color: var(--silver);
+  max-width: 34em;
+}
+
+.machine__panel {
+  min-height: 9.5rem;
+}
+
+.machine__wait {
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.mpart {
+  display: grid;
+  gap: 8px;
+}
+
+.mpart__title {
+  font-size: var(--fs-h3);
+  font-weight: 800;
+  font-stretch: 116%;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--team);
+}
+
+.mpart__body,
+.mpart__figure {
+  animation: mpart-in 0.7s var(--ease-out) 0.12s both;
+}
+
+.mpart__figure {
+  animation-delay: 0.2s;
+}
+
+@keyframes mpart-in {
+  from { opacity: 0; transform: translate3d(0, 16px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+.mpart__body {
+  color: var(--silver);
+  max-width: 40em;
+}
+
+.mpart__figure {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7em;
+}
+
+.mpart__figure strong {
+  font-size: clamp(1.3rem, 2vw, 1.9rem);
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+}
+
+.mpart__figure span {
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+/* ---- the car ---- */
+
+.machine__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  /* room for the callout labels above and below the car */
+  padding-block: 46px 42px;
+  perspective: 1600px;
+}
+
+.machine__car {
+  position: relative;
+  width: min(88vw, 122vh, 1560px);
+  animation-name: machine-build;
+  transition: transform 0.9s var(--ease-out);
+}
+
+/* --x pulls the layers apart; --wheel-blur spins the wheels up. Both are
+   registered properties, so the scroll position can animate them directly. */
+@keyframes machine-build {
+  0% { --x: 1; --wheel-blur: 0.9; }
+  40%, 100% { --x: 0; --wheel-blur: 0; }
+}
+
+.machine__carfade {
+  animation: machine-swap 0.7s var(--ease-out) both;
+}
+
+@keyframes machine-swap {
+  from { opacity: 0; transform: translate3d(6%, 0, 0) skewX(-6deg); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Straight mode: wheels blur, the body squats, the air starts moving. */
+.machine__pin[data-mode='straight'] .pcar {
+  --spin: 0.34s;
+}
+
+.machine__pin[data-mode='straight'] .pcar__tyre { opacity: 0.2; }
+.machine__pin[data-mode='straight'] .pcar__tyre--spin { opacity: 1; }
+
+.machine__pin[data-mode='straight'] .pcar__body {
+  translate: 0 0.5%;
+  transition: translate 0.6s var(--ease-out);
+}
+
+.machine__streaks {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.5s linear;
+  overflow: hidden;
+}
+
+.machine__pin[data-mode='straight'] .machine__streaks {
+  opacity: 1;
+}
+
+.machine__streaks i {
+  position: absolute;
+  left: 0;
+  width: 34vw;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--white) 70%, transparent);
+  opacity: 0.3;
+  animation: streak-right 0.9s linear infinite paused;
+}
+
+.machine__pin[data-mode='straight'] .machine__streaks i {
+  animation-play-state: running;
+}
+
+.machine__streaks i:nth-child(1) { top: 16%; animation-delay: -0.1s; }
+.machine__streaks i:nth-child(2) { top: 31%; animation-duration: 0.7s; animation-delay: -0.5s; width: 22vw; }
+.machine__streaks i:nth-child(3) { top: 47%; animation-duration: 1.2s; animation-delay: -0.8s; background: linear-gradient(90deg, transparent, var(--team) 70%, transparent); height: 2px; }
+.machine__streaks i:nth-child(4) { top: 63%; animation-duration: 0.8s; animation-delay: -0.3s; }
+.machine__streaks i:nth-child(5) { top: 78%; animation-duration: 1s; animation-delay: -0.6s; width: 44vw; }
+.machine__streaks i:nth-child(6) { top: 90%; animation-duration: 0.6s; animation-delay: -0.2s; background: linear-gradient(90deg, transparent, var(--team) 70%, transparent); }
+
+/* ---- callouts ---- */
+
+.machine__hots {
+  position: absolute;
+  inset: 0;
+  container-type: size;
+}
+
+.machine__hots li {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s linear;
+}
+
+.machine__hots li[data-shown] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hot {
+  position: absolute;
+  left: 0;
+  display: grid;
+  justify-items: center;
+  translate: -50% 0;
+  white-space: nowrap;
+  font-size: var(--fs-small);
+  font-stretch: 82%;
+  font-weight: 700;
+}
+
+/* The marker sits on the part; a stem runs from it to the label. */
+.machine__hots li[data-side='up'] .hot {
+  bottom: -11px;
+  grid-template-rows: auto var(--stem, 7vh) 22px;
+  gap: 2px;
+}
+
+.machine__hots li[data-side='down'] .hot {
+  top: -11px;
+  grid-template-rows: 22px var(--stem, 5vh) auto;
+  gap: 2px;
+}
+
+.machine__hots li[data-side='up'] .hot span { grid-row: 1; }
+.machine__hots li[data-side='up'] .hot i { grid-row: 3; }
+.machine__hots li[data-side='down'] .hot span { grid-row: 3; }
+.machine__hots li[data-side='down'] .hot i { grid-row: 1; }
+
+.hot::before {
+  content: '';
+  grid-row: 2;
+  width: 1px;
+  height: 100%;
+  background: var(--white);
+  transform: scaleY(0);
+  transition: transform 0.6s var(--ease-out) 0.1s;
+}
+
+.machine__hots li[data-side='up'] .hot::before { transform-origin: 50% 100%; }
+.machine__hots li[data-side='down'] .hot::before { transform-origin: 50% 0; }
+
+.machine__hots li[data-shown] .hot::before {
+  transform: none;
+}
+
+.hot i {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--white);
+  background: rgb(0 0 0 / 0.55);
+  transition: background-color 0.3s linear, border-color 0.3s linear, transform 0.4s var(--ease-back);
+}
+
+.hot i::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--team);
+  opacity: 0;
+}
+
+.hot[aria-pressed='true'] i {
+  background: var(--team);
+  border-color: var(--team);
+  transform: scale(1.15);
+}
+
+.hot[aria-pressed='true'] i::after {
+  animation: hot-ping 1.6s var(--ease-out) infinite;
+}
+
+@keyframes hot-ping {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.8); }
+}
+
+.hot span {
+  padding: 0.25em 0.7em;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.7);
+  border: 1px solid var(--line-strong);
+  opacity: 0;
+  transform: translate3d(0, 6px, 0);
+  transition: opacity 0.3s linear 0.4s, transform 0.5s var(--ease-out) 0.4s, background-color 0.3s linear, color 0.3s linear, border-color 0.3s linear;
+}
+
+.machine__hots li[data-side='down'] .hot span {
+  transform: translate3d(0, -6px, 0);
+}
+
+.machine__hots li[data-shown] .hot span {
+  opacity: 1;
+  transform: none;
+}
+
+.hot[aria-pressed='true'] span {
+  background: var(--team);
+  border-color: var(--team);
+  color: var(--team-ink);
+}
+
+/* ---- bottom row ---- */
+
+.machine__bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: clamp(16px, 3vw, 56px);
+  align-items: end;
+}
+
+.machine__controls {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.machine__modenote {
+  min-height: 2.9em;
+  font-size: var(--fs-small);
+  line-height: 1.4;
+  color: var(--silver);
+  max-width: 30em;
+}
+
+.machine__teams {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.machine__teams button {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.machine__teams button::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--team);
+  transition: transform 0.4s var(--ease-back);
+}
+
+.machine__teams button:hover::before,
+.machine__teams button[aria-pressed='true']::before {
+  transform: scale(1.5);
+}
+
+.machine__teams button[aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--team);
+}
+
+.machine__teams .credit {
+  margin-left: 10px;
+}
+
+.machine__dims {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.machine__dims dt {
+  font-size: var(--fs-micro);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.machine__dims dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.3em;
+}
+
+.machine__dimval {
+  font-size: clamp(1.3rem, 2.3vw, 2.2rem);
+  font-weight: 800;
+  font-stretch: 110%;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.machine__unit {
+  font-size: var(--fs-small);
+  color: var(--silver);
+}
+
+.machine__was {
+  flex-basis: 100%;
+  font-size: var(--fs-micro);
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.power {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.power figcaption {
+  font-size: var(--fs-micro);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.power__bar {
+  display: flex;
+  gap: 2px;
+  height: 34px;
+}
+
+.power__seg {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  flex: 0 0 calc(var(--share) * 100%);
+  padding-inline: 10px;
+  overflow: hidden;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  white-space: nowrap;
+  transform-origin: 0 50%;
+}
+
+.power__seg b {
+  font-size: var(--fs-small);
+  font-weight: 800;
+}
+
+.power__seg--engine {
+  background: var(--silver);
+  color: #000;
+  border-radius: 4px 0 0 4px;
+}
+
+.power__seg--electric {
+  background: var(--team);
+  color: var(--team-ink);
+  border-radius: 0 4px 4px 0;
+}
+
+html.js .power__seg {
+  clip-path: inset(0 100% 0 0);
+}
+
+html.js [data-inview='true'] .power__seg {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1.1s var(--ease-in-out);
+}
+
+html.js [data-inview='true'] .power__seg--electric {
+  transition-delay: 0.5s;
+}
+
+.power__note {
+  position: relative;
+  padding-top: 9px;
+  font-size: var(--fs-micro);
+  color: var(--muted);
+}
+
+.power__note i {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calc(var(--share) * 100%);
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--team) 45%, var(--steel));
+}
+
+/* ---- smaller screens ---- */
+
+@media (max-width: 1000px) {
+  .machine__bottom {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .machine__controls {
+    grid-column: 1 / -1;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .machine__teams {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .machine__top {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .machine__lead {
+    display: none;
+  }
+
+  .machine__panel {
+    min-height: 11.5rem;
+  }
+
+  .machine__stage {
+    place-items: center start;
+  }
+
+  /* The car is wider than the screen and slides to bring each part to centre. */
+  .machine__car {
+    width: 230vw;
+    max-width: none;
+    transform: translate3d(calc(50vw - var(--hx) * 230vw), 0, 0);
+  }
+
+  .machine__bottom {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .machine__controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .machine__modenote {
+    display: none;
+  }
+
+  .power {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .machine__carfade,
+  .mpart__body,
+  .mpart__figure,
+  .hot[aria-pressed='true'] i::after,
+  .machine__streaks i {
+    animation: none;
+  }
+
+  .machine__car {
+    --x: 0;
+    transition: none;
+  }
+}
