@@ -21,7 +21,7 @@ Node 20 or newer. The build uses relative paths, so `dist/` can be hosted from a
 | --- | --- |
 | Intro | Five start lights come on in turn, go out together, and the screen splits open |
 | Hero | A rolling shot: a real car brakes in with its discs glowing, holds station with the wheels turning while speed lines stream past, then launches off in a blur for the next team's car |
-| History | A pinned strip that scrolls sideways through six eras; each photograph builds itself from the nearest object outwards and pans with the scroll |
+| History | A pinned strip that scrolls sideways through six eras, with outlined years drifting behind the photographs |
 | Race weekend | One pinned screen that steps through practice, Q1, Q2, Q3 and the race while a 22-car grid thins out and launches |
 | The machine | A blueprint of the car (edges and depth contours) that a scan line turns back into the photograph as you scroll, then callouts for each 2026 rule change |
 | Teams | Eleven slanted "garage doors" that swing open in the team's colours while the car rolls in and brakes |
@@ -41,7 +41,7 @@ Each photo also has a **depth map**, estimated offline with Depth Anything V2 Sm
 - **motion blur and light trails**: a long exposure along the direction of travel, tinted in the team colour with a slight colour split; or, with the camera tracking the car, a sharp car over its trail
 - **heat haze** over the engine cover, **brake glow** through the rims, and a soft contact shadow
 - **blueprint**: Sobel edges and depth contours, wiped away by a scan line
-- on the on-track photos: a **camera push** (dolly) and **panning blur** applied only to what is behind the car, and a **reveal** that builds the picture from near to far
+- on the on-track photos: a **camera push** (dolly) and **panning blur** applied only to what is behind the car
 
 All scenes share one WebGL context: each `<canvas>` on the page is a 2D canvas that the renderer copies its finished view into, so there is no limit on how many scenes a page has and they stay in the normal stacking order. Textures are shared and released when unused. If WebGL2 is not available, or `prefers-reduced-motion` is set, the plain photographs are shown instead.
 
@@ -113,7 +113,7 @@ All photographs come from Wikimedia Commons under Creative Commons licences. The
 - McLaren MP4/4: Nic Redhead, CC BY-SA 2.0
 - Ferrari F2004 and Mercedes W05: emperornie, CC BY-SA 2.0
 
-The images were resized and cropped and have depth maps estimated from them; side-on car photos were also cut out and levelled. Because the licences are ShareAlike, the adapted images and depth maps in `public/photos/` are offered under the same licence as their originals. If you publish the site, keep the credits section.
+The images were resized and cropped; the 2026 car photos were also given depth maps, and the side-on ones were cut out and levelled. Because the licences are ShareAlike, the adapted images and depth maps in `public/photos/` are offered under the same licence as their originals. If you publish the site, keep the credits section.
 
 The typeface is Archivo (SIL Open Font License).
 

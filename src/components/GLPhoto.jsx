@@ -1,5 +1,4 @@
 import { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import gsap from 'gsap';
 import { glAvailable, createView } from '../gl/engine';
 import { scrollState } from '../lib/smooth';
 import './Photo.css';
@@ -18,7 +17,7 @@ export const PHOTO_STATE = {
   panDirY: 0,
   grain: 0.035,
   vignette: 0.32,
-  reveal: 1, // 0..1: builds from near to far
+  reveal: 1, // 0..1: builds the picture from near to far
   exposure: 1,
   tilt: 0.024, // parallax from the pointer and from moving through the viewport
   velPan: 0.03, // how much fast scrolling adds panning blur
@@ -32,29 +31,24 @@ function rgb(hex) {
 /**
  * A photograph with depth: the camera drifts around it with the pointer and
  * the scroll position, and the background can be panned into a blur while
- * the car stays sharp. With `revealOnView` the picture builds itself from
- * the nearest objects outwards the first time it is seen.
+ * the car stays sharp.
  *
  * Without WebGL (or with reduced motion) it is an ordinary framed photo.
  */
 const GLPhoto = forwardRef(function GLPhoto(
-  { id, depth, alt, ratio = '16 / 10', eager = false, tint = '#ffffff', initial, revealOnView = false, className = '', children, ...rest },
+  { id, depth, alt, ratio = '16 / 10', eager = false, tint = '#ffffff', initial, className = '', children, ...rest },
   ref
 ) {
   const canvas = useRef(null);
   const fig = useRef(null);
   const state = useRef(null);
-  if (!state.current) state.current = { ...PHOTO_STATE, ...(revealOnView ? { reveal: 0 } : null), ...initial };
+  if (!state.current) state.current = { ...PHOTO_STATE, ...initial };
   const s = state.current;
   const live = useRef({});
   live.current = { tint: rgb(tint) };
   const [img, setImg] = useState('loading');
   const [drawn, setDrawn] = useState(false);
   const enabled = glAvailable();
-  // While a reveal is still to come, keep the plain photo hidden so it does
-  // not show and then vanish when the canvas takes over. It comes back if
-  // WebGL fails or is slow.
-  const [pending, setPending] = useState(revealOnView && enabled);
 
   useImperativeHandle(ref, () => ({ s, el: fig.current }), [s]);
 
@@ -80,14 +74,8 @@ const GLPhoto = forwardRef(function GLPhoto(
         u.uTint = live.current.tint;
       },
       onFirstFrame: () => setDrawn(true),
-      onLost: () => {
-        setDrawn(false);
-        setPending(false);
-      },
-      onFail: () => {
-        setDrawn(false);
-        setPending(false);
-      },
+      onLost: () => setDrawn(false),
+      onFail: () => setDrawn(false),
     });
     return () => {
       if (v) v.dispose();
@@ -95,46 +83,12 @@ const GLPhoto = forwardRef(function GLPhoto(
     };
   }, [enabled, id, depth, s]);
 
-  // Build the picture from near to far once it is both drawn and on screen.
-  useEffect(() => {
-    if (!revealOnView || !drawn || !fig.current) return undefined;
-    let tween;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        io.disconnect();
-        tween = gsap.to(s, { reveal: 1, duration: 2.4, ease: 'power2.inOut', onComplete: () => setPending(false) });
-      },
-      { rootMargin: '0px -12% 0px -12%', threshold: 0.25 }
-    );
-    io.observe(fig.current);
-    return () => {
-      io.disconnect();
-      if (tween) tween.kill();
-    };
-  }, [revealOnView, drawn, s]);
-
-  // If the canvas has not drawn a few seconds after the photo came into view, show the plain one.
-  useEffect(() => {
-    if (!pending || drawn || !fig.current) return undefined;
-    let timer;
-    const io = new IntersectionObserver(([entry]) => {
-      window.clearTimeout(timer);
-      if (entry.isIntersecting) timer = window.setTimeout(() => setPending(false), 3500);
-    });
-    io.observe(fig.current);
-    return () => {
-      io.disconnect();
-      window.clearTimeout(timer);
-    };
-  }, [pending, drawn]);
-
   useEffect(() => {
     setImg('loading');
   }, [id]);
 
   return (
-    <figure ref={fig} className={`photo glphoto ${className}`} data-state={img} data-gl={drawn ? 'on' : 'off'} data-reveal={pending ? 'pending' : undefined} style={{ '--ratio': ratio }} {...rest}>
+    <figure ref={fig} className={`photo glphoto ${className}`} data-state={img} data-gl={drawn ? 'on' : 'off'} style={{ '--ratio': ratio }} {...rest}>
       <div className="photo__frame">
         {img !== 'failed' && (
           <img

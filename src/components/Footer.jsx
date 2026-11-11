@@ -24,9 +24,9 @@ export default function Footer() {
             Photographs
           </h2>
           <p className="footer__p">
-            Every photograph here comes from Wikimedia Commons under a Creative Commons licence. Each has been resized and cropped, and has a depth map estimated from
-            it; the side-on car photos were also cut out of their backgrounds and levelled. These adapted versions, depth maps included, are shared under the same
-            licences as the originals.
+            Every photograph here comes from Wikimedia Commons under a Creative Commons licence. Each has been resized and cropped; the 2026 car photos also have depth
+            maps estimated from them, and the side-on ones were cut out of their backgrounds and levelled. These adapted versions, depth maps included, are shared under
+            the same licences as the originals.
           </p>
           {CREDIT_GROUPS.map((g) => (
             <div key={`${g.author}-${g.licence.name}`} className="footer__group">

@@ -1,14 +1,9 @@
-import { Credit } from '../components/Photo';
-import GLPhoto from '../components/GLPhoto';
-import { glAvailable } from '../gl/engine';
+import Photo, { Credit } from '../components/Photo';
 import SplitText from '../components/SplitText';
 import { ERAS } from '../data/history';
 import useProgress from '../hooks/useProgress';
 import useInView from '../hooks/useInView';
 import './History.css';
-
-/** The depth map that goes with a photo: eras/1978 -> depth/era-1978, action/mercedes -> depth/action-mercedes. */
-const depthOf = (photo) => `depth/${photo.replace('eras/', 'era-').replace('action/', 'action-')}`;
 
 function Era({ era, index, near }) {
   const [ref, inView] = useInView({ margin: '0px -18% 0px -18%', threshold: 0.2 });
@@ -18,17 +13,7 @@ function Era({ era, index, near }) {
         {era.year}
       </span>
       <div className="era__photo">
-        <GLPhoto
-          id={era.photo}
-          depth={depthOf(era.photo)}
-          alt={era.caption}
-          ratio="16 / 10"
-          className={glAvailable() ? '' : 'wipe'}
-          eager={near}
-          tint="#dfe3e8"
-          revealOnView
-          initial={{ focus: 0.55, zoom: 1.1, dolly: 0.12, tilt: 0.03 }}
-        />
+        <Photo id={era.photo} alt={era.caption} ratio="16 / 10" className="wipe" eager={near} />
         <Credit id={era.photo} />
       </div>
       <div className="era__copy">

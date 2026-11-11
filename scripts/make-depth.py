@@ -7,7 +7,6 @@ It returns relative inverse depth: larger means nearer.
 Outputs, all 8-bit greyscale WebP where white is nearest:
   depth/<team>-a.webp        side-on car, on the same levelled canvas as cars/<team>-a.webp
   depth/action-<team>.webp   on-track shot, matching action/<team>.webp
-  depth/era-<year>.webp      archive shot, matching eras/<year>.webp
 
 Side-on cars are estimated on the original photo (the track around the car
 helps the model), then put through the same levelling transform as the
@@ -126,13 +125,3 @@ for p in sorted((photos / 'action').glob('*.webp')):
     h, w = img.shape[:2]
     save(d, out / f'action-{p.stem}.webp', (w // 2, h // 2))
     print('action', p.stem)
-
-# ---- archive shots ----
-for p in sorted((photos / 'eras').glob('*.webp')):
-    img = cv2.cvtColor(np.array(Image.open(p).convert('RGB')), cv2.COLOR_RGB2BGR)
-    d = stretch(estimate(img), None, 1, 99.5)
-    g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype(np.float32) / 255
-    d = np.clip(guided(g, d, 4, 1e-3), 0, 1)
-    h, w = img.shape[:2]
-    save(d, out / f'era-{p.stem}.webp', (w // 2, h // 2))
-    print('era', p.stem)
