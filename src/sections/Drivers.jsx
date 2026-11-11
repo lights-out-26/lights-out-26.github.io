@@ -39,7 +39,7 @@ const DriverCard = memo(function DriverCard({ d, index }) {
             {d.no}
           </span>
           <div className="dcard__car">
-            <PhotoCar id={d.car} alt="" wheels={false} sizes="700px" />
+            <PhotoCar id={d.car} alt="" sizes="700px" />
           </div>
           <p className="dcard__top">
             <span className="t-num">P{RANK[d.code]}</span>
@@ -165,7 +165,7 @@ export default function Drivers() {
   return (
     <section id="drivers" className="drivers" ref={ref} data-inview={inView ? 'true' : 'false'}>
       <header className="drivers__head wrap">
-        <h2 className="t-display">
+        <h2 className="t-display" data-skew="">
           <SplitText text="Twenty-two drivers" styleName="focus" stagger={22} />
         </h2>
         <div className="drivers__bar rise" style={{ '--delay': '300ms' }}>

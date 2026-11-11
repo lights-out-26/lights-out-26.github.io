@@ -1,6 +1,9 @@
-import { useMemo } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import gsap from 'gsap';
 import PhotoCar from '../components/PhotoCar';
-import Photo, { Credit } from '../components/Photo';
+import GLCar from '../components/GLCar';
+import GLPhoto from '../components/GLPhoto';
+import { Credit } from '../components/Photo';
 import SplitText from '../components/SplitText';
 import { Count, Odometer } from '../components/Numbers';
 import Footer from '../components/Footer';
@@ -13,6 +16,8 @@ import { teamVars, standing, ordinal, ABBR, fitSize } from '../lib/team';
 import useInView from '../hooks/useInView';
 import useProgress from '../hooks/useProgress';
 import { usePointerParallax } from '../hooks/usePointer';
+import useReducedMotion from '../hooks/useReducedMotion';
+import { glAvailable } from '../gl/engine';
 import './TeamPage.css';
 
 const RANK = Object.fromEntries(DRIVER_ORDER.map((code, i) => [code, i + 1]));
@@ -29,10 +34,45 @@ function Reveal({ as: Tag = 'div', className = '', options, children, ...rest })
   );
 }
 
+const HERO_PAD = { t: 0.12, r: 0.6, b: 0.2, l: 0.06 };
+
 function TeamHero({ team }) {
   const place = standing(team.id);
-  const scrollRef = useProgress('contain');
+  const progress = useRef(0);
+  const onScroll = useCallback((p) => {
+    progress.current = p;
+  }, []);
+  const scrollRef = useProgress('contain', onScroll);
   const parallax = usePointerParallax({ ease: 0.07 });
+  const wrap = useRef(null);
+  const car = useRef(null);
+  const reduce = useReducedMotion();
+
+  // Arrival: the car brakes in from the right, discs glowing, light sweeping over it.
+  useLayoutEffect(() => {
+    if (reduce) return undefined;
+    const s = car.current.s;
+    const tl = gsap
+      .timeline({ delay: 0.35 })
+      .fromTo(wrap.current, { xPercent: 125, skewX: 12, scaleX: 1.1 }, { xPercent: 0, skewX: 0, scaleX: 1, duration: 1.6, ease: 'expo.out' }, 0)
+      .fromTo(s, { speed: 1, spin: 2.8, wheelRate: 80, aberr: 1, brake: 0 }, { speed: 0, spin: 0, wheelRate: 0, aberr: 0, duration: 1.5, ease: 'power3.out' }, 0)
+      .to(s, { brake: 1, duration: 0.3, ease: 'power2.out' }, 0.1)
+      .to(s, { brake: 0, duration: 1.6, ease: 'power2.in' }, 0.8)
+      .fromTo(s, { sweep: -0.7 }, { sweep: 1.7, duration: 1.7, ease: 'power2.inOut', immediateRender: false }, 0.9)
+      .set(s, { sweep: -1 });
+    return () => tl.kill();
+  }, [reduce]);
+
+  // Leaving: the wheels are geared to the scroll and the trail grows as it pulls away.
+  const onFrame = useCallback((s, u) => {
+    const p = progress.current;
+    if (p < 0.001) return;
+    u.uAngle += p * 46;
+    u.uSpin = Math.min(3, u.uSpin + p * 2.6);
+    u.uSpeed = Math.min(1.25, u.uSpeed + p * p * 1.1);
+    u.uAberr += p * 0.9;
+  }, []);
+
   return (
     <header className="tph" ref={scrollRef} data-timeline="contain">
       <div className="tph__stage" ref={parallax}>
@@ -46,8 +86,18 @@ function TeamHero({ team }) {
         </p>
 
         <div className="tph__carscroll scrub">
-          <div className="tph__car">
-            <PhotoCar id={`${team.id}-a`} alt={`The ${team.chassisFull}, photographed from the side at the 2026 Austrian Grand Prix`} sliced speed eager data-roll="" />
+          <div className="tph__car" ref={wrap}>
+            <GLCar
+              ref={car}
+              id={`${team.id}-a`}
+              tint={team.colors.accent}
+              alt={`The ${team.chassisFull}, photographed from the side at the 2026 Austrian Grand Prix`}
+              hd
+              eager
+              pad={HERO_PAD}
+              initial={{ heat: 0.45, sheen: 0.85, tilt: 0.007 }}
+              onFrame={onFrame}
+            />
           </div>
         </div>
 
@@ -101,44 +151,114 @@ function TeamStory({ team }) {
   );
 }
 
-/** The labels shown while the car is apart; their positions live in TeamPage.css. */
-const PARTS = [
-  ['nose', 'Front wing and nose'],
-  ['cell', 'Survival cell and halo'],
-  ['pu', 'Power unit'],
-  ['tail', 'Rear wing and gearbox'],
-  ['wheels', '18-inch wheels'],
-];
+const TOP_SPEED = 340;
+/** Illustrative upshift points (km/h) for an eight-speed gearbox. */
+const SHIFTS = [0, 70, 112, 152, 190, 228, 264, 300];
+const SPEED_PAD = { t: 0.1, r: 0.5, b: 0.18, l: 0.05 };
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
 
-function TeamCar({ team }) {
-  const ref = useProgress('contain');
+/**
+ * Flat out. Identity: acceleration. A pinned scene where scrolling is the
+ * throttle: speed, gear and a growing light trail all follow the scroll,
+ * with a little lag, as if the car had weight.
+ */
+function TeamSpeed({ team }) {
+  const wrap = useRef(null);
+  const road = useRef(null);
+  const kmhEl = useRef(null);
+  const gearEl = useRef(null);
+  const barEl = useRef(null);
+  const hud = useRef(null);
+  const target = useRef(0);
+  const current = useRef(0);
+  const roadX = useRef(0);
+  const gl = glAvailable();
+
+  const readout = useCallback((p, dt) => {
+    const kmh = TOP_SPEED * easeInOut(Math.max(0, Math.min(1, (p - 0.05) / 0.8)));
+    const k = kmh / TOP_SPEED;
+    if (kmhEl.current) kmhEl.current.textContent = String(Math.round(kmh));
+    if (gearEl.current) gearEl.current.textContent = String(SHIFTS.filter((g) => kmh >= g).length);
+    if (barEl.current) barEl.current.style.transform = `scaleX(${k.toFixed(4)})`;
+    if (hud.current) hud.current.dataset.straight = kmh >= 290 ? 'on' : 'off';
+    if (road.current && dt) {
+      roadX.current = (roadX.current - kmh * dt * 9) % 2000;
+      road.current.style.backgroundPositionX = `${roadX.current.toFixed(1)}px`;
+      road.current.style.opacity = (0.12 + k * 0.88).toFixed(3);
+    }
+    return { kmh, k };
+  }, []);
+
+  const onScroll = useCallback(
+    (p) => {
+      target.current = p;
+      if (!gl) readout(p, 0);
+    },
+    [gl, readout]
+  );
+  const ref = useProgress('contain', onScroll);
+
+  const onFrame = useCallback(
+    (s, u, dt) => {
+      current.current += (target.current - current.current) * Math.min(1, dt * 5);
+      const { kmh, k } = readout(current.current, dt);
+      s.wheelRate = Math.min(kmh, 120) * 0.35;
+      u.uSpin = Math.min(3, k * 3);
+      u.uHeat = 0.25 + k * 0.9;
+      // The camera tracks the car, so the car stays sharp while a light trail grows behind it.
+      u.uSpeed = Math.min(1.25, u.uSpeed + Math.max(0, (k - 0.35) / 0.65) * 0.55);
+      u.uAberr += Math.max(0, (k - 0.6) / 0.4) * 0.8;
+      const shake = k * k * 2.4;
+      if (wrap.current) wrap.current.style.transform = shake > 0.05 ? `translate3d(${((Math.random() - 0.5) * shake).toFixed(2)}px, ${((Math.random() - 0.5) * shake).toFixed(2)}px, 0)` : '';
+    },
+    [readout]
+  );
+
   return (
-    <section className="tpc" ref={ref} data-timeline="contain" aria-labelledby="tpc-title">
-      <div className="tpc__pin">
-        <div className="tpc__head wrap">
-          <h2 id="tpc-title" className="t-h2">
-            The {team.chassis}, taken apart
+    <section className="tpv" ref={ref} data-timeline="contain" aria-labelledby="tpv-title">
+      <div className="tpv__pin">
+        <div className="tpv__head wrap">
+          <h2 id="tpv-title" className="t-h2" data-skew="">
+            The {team.chassis}, flat out
           </h2>
-          <p>
-            One photograph, six layers. Scroll to pull the {team.chassisFull} into its main sections and put it back together.
-          </p>
+          <p>Scroll to take it from a standstill to about 340 km/h, roughly what these cars reach at the end of the longest straights.</p>
         </div>
-        <div className="tpc__stage">
-          <span className="tpc__ghost t-team scrub" aria-hidden="true">
+        <div className="tpv__stage">
+          <div className="tpv__road" ref={road} aria-hidden="true" />
+          <span className="tpv__ghost t-team" aria-hidden="true">
             {team.chassis}
           </span>
-          <div className="tpc__car scrub">
-            <PhotoCar id={`${team.id}-a`} alt={`The ${team.chassisFull} separated into nose, cockpit, engine cover, tail and wheels`} sliced />
-            <ul className="tpc__labels scrub" aria-hidden="true">
-              {PARTS.map(([id, text]) => (
-                <li key={id} data-part={id}>
-                  {id === 'pu' ? `${team.powerUnit} power unit` : text}
-                </li>
-              ))}
-            </ul>
+          <div className="tpv__car" ref={wrap}>
+            <GLCar
+              id={`${team.id}-a`}
+              tint={team.colors.accent}
+              alt={`The ${team.chassisFull} at speed`}
+              hd
+              pad={SPEED_PAD}
+              initial={{ heat: 0.25, sheen: 0.8, tilt: 0.006, velGain: 0, hold: 1 }}
+              onFrame={onFrame}
+            />
           </div>
         </div>
-        <p className="tpc__credit wrap">
+        <div className="tpv__hud wrap" ref={hud} data-straight="off" aria-hidden="true">
+          <p className="tpv__speed">
+            <b className="t-num" ref={kmhEl}>
+              0
+            </b>
+            <span>km/h</span>
+          </p>
+          <p className="tpv__gear">
+            <span>Gear</span>
+            <b className="t-num" ref={gearEl}>
+              1
+            </b>
+          </p>
+          <p className="tpv__mode">Straight mode</p>
+          <div className="tpv__bar">
+            <i ref={barEl} />
+          </div>
+        </div>
+        <p className="tpv__credit wrap">
           <Credit id={`${team.id}-a`} />
         </p>
       </div>
@@ -147,14 +267,29 @@ function TeamCar({ team }) {
 }
 
 function TeamAction({ team }) {
-  const ref = useProgress('cover');
   const key = `action/${team.id}`;
+  const photo = useRef(null);
+  // The camera pushes in and drops as the frame rises; the background pans into a blur.
+  const onScroll = useCallback((p) => {
+    const s = photo.current && photo.current.s;
+    if (!s) return;
+    s.zoom = 1.32 - p * 0.24;
+    s.camY = (p - 0.5) * 0.03;
+    s.pan = 0.004 + Math.max(0, p - 0.3) * 0.022;
+  }, []);
+  const ref = useProgress('cover', onScroll);
   return (
     <section className="tpa" ref={ref} data-timeline="cover" aria-label={`${team.name} on track`}>
       <div className="tpa__frame scrub">
-        <div className="tpa__img scrub">
-          <Photo id={key} alt={`A ${team.chassisFull} at speed during the 2026 Austrian Grand Prix weekend`} ratio="21 / 10" />
-        </div>
+        <GLPhoto
+          ref={photo}
+          id={key}
+          depth={`depth/action-${team.id}`}
+          alt={`A ${team.chassisFull} at speed during the 2026 Austrian Grand Prix weekend`}
+          ratio="21 / 10"
+          tint={team.colors.accent}
+          initial={{ focus: 0.52, zoom: 1.32, dolly: 0.14, vignette: 0.4 }}
+        />
         <p className="tpa__word t-team scrub" aria-hidden="true">
           Spielberg
         </p>
@@ -187,7 +322,7 @@ function DriverRow({ code, team, flip }) {
         {d.no}
       </span>
       <div className="tpd__car scrub">
-        <PhotoCar id={d.car} alt={`${d.first} ${d.last}'s ${team.chassis}, car number ${d.no}`} wheels={false} />
+        <PhotoCar id={d.car} alt={`${d.first} ${d.last}'s ${team.chassis}, car number ${d.no}`} />
       </div>
       <div className="tpd__copy wrap">
         <p className="tpd__first rise">{d.first}</p>
@@ -265,7 +400,7 @@ function TeamResults({ team }) {
   return (
     <section className="tpr wrap" aria-labelledby="tpr-title">
       <Reveal className="tpr__head">
-        <h2 id="tpr-title" className="t-h2">
+        <h2 id="tpr-title" className="t-h2" data-skew="">
           <SplitText text="Honours and results" styleName="rise" />
         </h2>
         <p className="rise" style={{ '--delay': '200ms' }}>
@@ -340,7 +475,7 @@ function TeamStrengths({ team }) {
   return (
     <section className="tpt wrap" aria-labelledby="tpt-title">
       <Reveal className="tpt__head">
-        <h2 id="tpt-title" className="t-h2">
+        <h2 id="tpt-title" className="t-h2" data-skew="">
           <SplitText text="What defines this car" styleName="rise" />
         </h2>
       </Reveal>
@@ -395,11 +530,11 @@ export default function TeamPage({ id }) {
     <article className="tp" style={{ ...teamVars(team), '--len': team.chassis.length, '--name-fit': fitSize(team.name, team, 'vw', 88) }}>
       <TeamHero team={team} />
       <TeamStory team={team} />
-      <TeamCar team={team} />
+      <TeamSpeed team={team} />
       <TeamAction team={team} />
       <section className="tpds" aria-labelledby="tpds-title">
         <Reveal className="tpds__head wrap">
-          <h2 id="tpds-title" className="t-display">
+          <h2 id="tpds-title" className="t-display" data-skew="">
             <SplitText text="The drivers" styleName="brake" />
           </h2>
         </Reveal>

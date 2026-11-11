@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
-import PhotoCar from '../components/PhotoCar';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import GLCar from '../components/GLCar';
+import { glAvailable } from '../gl/engine';
 import { Credit } from '../components/Photo';
 import { Count } from '../components/Numbers';
 import SplitText from '../components/SplitText';
@@ -12,11 +14,19 @@ import './Machine.css';
 
 const FIRST = 0.44; // scroll progress at which the first callout appears
 const SPAN = 0.5; // ...and how much scroll the five of them share
+const SCAN = [0.02, 0.4]; // the scroll range over which the scan line crosses the car
+
+/** What the car does in each aerodynamic mode. */
+const MODES = {
+  corner: { wheelRate: 9, spin: 0.3, heat: 0.25, speed: 0, aberr: 0 },
+  straight: { wheelRate: 60, spin: 2.4, heat: 1, speed: 0.07, aberr: 0.15 },
+};
+const PAD = { t: 0.06, r: 0.14, b: 0.14, l: 0.04 };
 
 /**
- * The machine. Identity: assembly. A real car photo arrives in pieces (four
- * body sections and two wheels on separate layers) and pulls itself together
- * as you scroll; then the 2026 rule changes are pinned onto it one by one.
+ * The machine. Identity: a scan. The car first appears as a blueprint drawn
+ * from the photo's own edges and depth contours; scrolling sweeps a scan line
+ * across it to reveal the real car, then the 2026 rule changes are pinned on.
  */
 export default function Machine() {
   const [carId, setCarId] = useState('mclaren');
@@ -24,10 +34,19 @@ export default function Machine() {
   const [reached, setReached] = useState(-1);
   const [picked, setPicked] = useState(null);
 
+  const car = useRef(null);
+  const scan = useRef(0);
   const onProgress = useCallback((p) => {
     const i = Math.floor(((p - FIRST) / SPAN) * PARTS.length);
     setReached(Math.max(-1, Math.min(PARTS.length - 1, i)));
+    const v = Math.max(0, Math.min(1, (p - SCAN[0]) / (SCAN[1] - SCAN[0])));
+    scan.current = v >= 1 ? -1 : v;
+    if (car.current) car.current.s.scan = scan.current;
   }, []);
+
+  useEffect(() => {
+    if (car.current) gsap.to(car.current.s, { ...MODES[mode], duration: mode === 'straight' ? 1.1 : 0.8, ease: 'power2.inOut', overwrite: 'auto' });
+  }, [mode]);
   const ref = useProgress('contain', onProgress);
   const [dataRef, dataIn] = useInView({ margin: '0px', threshold: 0.4 });
 
@@ -44,11 +63,11 @@ export default function Machine() {
       <div className="machine__pin" data-mode={mode}>
         <div className="machine__top wrap">
           <header className="machine__head">
-            <h2 id="machine-title" className="t-h2">
+            <h2 id="machine-title" className="t-h2" data-skew="">
               The 2026 car, piece by piece
             </h2>
             <p className="machine__lead">
-              New chassis rules and new power unit rules arrived together for the first time. Scroll to put the car together, then see what changed.
+              New chassis rules and new power unit rules arrived together for the first time. {glAvailable() ? 'Scroll to scan the car, then see what changed.' : 'Scroll on to see what changed.'}
             </p>
           </header>
 
@@ -65,7 +84,9 @@ export default function Machine() {
                 </p>
               </article>
             ) : (
-              <p className="machine__wait">Four body sections and two wheels, each on its own layer.</p>
+              <p className="machine__wait">
+                {glAvailable() ? 'A blueprint traced from the photograph’s edges and depth. Keep scrolling to scan it.' : 'Keep scrolling to see what changed.'}
+              </p>
             )}
           </div>
         </div>
@@ -74,14 +95,16 @@ export default function Machine() {
           <div className="machine__streaks" aria-hidden="true">
             <i /><i /><i /><i /><i /><i />
           </div>
-          <div className="machine__car scrub" style={{ '--hx': part ? part.x : 0.5 }}>
+          <div className="machine__car" style={{ '--hx': part ? part.x : 0.5 }}>
             <div className="machine__carfade" key={carId}>
-              <PhotoCar
+              <GLCar
+                ref={car}
                 id={`${carId}-a`}
+                tint={team.colors.accent}
                 alt={`The ${team.chassisFull} from the side, with the main parts of a 2026 car marked`}
-                sliced
-                speed
-                data-roll={mode === 'straight' ? '' : undefined}
+                hd
+                pad={PAD}
+                initial={{ ...MODES[mode], scan: scan.current, blue: 1, tilt: 0.005 }}
               />
             </div>
             <ol className="machine__hots" aria-label="Parts of the car">

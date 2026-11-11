@@ -1,8 +1,8 @@
 """Turn the downloaded photos into web assets.
 
 Side-on shots  -> cut out, levelled and scaled so both axles land on the same
-                  spot in every image (cars/*.webp), plus separate wheel discs
-                  (sharp and spin-blurred) and a motion-blurred "at speed" copy.
+                  spot in every image (cars/*.webp). Wheel spin, motion blur
+                  and depth are done live in WebGL (see make-depth.py).
 Action shots   -> cropped around the car (action/*.webp).
 Archive shots  -> resized (eras/*.webp).
 
@@ -18,7 +18,7 @@ WHEELS = json.load(open(wheels_json))
 CW, CH = 6000, 1540          # canvas size
 FX, RX, AY = 1750, 5150, 1110  # front axle x, rear axle x, axle height
 PX = 0.5                     # px per mm for the large size -> 3000 x 770
-for d in ('cars', 'wheels', 'action', 'eras'): (out / d).mkdir(parents=True, exist_ok=True)
+for d in ('cars', 'action', 'eras'): (out / d).mkdir(parents=True, exist_ok=True)
 
 def save_webp(arr_bgra_or_bgr, path, q=84):
     a = arr_bgra_or_bgr
@@ -77,28 +77,6 @@ def radii(w, mm):
     r0 = float(np.clip(r0, 352, 398))
     return r0, r0 * 1.03
 
-def wheel_images(bgra, cx, cy, r):
-    R = int(np.ceil(r)) + 2; x0, y0 = int(cx) - R, int(cy) - R
-    crop = bgra[y0:y0 + 2 * R, x0:x0 + 2 * R].astype(np.float32)
-    yy, xx = np.mgrid[0:2 * R, 0:2 * R]; d = np.hypot(xx - R, yy - R)
-    disc = np.clip((r - d) / 1.6, 0, 1)
-    sharp = crop.copy(); sharp[..., 3] *= disc
-    # spin blur: average every ring around the hub
-    n = 2 * R; pol = cv2.warpPolar(crop, (n, 720), (R, R), R, cv2.WARP_POLAR_LINEAR + cv2.INTER_LINEAR)
-    pol = np.clip(np.nan_to_num(pol, nan=0.0, posinf=0.0, neginf=0.0), 0, 255)
-    pm = pol.copy(); pm[..., :3] *= pm[..., 3:4] / 255
-    mean = pm.mean(axis=0, keepdims=True).repeat(720, axis=0)
-    back = cv2.warpPolar(mean, (2 * R, 2 * R), (R, R), R, cv2.WARP_POLAR_LINEAR + cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
-    back = np.nan_to_num(back); al = np.maximum(back[..., 3:4], 1.0); blur = np.dstack([back[..., :3] / (al / 255), back[..., 3]])
-    blur[..., 3] *= disc
-    return np.clip(sharp, 0, 255).astype(np.uint8), np.clip(blur, 0, 255).astype(np.uint8)
-
-def speed_copy(bgra, k):
-    f = bgra.astype(np.float32); pm = f.copy(); pm[..., :3] *= pm[..., 3:4] / 255
-    pm = cv2.blur(pm, (k, 1)); pm = cv2.GaussianBlur(pm, (0, 0), sigmaX=k / 9, sigmaY=0.6)
-    al = np.maximum(pm[..., 3:4], 1e-3)
-    return np.clip(np.dstack([pm[..., :3] / (al / 255), pm[..., 3]]), 0, 255).astype(np.uint8)
-
 meta = {'canvas': {'w': CW, 'h': CH, 'frontX': FX / CW, 'rearX': RX / CW, 'axleY': AY / CH}, 'cars': {}}
 side = sorted(k for k in WHEELS if k.endswith(('-a', '-b')))
 for k in side:
@@ -114,11 +92,6 @@ for k in side:
         save_webp(bgra, out / 'cars' / f'{k}-lg.webp', 84)
         md = cv2.resize(bgra, (bgra.shape[1] // 2, bgra.shape[0] // 2), interpolation=cv2.INTER_AREA)
         save_webp(md, out / 'cars' / f'{k}.webp', 82)
-        save_webp(speed_copy(md, 151), out / 'cars' / f'{k}-speed.webp', 62)
-        for name, cx, r in (('f', FX, rf), ('r', RX, rr)):
-            sharp, blur = wheel_images(bgra, cx * px, AY * px, r * px * 0.985)
-            save_webp(sharp, out / 'wheels' / f'{k}-{name}.webp', 84); save_webp(blur, out / 'wheels' / f'{k}-{name}-spin.webp', 70)
-        entry['wheelBox'] = round((int(np.ceil(rf * px * 0.985)) + 2) * 2 / bgra.shape[1], 5), round((int(np.ceil(rr * px * 0.985)) + 2) * 2 / bgra.shape[1], 5)
     else:
         save_webp(bgra, out / 'cars' / f'{k}.webp', 82)
     meta['cars'][k] = entry

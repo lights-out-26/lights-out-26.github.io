@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import SplitText from '../components/SplitText';
 import { WEEKEND } from '../data/tech';
 import useProgress from '../hooks/useProgress';
+import { scrollToY } from '../lib/smooth';
 import './Weekend.css';
 
 const SLOTS = Array.from({ length: 22 }, (_, i) => i + 1);
@@ -27,8 +28,7 @@ export default function Weekend() {
     if (!el) return;
     const top = el.getBoundingClientRect().top + window.scrollY;
     const travel = el.offsetHeight - window.innerHeight;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: top + (travel * (i + 0.4)) / WEEKEND.length, behavior: reduce ? 'auto' : 'smooth' });
+    scrollToY(top + (travel * (i + 0.4)) / WEEKEND.length);
   };
 
   return (

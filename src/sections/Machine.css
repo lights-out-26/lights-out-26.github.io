@@ -117,17 +117,10 @@
 .machine__car {
   position: relative;
   width: min(88vw, 122vh, 1560px);
-  animation-name: machine-build;
   transition: transform 0.9s var(--ease-out);
 }
 
-/* --x pulls the layers apart; --wheel-blur spins the wheels up. Both are
-   registered properties, so the scroll position can animate them directly. */
-@keyframes machine-build {
-  0% { --x: 1; --wheel-blur: 0.9; }
-  40%, 100% { --x: 0; --wheel-blur: 0; }
-}
-
+/* A new team's car slides in on top of the blueprint. */
 .machine__carfade {
   animation: machine-swap 0.7s var(--ease-out) both;
 }
@@ -137,15 +130,8 @@
   to { opacity: 1; transform: none; }
 }
 
-/* Straight mode: wheels blur, the body squats, the air starts moving. */
-.machine__pin[data-mode='straight'] .pcar {
-  --spin: 0.34s;
-}
-
-.machine__pin[data-mode='straight'] .pcar__tyre { opacity: 0.2; }
-.machine__pin[data-mode='straight'] .pcar__tyre--spin { opacity: 1; }
-
-.machine__pin[data-mode='straight'] .pcar__body {
+/* Straight mode: the body squats a touch as downforce builds. */
+.machine__pin[data-mode='straight'] .machine__carfade .glcar {
   translate: 0 0.5%;
   transition: translate 0.6s var(--ease-out);
 }
@@ -564,7 +550,6 @@ html.js [data-inview='true'] .power__seg--electric {
   }
 
   .machine__car {
-    --x: 0;
     transition: none;
   }
 }

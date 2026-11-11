@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RouterProvider, useRouter } from './router/router';
 import { TEAM_BY_ID } from './data/teams';
-import { refresh, scrollToEl } from './lib/scroll';
+import { refresh } from './lib/scroll';
+import { initSmoothScroll, scrollToEl, scrollToY, refreshTriggers } from './lib/smooth';
 import Preloader from './components/Preloader';
 import Cursor from './components/Cursor';
 import Nav from './components/Nav';
@@ -15,6 +16,8 @@ function Shell() {
   const previous = useRef(null);
   const onBoot = useCallback(() => setBooted(true), []);
 
+  useEffect(() => initSmoothScroll(), []);
+
   // Put the scroll position where each kind of navigation expects it.
   useLayoutEffect(() => {
     const was = previous.current;
@@ -22,9 +25,9 @@ function Shell() {
     const sameHome = was && was.page === 'home' && route.page === 'home';
 
     if (route.page === 'team') {
-      window.scrollTo(0, 0);
+      scrollToY(0, { smooth: false });
     } else if (route.restore != null) {
-      window.scrollTo(0, route.restore);
+      scrollToY(route.restore, { smooth: false });
     } else if (route.section) {
       const go = () => scrollToEl(document.getElementById(route.section), !!sameHome);
       if (sameHome) go();
@@ -32,9 +35,10 @@ function Shell() {
     } else if (sameHome && route.stamp) {
       scrollToEl(document.body, true);
     } else if (was) {
-      window.scrollTo(0, 0);
+      scrollToY(0, { smooth: false });
     }
     refresh();
+    refreshTriggers();
   }, [route]);
 
   useEffect(() => {

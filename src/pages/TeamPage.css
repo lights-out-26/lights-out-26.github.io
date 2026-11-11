@@ -80,47 +80,16 @@
   animation-name: tph-car-scroll;
 }
 
-/* Scrolling drives the car away: it accelerates off to the left, blurring as it goes. */
+/* Scrolling drives the car away to the left; the WebGL scene adds the
+   trail and gears the wheels to the scroll (see TeamHero). */
 @keyframes tph-car-scroll {
-  0% { transform: none; --speed: 0; --wheel-blur: 0; }
-  100% { transform: translate3d(-128vw, 0, 0) skewX(-9deg); --speed: 1; --wheel-blur: 1; }
+  0% { transform: none; }
+  100% { transform: translate3d(-128vw, 0, 0) skewX(-9deg); }
 }
 
+/* GSAP brakes the car in on arrival. */
 .tph__car {
-  transform: translate3d(calc(var(--mx, 0) * 1vw), calc(var(--my, 0) * 0.4vw), 0);
-  animation: tph-car-in 1.6s var(--ease-brake) 0.35s backwards;
-}
-
-@keyframes tph-car-in {
-  0% { transform: translate3d(120vw, 0, 0) skewX(12deg) scaleX(1.1); --speed: 1; --wheel-blur: 1; }
-  60% { --speed: 0.6; }
-  100% { transform: none; --speed: 0; --wheel-blur: 0; }
-}
-
-.tph__car .pcar__slice {
-  animation: hero-part-in 1.6s var(--ease-brake) 0.35s backwards;
-}
-
-.tph__car .pcar__wheel {
-  animation: hero-wheel-in 1.6s var(--ease-brake) 0.35s backwards;
-}
-
-/* The wheels are geared to the scroll: as the car moves off, they turn. */
-.tph .pcar__tyre {
-  animation: tph-wheel 1s linear both paused;
-  animation-delay: calc(var(--p, 0) * -1s);
-}
-
-@supports (animation-timeline: view()) {
-  .tph .pcar__tyre {
-    animation: tph-wheel 1s linear both;
-    animation-timeline: --tl;
-    animation-range: contain 0% contain 100%;
-  }
-}
-
-@keyframes tph-wheel {
-  to { transform: rotate(-1800deg); }
+  will-change: transform;
 }
 
 .tph__top {
@@ -248,107 +217,150 @@
   padding-top: 0.6em;
 }
 
-/* ============ the car, taken apart ============ */
+/* ============ flat out ============ */
 
-.tpc {
+.tpv {
   position: relative;
-  height: 330vh;
-  height: 330svh;
+  height: 320vh;
+  height: 320svh;
 }
 
-.tpc__pin {
+.tpv__pin {
   position: sticky;
   top: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr);
   height: 100vh;
   height: 100svh;
   padding-block: calc(var(--nav-h) + 2vh) 3vh;
   overflow: hidden;
-  background: radial-gradient(60% 44% at 50% 60%, color-mix(in srgb, var(--team-deep) 90%, transparent), transparent 75%);
+  background: radial-gradient(60% 44% at 50% 62%, color-mix(in srgb, var(--team-deep) 90%, transparent), transparent 75%);
 }
 
-.tpc__head {
+.tpv__head {
   display: grid;
   gap: 10px;
 }
 
-.tpc__head p {
+.tpv__head p {
   max-width: 40em;
   color: var(--silver);
 }
 
-.tpc__stage {
+.tpv__stage {
   position: relative;
   display: grid;
   place-items: center;
   min-height: 0;
-  perspective: 1500px;
 }
 
-.tpc__ghost {
+/* Streaks of track rushing past; their speed and strength follow the car. */
+.tpv__road {
+  position: absolute;
+  inset: 18% -10%;
+  opacity: 0.15;
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.5) 0 140px, transparent 140px 520px) 0 24% / 2000px 2px no-repeat,
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--team) 80%, transparent) 0 60px, transparent 60px 380px) 0 52% / 2000px 3px no-repeat,
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.35) 0 220px, transparent 220px 700px) 0 86% / 2000px 2px no-repeat,
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.18) 0 90px, transparent 90px 300px) 0 70% / 2000px 1px no-repeat;
+  background-repeat: repeat-x;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+}
+
+.tpv__ghost {
   position: absolute;
   font-size: min(calc(96vw / (var(--len, 4) * 0.7)), 54vh);
   color: transparent;
   -webkit-text-stroke: 1.5px color-mix(in srgb, var(--team) 40%, transparent);
   white-space: nowrap;
   pointer-events: none;
-  animation-name: tpc-ghost;
 }
 
-@keyframes tpc-ghost {
-  from { transform: translate3d(10vw, 0, 0) scale(0.92); }
-  to { transform: translate3d(-10vw, 0, 0) scale(1.08); }
-}
-
-.tpc__car {
+.tpv__car {
   position: relative;
-  width: min(80vw, 108vh, 1380px);
-  transform-style: preserve-3d;
-  /* Tilting the whole stack as it separates turns the layer depths into real parallax. */
-  transform: rotateX(calc(var(--x) * 10deg)) rotateY(calc(var(--x) * -16deg));
-  animation-name: tpc-explode;
+  width: min(84vw, 112vh, 1380px);
 }
 
-@keyframes tpc-explode {
-  0%, 12% { --x: 0; --wheel-blur: 0; }
-  42%, 62% { --x: 1; --wheel-blur: 0.5; }
-  90%, 100% { --x: 0; --wheel-blur: 0; }
+.tpv__hud {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: end;
+  gap: 8px clamp(20px, 4vw, 64px);
 }
 
-.tpc__labels {
-  position: absolute;
-  inset: 0;
-  animation-name: tpc-labels;
-  transform: translateZ(180px);
+.tpv__speed {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25em;
 }
 
-@keyframes tpc-labels {
-  0%, 30% { opacity: 0; }
-  42%, 62% { opacity: 1; }
-  72%, 100% { opacity: 0; }
+.tpv__speed b {
+  min-width: 3ch;
+  font-size: clamp(3rem, 8vw, 7.5rem);
+  font-weight: 900;
+  font-stretch: 118%;
+  font-style: italic;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+  text-align: right;
 }
 
-.tpc__labels [data-part='nose'] { left: 9%; top: 22%; }
-.tpc__labels [data-part='cell'] { left: 37%; top: -16%; }
-.tpc__labels [data-part='pu'] { left: 64%; top: -24%; }
-.tpc__labels [data-part='tail'] { left: 89%; top: -6%; }
-.tpc__labels [data-part='wheels'] { left: 58%; top: 122%; }
-
-.tpc__labels li {
-  position: absolute;
-  translate: -50% -50%;
-  padding: 0.35em 0.85em;
-  border-radius: 999px;
-  background: var(--team);
-  color: var(--team-ink);
+.tpv__speed span,
+.tpv__gear span {
   font-size: var(--fs-small);
-  font-stretch: 86%;
-  font-weight: 700;
-  white-space: nowrap;
+  font-weight: 600;
+  color: var(--muted);
 }
 
-.tpc__credit {
+.tpv__gear {
+  display: grid;
+  justify-items: start;
+}
+
+.tpv__gear b {
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  font-weight: 800;
+  line-height: 0.95;
+  color: var(--team);
+}
+
+.tpv__mode {
+  justify-self: end;
+  padding: 0.4em 0.9em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--muted);
+  transition: background-color 0.3s linear, color 0.3s linear, border-color 0.3s linear;
+}
+
+.tpv__hud[data-straight='on'] .tpv__mode {
+  background: var(--team);
+  border-color: var(--team);
+  color: var(--team-ink);
+}
+
+.tpv__bar {
+  grid-column: 1 / -1;
+  height: 3px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.tpv__bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--white), var(--team));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+.tpv__credit {
+  margin-top: 10px;
   min-height: 1.4em;
 }
 
@@ -369,15 +381,6 @@
 @keyframes tpa-frame {
   0% { clip-path: inset(14% 16% 14% 16%); }
   42%, 100% { clip-path: inset(0 0 0 0); }
-}
-
-.tpa__img {
-  animation-name: tpa-img;
-}
-
-@keyframes tpa-img {
-  from { transform: scale(1.28) translate3d(0, -5%, 0); }
-  to { transform: scale(1.04) translate3d(0, 4%, 0); }
 }
 
 .tpa__word {
@@ -932,20 +935,20 @@ html.js [data-inview='true'] .strip__cell {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .tpc__car {
+  .tpv__car {
+    justify-self: start;
     width: 92vw;
+    margin-left: 2vw;
   }
 
-  .tpc__labels li {
-    font-size: 0.6875rem;
-    padding: 0.3em 0.6em;
+  .tpv__hud {
+    grid-template-columns: auto auto;
   }
 
-  .tpc__labels [data-part='nose'] { left: 20%; top: 150%; }
-  .tpc__labels [data-part='cell'] { left: 26%; top: -42%; }
-  .tpc__labels [data-part='pu'] { left: 56%; top: -84%; }
-  .tpc__labels [data-part='tail'] { left: 80%; top: -42%; }
-  .tpc__labels [data-part='wheels'] { left: 72%; top: 150%; }
+  .tpv__mode {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
 
   .tpd {
     align-items: end;
@@ -993,24 +996,12 @@ html.js [data-inview='true'] .strip__cell {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tph__car,
-  .tph__car .pcar__slice,
-  .tph__car .pcar__wheel,
-  .tph .pcar__tyre,
   .tph .motif,
   .tph__back,
   .tph__place,
   .tph__entrant,
   .tph__facts > div {
     animation: none !important;
-  }
-
-  .tpc__car {
-    transform: none;
-  }
-
-  .tpc__labels {
-    display: none;
   }
 
   .strip__cell {

@@ -51,7 +51,7 @@ export default function History() {
       <div className="history__pin">
         <div className="history__track scrub">
           <header className="history__head" ref={headRef} data-inview={headIn ? 'true' : 'false'}>
-            <h2 className="history__title t-display">
+            <h2 className="history__title t-display" data-skew="">
               <SplitText text="Seventy-six years, six cars" styleName="rise" />
             </h2>
             <p className="t-lead rise" style={{ '--delay': '400ms' }}>

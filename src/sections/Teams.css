@@ -175,16 +175,6 @@
   pointer-events: none;
 }
 
-/* The wheels turn as the car rolls in, then settle. */
-.slat[data-active] .slat__car .pcar__tyre {
-  animation: slat-wheels 1.5s var(--ease-out) both;
-}
-
-@keyframes slat-wheels {
-  from { transform: rotate(760deg); }
-  to { transform: none; }
-}
-
 /* ---- wide screens: eleven slanted doors side by side ---- */
 
 @media (min-width: 900px) {
@@ -372,9 +362,5 @@
   .slat__chassis {
     transition: none !important;
     animation: none !important;
-  }
-
-  .slat[data-active] .slat__car .pcar__tyre {
-    animation: none;
   }
 }

@@ -68,10 +68,5 @@ export function refresh() {
   schedule();
 }
 
-/** Scroll to an element, leaving room for the fixed header. */
-export function scrollToEl(el, smooth = true) {
-  if (!el) return;
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const top = el.getBoundingClientRect().top + window.scrollY;
-  window.scrollTo({ top, behavior: smooth && !reduce ? 'smooth' : 'auto' });
-}
+/** Scrolling to an element goes through the smooth scroller. */
+export { scrollToEl } from './smooth';

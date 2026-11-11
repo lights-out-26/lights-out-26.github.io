@@ -1,53 +1,27 @@
-/* ------------------------------------------------------------------
-   The layered photo car. See PhotoCar.jsx for what each layer is.
-   ------------------------------------------------------------------ */
+/* Still car photos, and the poster image and placeholder shared with GLCar. */
 
-/* --x, --wheel-blur and --speed are registered properties (see tokens.css)
-   that default to 0 and inherit, so any ancestor can set or animate them. */
 .pcar {
-  /* slice cut lines (percent of width) and their slant */
-  --c1: 22%;
-  --c2: 53%;
-  --c3: 77.5%;
-  --slant: 2.5%;
-
   position: relative;
   width: 100%;
   aspect-ratio: 6000 / 1540;
-  transform-style: preserve-3d;
   -webkit-user-select: none;
   user-select: none;
 }
 
-.pcar__body,
-.pcar__img,
-.pcar__slice,
-.pcar__speed {
+.pcar__img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-}
-
-.pcar__body {
-  transform-style: preserve-3d;
-}
-
-.pcar img {
   max-width: none;
   pointer-events: none;
+  transition: opacity 0.4s linear;
 }
 
-/* ---- loading and missing states ---- */
-
-.pcar[data-state='loading'] .pcar__body,
-.pcar[data-state='loading'] .pcar__wheel,
-.pcar[data-state='failed'] .pcar__body,
-.pcar[data-state='failed'] .pcar__wheel,
-.pcar[data-state='failed'] .pcar__speed {
+.pcar[data-state='loading'] .pcar__img,
+.pcar[data-state='failed'] .pcar__img {
   opacity: 0;
 }
-
 
 .pcar[data-state='loading']::after {
   content: '';
@@ -79,137 +53,12 @@
 .pcar__missing span {
   position: relative;
   padding: 0.3em 0.8em;
-  background: var(--black);
-  border: 1px solid var(--line);
   border-radius: 999px;
+  background: var(--graphite);
 }
-
-/* ---- shadow ---- */
-
-.pcar__shadow {
-  position: absolute;
-  left: 4%;
-  right: 2%;
-  top: 88%;
-  height: 16%;
-  background: radial-gradient(50% 50% at 50% 50%, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.5) 55%, transparent 100%);
-  filter: blur(6px);
-  opacity: calc(1 - var(--x) * 0.75);
-  transform: translate3d(0, calc(var(--x) * 30%), -40px) scaleX(calc(1 + var(--x) * 0.12));
-}
-
-/* ---- slices ----
-   Four copies of the same photo, each clipped to one slanted band. The
-   bands tile the canvas exactly, so at --x: 0 they read as one image. */
-
-.pcar__slice,
-.pcar__wheel {
-  transform: translate3d(calc(var(--ex, 0) * var(--x) * 1%), calc(var(--ey, 0) * var(--x) * 1%), calc(var(--ez, 0) * var(--x) * 1px))
-    rotate(calc(var(--er, 0) * var(--x) * 1deg));
-}
-
-.pcar__slice--nose {
-  --ex: -7; --ey: 7; --ez: 70; --er: -2;
-  clip-path: polygon(0 0, calc(var(--c1) + var(--slant)) 0, calc(var(--c1) - var(--slant)) 100%, 0 100%);
-}
-
-.pcar__slice--cockpit {
-  --ex: -2.4; --ey: -9; --ez: 20; --er: 0;
-  clip-path: polygon(calc(var(--c1) + var(--slant)) 0, calc(var(--c2) + var(--slant)) 0, calc(var(--c2) - var(--slant)) 100%, calc(var(--c1) - var(--slant)) 100%);
-}
-
-.pcar__slice--engine {
-  --ex: 2.4; --ey: -15; --ez: -10; --er: 0;
-  clip-path: polygon(calc(var(--c2) + var(--slant)) 0, calc(var(--c3) + var(--slant)) 0, calc(var(--c3) - var(--slant)) 100%, calc(var(--c2) - var(--slant)) 100%);
-}
-
-.pcar__slice--tail {
-  --ex: 7; --ey: -4; --ez: 50; --er: 2;
-  clip-path: polygon(calc(var(--c3) + var(--slant)) 0, 100% 0, 100% 100%, calc(var(--c3) - var(--slant)) 100%);
-}
-
-/* When the parts separate, the wheels leave holes behind them. */
-.pcar[data-sliced] .pcar__slice {
-  -webkit-mask-image: radial-gradient(ellipse var(--hf) calc(var(--hf) * 3.896) at var(--fx) var(--ay), transparent 97%, #000 100%),
-    radial-gradient(ellipse var(--hr) calc(var(--hr) * 3.896) at var(--rx) var(--ay), transparent 97%, #000 100%);
-  mask-image: radial-gradient(ellipse var(--hf) calc(var(--hf) * 3.896) at var(--fx) var(--ay), transparent 97%, #000 100%),
-    radial-gradient(ellipse var(--hr) calc(var(--hr) * 3.896) at var(--rx) var(--ay), transparent 97%, #000 100%);
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
-}
-
-/* ---- wheels ---- */
-
-.pcar__wheel {
-  position: absolute;
-  top: var(--ay);
-  aspect-ratio: 1;
-  margin: 0;
-  translate: -50% -50%;
-}
-
-.pcar__wheel--f {
-  --ex: -5; --ey: 30; --ez: 150;
-  left: var(--fx);
-  width: var(--wf);
-}
-
-.pcar__wheel--r {
-  --ex: 5; --ey: 30; --ez: 150;
-  left: var(--rx);
-  width: var(--wr);
-}
-
-/* --ex / --ey are percentages of the wheel's own box here, so scale them up
-   to travel a similar distance to the body slices. */
-.pcar__wheel {
-  transform: translate3d(calc(var(--ex, 0) * var(--x) * 8%), calc(var(--ey, 0) * var(--x) * 2.4%), calc(var(--ez, 0) * var(--x) * 1px));
-}
-
-.pcar__tyre {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: calc(1 - var(--wheel-blur) * 0.82);
-}
-
-.pcar__tyre--spin {
-  opacity: var(--wheel-blur);
-}
-
-.pcar[data-roll] .pcar__tyre {
-  animation: spin var(--spin, 0.9s) linear infinite;
-}
-
-.pcar[data-roll] .pcar__tyre--spin {
-  animation-duration: calc(var(--spin, 0.9s) * 2.7);
-}
-
-/* ---- speed copy ---- */
-
-.pcar__speed {
-  opacity: var(--speed, 0);
-  mix-blend-mode: screen;
-  transform-origin: 0 50%;
-  transform: translate3d(calc(var(--speed, 0) * 3%), 0, 0) scaleX(calc(1 + var(--speed, 0) * 0.22));
-}
-
-/* The sharp photo only starts to thin out once the blur is well established. */
-.pcar__body {
-  opacity: clamp(0.55, 1.5 - var(--speed, 0), 1);
-}
-
-/* Order of the parts from the nose back; scenes use it to stagger them. */
-.pcar__slice--nose { --si: 0; }
-.pcar__slice--cockpit { --si: 1; }
-.pcar__slice--engine { --si: 2; }
-.pcar__slice--tail { --si: 3; }
-.pcar__wheel--f { --si: 0.6; }
-.pcar__wheel--r { --si: 2.7; }
 
 @media (prefers-reduced-motion: reduce) {
-  .pcar[data-roll] .pcar__tyre {
+  .pcar[data-state='loading']::after {
     animation: none;
   }
 }

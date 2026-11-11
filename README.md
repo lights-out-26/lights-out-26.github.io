@@ -1,6 +1,6 @@
 # Lights Out 26
 
-An unofficial, animation-led tour of the 2026 Formula 1 grid: eleven teams, twenty-two cars and a new rulebook. Built with React and plain CSS as a front-end portfolio piece.
+An unofficial, animation-led tour of the 2026 Formula 1 grid: eleven teams, twenty-two cars and a new rulebook. Built with React, CSS, GSAP and WebGL as a front-end portfolio piece.
 
 Not affiliated with Formula 1, the FIA or any team.
 
@@ -20,53 +20,64 @@ Node 20 or newer. The build uses relative paths, so `dist/` can be hosted from a
 | Section | Animation idea |
 | --- | --- |
 | Intro | Five start lights come on in turn, go out together, and the screen splits open |
-| Hero | A rolling shot: a real car holds station while speed lines, road markings and other cars stream past, then launches off for the next team's car |
+| Hero | A rolling shot: a real car brakes in with its discs glowing, holds station with the wheels turning while speed lines stream past, then launches off in a blur for the next team's car |
 | History | A pinned strip that scrolls sideways through six eras, with outlined years drifting behind the photographs |
 | Race weekend | One pinned screen that steps through practice, Q1, Q2, Q3 and the race while a 22-car grid thins out and launches |
-| The machine | A car photo that arrives in six layers and assembles as you scroll, then callouts for each 2026 rule change |
-| Teams | Eleven slanted "garage doors" that swing open in the team's colours |
+| The machine | A blueprint of the car (edges and depth contours) that a scan line turns back into the photograph as you scroll, then callouts for each 2026 rule change |
+| Teams | Eleven slanted "garage doors" that swing open in the team's colours while the car rolls in and brakes |
 | Drivers | Cards that tilt toward the pointer, flood with colour and flip over |
 | Records | A line chart that plots itself, bars that run out to their values, CSS-only counters |
-| Team pages | Per-team colours, type and pattern; a scroll-geared hero car; an exploded view; a round-by-round result strip |
+| Team pages | Per-team colours, type and pattern; a scroll-geared hero car; a pinned "flat out" scene where scrolling is the throttle (0 to 340 km/h); a panning shot with the background in motion blur; a round-by-round result strip |
 
 ## How the car animation works
 
-Every side-on car is a real photograph (see credits below) that has been cut out of its background and levelled onto one shared canvas so that both axles land in the same place in every image. `PhotoCar` then rebuilds it from layers:
+Every car is a real photograph (see credits below); nothing is modelled or redrawn, so the liveries and sponsor marks are the real ones. Side-on photos are cut out of their background and levelled onto one shared canvas, so both axles land in the same place in every image.
 
-- four slanted slices of the body (`clip-path`), which can separate and stagger
-- two wheel discs lifted from the same photo, each with a sharp and a spin-blurred version
-- a motion-blurred copy used for speed trails (`mix-blend-mode: screen`)
-- a contact shadow
+Each photo also has a **depth map**, estimated offline with Depth Anything V2 Small (`scripts/make-depth.py`). In the browser, the photo and its depth map go to a WebGL2 shader (`src/gl/`) that draws:
 
-Scenes drive the layers through four registered custom properties, which means CSS can animate them directly, including from the scroll position:
+- **depth parallax**: near parts move further than far ones as the pointer and the scroll move the camera
+- **relighting**: surface normals from the depth map, so a light follows the pointer and a highlight can sweep along the bodywork
+- **wheel spin**: the wheel discs are rotated in the shader, with a rotational blur that grows with speed
+- **motion blur and light trails**: a long exposure along the direction of travel, tinted in the team colour with a slight colour split; or, with the camera tracking the car, a sharp car over its trail
+- **heat haze** over the engine cover, **brake glow** through the rims, and a soft contact shadow
+- **blueprint**: Sobel edges and depth contours, wiped away by a scan line
+- on the on-track photos: a **camera push** (dolly) and **panning blur** applied only to what is behind the car
 
-| Property | Effect |
-| --- | --- |
-| `--x` | 0 to 1: how far the layers are pulled apart |
-| `--wheel-blur` | 0 to 1: cross-fade from sharp wheels to spinning ones |
-| `--speed` | 0 to 1: how much of the motion-blurred copy shows |
-| `--spin` | time for one wheel revolution |
+All scenes share one WebGL context: each `<canvas>` on the page is a 2D canvas that the renderer copies its finished view into, so there is no limit on how many scenes a page has and they stay in the normal stacking order. Textures are shared and released when unused. If WebGL2 is not available, or `prefers-reduced-motion` is set, the plain photographs are shown instead.
+
+`GLCar` and `GLPhoto` expose a plain state object (`ref.current.s`): speed, wheel rate, spin blur, brake, heat, sweep, scan, zoom, focus, pan and so on. GSAP timelines tween those values and the renderer maps them to shader uniforms every frame, so a scene is written as an ordinary timeline:
+
+```js
+gsap.timeline()
+  .fromTo(wrap, { xPercent: 140 }, { xPercent: 0, duration: 1.55, ease: 'expo.out' }, 0)
+  .fromTo(car.s, { speed: 1, wheelRate: 90 }, { speed: 0, wheelRate: 24, duration: 1.45 }, 0)
+  .to(car.s, { brake: 1, duration: 0.3 }, 0.08)
+  .to(car.s, { brake: 0, duration: 1.4 }, 0.7);
+```
 
 ## Scroll-linked animation
 
-`[data-timeline]` declares a CSS view timeline and `.scrub` binds an element's keyframes to it. Where the browser has no scroll-driven animations, `src/lib/scroll.js` measures progress once per frame and writes it to `--p`; the same keyframes are then scrubbed with a negative `animation-delay`. Intersection Observer (`useInView`) triggers the one-shot reveals.
+Lenis smooths wheel and trackpad scrolling (touch keeps the native feel). GSAP's ticker drives Lenis, ScrollTrigger and the WebGL renderer from one `requestAnimationFrame`, and the current scroll speed feeds the shaders (faster scrolling, more blur) and makes the big headings lean (`data-skew`).
 
-`prefers-reduced-motion` is respected throughout: loops stop, reveals show their end state, and the sideways history section becomes an ordinary vertical list.
+`[data-timeline]` declares a CSS view timeline and `.scrub` binds an element's keyframes to it. Where the browser has no scroll-driven animations, `src/lib/scroll.js` measures progress once per frame and writes it to `--p`; the same keyframes are then scrubbed with a negative `animation-delay`. `useProgress` hands the same progress to JavaScript for the WebGL scenes. Intersection Observer (`useInView`) triggers the one-shot reveals.
+
+`prefers-reduced-motion` is respected throughout: smooth scrolling and WebGL are switched off, loops stop, reveals show their end state, and the sideways history section becomes an ordinary vertical list.
 
 ## Project layout
 
 ```
 src/
-  components/   PhotoCar, Photo, SplitText, Numbers, Cursor, Nav, Preloader, Transition, Footer
+  components/   GLCar, GLPhoto, PhotoCar, Photo, SplitText, Numbers, Cursor, Nav, Preloader, Transition, Footer
+  gl/           the shared WebGL2 renderer and the car and photo shaders
   sections/     Hero, History, Weekend, Machine, Teams, Drivers, Stats
   pages/        Home, TeamPage
   hooks/        useInView, useProgress, usePointer (parallax and tilt), useReducedMotion
-  lib/          scroll tracking, points maths, team styling helpers
+  lib/          smooth scrolling, scroll tracking, points maths, team styling helpers
   data/         teams, drivers, season results, records, history, tech, photo credits
   router/       a small hash router with animated page transitions
   styles/       tokens, base, motion primitives, team identities
-public/photos/  prepared images (cars, wheels, action, eras)
-scripts/        the photo pipeline and a data consistency check
+public/photos/  prepared images (cars, action, eras) and their depth maps (depth)
+scripts/        the photo and depth pipeline and a data consistency check
 ```
 
 ## Data
@@ -85,7 +96,8 @@ It recomputes every driver's and team's points from the race results and fails i
 2. `node scripts/cut-out.mjs` makes the background masks (uses `@imgly/background-removal-node`).
 3. `python scripts/find-wheels.py` locates both wheels.
 4. `python scripts/prepare-photos.py <raw> <masks> <wheels.json> public/photos` writes the web images and `carsMeta.json`.
-5. Add the credit to `src/data/credits.js`.
+5. `python scripts/make-depth.py <model.onnx> <raw> <wheels.json> public/photos` writes the depth maps. It needs `onnxruntime`, `opencv-python`, `numpy` and `pillow`, and the Depth Anything V2 Small ONNX model from [onnx-community/depth-anything-v2-small](https://huggingface.co/onnx-community/depth-anything-v2-small) (`onnx/model_quantized.onnx` was used here).
+6. Add the credit to `src/data/credits.js`.
 
 Driver cards and profiles show each driver's own car. To add portraits you have the rights to, place them in `public/photos/drivers/` and extend `DriverCard`.
 
@@ -101,6 +113,8 @@ All photographs come from Wikimedia Commons under Creative Commons licences. The
 - McLaren MP4/4: Nic Redhead, CC BY-SA 2.0
 - Ferrari F2004 and Mercedes W05: emperornie, CC BY-SA 2.0
 
-The images were resized and cropped; side-on car photos were also cut out, levelled and split into layers. Because the licences are ShareAlike, the adapted images in `public/photos/` are offered under the same licence as their originals. If you publish the site, keep the credits section.
+The images were resized and cropped; the 2026 car photos were also given depth maps, and the side-on ones were cut out and levelled. Because the licences are ShareAlike, the adapted images and depth maps in `public/photos/` are offered under the same licence as their originals. If you publish the site, keep the credits section.
 
 The typeface is Archivo (SIL Open Font License).
+
+Depth maps: Depth Anything V2 Small (Apache License 2.0), by Lihe Yang et al. Libraries: React (MIT), GSAP (free standard licence), Lenis (MIT).
