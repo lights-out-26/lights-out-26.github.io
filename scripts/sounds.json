@@ -1,0 +1,21 @@
+{
+  "about": "Real Formula 1 cars recorded by Edvvc at the Goodwood Festival of Speed hillclimb (2009 and 2010), Wikimedia Commons, CC BY-SA 3.0 (own work). Each entry is cut from the original recording: from `start` to `end` seconds, with fades, normalised to `lufs`. `cue` is when the car launches, in seconds from the start of the cut.",
+  "author": "Edvvc",
+  "licence": "CC BY-SA 3.0",
+  "sounds": {
+    "start": { "file": "Red Bull-Renault RB5 (2009).ogg", "start": 12.3, "end": 19.8, "fadeIn": 0.15, "fadeOut": 2.2, "lufs": -15, "cue": 2.45,
+      "use": "Intro: revs held on the line while the five lights come on, the clutch drops as they go out (2.45 s)" },
+    "launch": { "file": "Ferrari F60 (2009).ogg", "start": 0.5, "end": 9.8, "fadeIn": 0.4, "fadeOut": 2.0, "lufs": -16, "cue": 3.45,
+      "use": "Race weekend, race stage: idle, revs and launch timed to the lights going out" },
+    "idle": { "file": "Red Bull-Renault RB5 (2009).ogg", "start": 1.0, "end": 10.5, "fadeIn": 0, "fadeOut": 0, "lufs": -18, "loop": true,
+      "use": "Team pages, flat out: the idling engine, pitched up and opened out with the speed" },
+    "era-1950": { "file": "Mercedes-Benz W196 (1954).ogg", "start": 12.0, "end": 19.6, "fadeIn": 0.5, "fadeOut": 1.6, "lufs": -18,
+      "use": "History, 1950s: a 1954 Mercedes-Benz W196, driven by Stirling Moss" },
+    "era-1978": { "file": "Lotus-Cosworth 79 (1978).ogg", "start": 1.6, "end": 8.4, "fadeIn": 0.3, "fadeOut": 1.6, "lufs": -18,
+      "use": "History, 1978: the Lotus 79 itself" },
+    "era-1988": { "file": "McLaren-Honda MP4 4 (1988) driven by Bruno Senna.ogg", "start": 4.3, "end": 10.55, "fadeIn": 0.3, "fadeOut": 0.8, "lufs": -18,
+      "use": "History, 1988: the McLaren MP4/4 itself, driven by Bruno Senna" },
+    "era-2004": { "file": "Red Bull-Cosworth RB1 (2005).ogg", "start": 15.8, "end": 22.8, "fadeIn": 0.3, "fadeOut": 1.4, "lufs": -18,
+      "use": "History, V10 years: a 2005 Red Bull RB1 (Cosworth V10), driven by Mark Webber" }
+  }
+}

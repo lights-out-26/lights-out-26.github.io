@@ -19,7 +19,7 @@ Node 20 or newer. The build uses relative paths, so `dist/` can be hosted from a
 
 | Section | Animation idea |
 | --- | --- |
-| Intro | Five start lights come on in turn, go out together, and the screen splits open |
+| Intro | Five start lights come on in turn, go out together, and the screen splits open; "Start with sound" runs them again with a real F1 car holding revs and launching as they go out |
 | Hero | A rolling shot: a real car brakes in with its discs glowing, holds station with the wheels turning while speed lines stream past, then launches off in a blur for the next team's car |
 | History | A pinned strip that scrolls sideways through six eras, with outlined years drifting behind the photographs |
 | Race weekend | One pinned screen that steps through practice, Q1, Q2, Q3 and the race while a 22-car grid thins out and launches |
@@ -54,6 +54,25 @@ gsap.timeline()
   .to(car.s, { brake: 1, duration: 0.3 }, 0.08)
   .to(car.s, { brake: 0, duration: 1.4 }, 0.7);
 ```
+
+## Sound
+
+Every engine you can hear is a real Formula 1 car: recordings made by Edvvc at the Goodwood Festival of Speed hillclimb in 2009 and 2010 and shared on Wikimedia Commons (CC BY-SA 3.0). Sound is off until the viewer turns it on, from the intro or the switch in the navigation; the choice is remembered, and no sound file is fetched while it is off.
+
+| Where | Recording |
+| --- | --- |
+| Intro (start lights) | Red Bull RB5 (2009): revs held on the line, the clutch drops exactly as the lights go out (2.45 s) |
+| Race weekend, race stage | Ferrari F60 (2009): idle, revs and launch, timed to the lights going out and the grid leaving (3.45 s) |
+| History | The era's own car where one was recorded: Mercedes-Benz W196 (1954) for the 1950s, the Lotus 79 (1978), the McLaren MP4/4 (1988), and a Cosworth V10 Red Bull RB1 (2005) for the V10 years. The hybrid eras have no recording on Commons and stay silent |
+| Team pages, flat out | The RB5's idle, looped, pitched up and opened out through a low-pass filter as the speed rises |
+
+`src/lib/sound.js` plays them with the Web Audio API (fetched on demand, kept in time with the animation even when a file arrives late, paused while the tab is hidden). The clips are cut from the originals with:
+
+```bash
+FFMPEG=/path/to/ffmpeg python scripts/prepare-sounds.py <folder with the original .ogg files> public/sounds
+```
+
+`scripts/sounds.json` lists each source file, the cut, fades, loudness target (EBU R128) and the launch cue.
 
 ## Scroll-linked animation
 
@@ -116,5 +135,7 @@ All photographs come from Wikimedia Commons under Creative Commons licences. The
 The images were resized and cropped; the 2026 car photos were also given depth maps, and the side-on ones were cut out and levelled. Because the licences are ShareAlike, the adapted images and depth maps in `public/photos/` are offered under the same licence as their originals. If you publish the site, keep the credits section.
 
 The typeface is Archivo (SIL Open Font License).
+
+Sounds: Edvvc, Goodwood Festival of Speed recordings, CC BY-SA 3.0 (Red Bull RB5, Ferrari F60, Mercedes-Benz W196, Lotus 79, McLaren MP4/4, Red Bull RB1). The clips were cut, faded and loudness-normalised and are shared under the same licence.
 
 Depth maps: Depth Anything V2 Small (Apache License 2.0), by Lihe Yang et al. Libraries: React (MIT), GSAP (free standard licence), Lenis (MIT).

@@ -464,9 +464,11 @@ html.js .wstep:not([data-state='on']) .split__ch {
   background: #240808;
 }
 
-/* Each lamp comes on a beat after the last, then all five go dark together. */
+/* Each lamp comes on a beat after the last, then all five go dark together.
+   They start once the grid has formed up (0.9 s), so the lights go out at
+   3.45 s, the moment the cars launch and the launch sound's cue. */
 .weekend__pin[data-stage='race'] .gantry span {
-  animation: 4.4s linear infinite;
+  animation: 4.4s linear 0.9s infinite;
 }
 
 .weekend__pin[data-stage='race'] .gantry span:nth-child(1) { animation-name: gantry-1; }

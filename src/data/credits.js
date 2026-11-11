@@ -48,6 +48,24 @@ export const CREDITS = {
   ),
 };
 
+/**
+ * Sound credits. All recorded by Edvvc at the Goodwood Festival of Speed
+ * hillclimb, CC BY-SA 3.0 (scripts/sounds.json). The clips were cut, faded and
+ * loudness-normalised, and the flat-out engine note is pitched to the speed;
+ * the adapted clips are shared under the same licence.
+ */
+const BY_SA_3 = { name: 'CC BY-SA 3.0', url: 'https://creativecommons.org/licenses/by-sa/3.0/' };
+export const SOUND_CREDITS = [
+  ['start', 'Red Bull-Renault RB5 (2009).ogg', 'Red Bull RB5 (2009), driven by Adrian Newey', 'the start lights'],
+  ['launch', 'Ferrari F60 (2009).ogg', 'Ferrari F60 (2009)', 'the race start'],
+  ['era-1950', 'Mercedes-Benz W196 (1954).ogg', 'Mercedes-Benz W196 (1954), driven by Stirling Moss', '1950'],
+  ['era-1978', 'Lotus-Cosworth 79 (1978).ogg', 'Lotus 79 (1978)', '1978'],
+  ['era-1988', 'McLaren-Honda MP4 4 (1988) driven by Bruno Senna.ogg', 'McLaren MP4/4 (1988), driven by Bruno Senna', '1988'],
+  ['era-2004', 'Red Bull-Cosworth RB1 (2005).ogg', 'Red Bull RB1 (2005, Cosworth V10), driven by Mark Webber', '2004'],
+].map(([key, file, car, where]) => ({ key, file, car, where, author: 'Edvvc', licence: BY_SA_3, url: page(file) }));
+
+export const soundCreditFor = (key) => SOUND_CREDITS.find((c) => c.key === key);
+
 /** Credits grouped by author, for the credits list. */
 export const CREDIT_GROUPS = Object.values(
   Object.entries(CREDITS).reduce((groups, [key, c]) => {

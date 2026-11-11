@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useRouter } from '../router/router';
 import { lockScroll } from '../lib/smooth';
+import SoundToggle from './SoundToggle';
 import './Nav.css';
 
 const LINKS = [
@@ -71,12 +72,15 @@ export default function Nav() {
           ))}
         </nav>
 
-        <button className="nav__toggle" type="button" aria-expanded={open} aria-controls="menu" onClick={() => setOpen((v) => !v)}>
-          <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
-          <span className="nav__burger" aria-hidden="true">
-            <i /><i />
-          </span>
-        </button>
+        <div className="nav__end">
+          <SoundToggle />
+          <button className="nav__toggle" type="button" aria-expanded={open} aria-controls="menu" onClick={() => setOpen((v) => !v)}>
+            <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
+            <span className="nav__burger" aria-hidden="true">
+              <i /><i />
+            </span>
+          </button>
+        </div>
       </div>
 
       <div className="menu" id="menu" hidden={!open}>
@@ -87,7 +91,7 @@ export default function Nav() {
             </Link>
           ))}
           <Link to="#credits" className="menu__small" label="The grid" style={{ '--i': LINKS.length }}>
-            <span>Photo credits</span>
+            <span>Photo and sound credits</span>
           </Link>
         </nav>
       </div>

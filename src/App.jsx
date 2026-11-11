@@ -3,6 +3,7 @@ import { RouterProvider, useRouter } from './router/router';
 import { TEAM_BY_ID } from './data/teams';
 import { refresh } from './lib/scroll';
 import { initSmoothScroll, scrollToEl, scrollToY, refreshTriggers } from './lib/smooth';
+import { armSound } from './lib/sound';
 import Preloader from './components/Preloader';
 import Cursor from './components/Cursor';
 import Nav from './components/Nav';
@@ -16,7 +17,10 @@ function Shell() {
   const previous = useRef(null);
   const onBoot = useCallback(() => setBooted(true), []);
 
-  useEffect(() => initSmoothScroll(), []);
+  useEffect(() => {
+    initSmoothScroll();
+    armSound();
+  }, []);
 
   // Put the scroll position where each kind of navigation expects it.
   useLayoutEffect(() => {

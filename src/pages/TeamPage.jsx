@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import PhotoCar from '../components/PhotoCar';
 import GLCar from '../components/GLCar';
@@ -18,6 +18,7 @@ import useProgress from '../hooks/useProgress';
 import { usePointerParallax } from '../hooks/usePointer';
 import useReducedMotion from '../hooks/useReducedMotion';
 import { glAvailable } from '../gl/engine';
+import { isSoundOn, play } from '../lib/sound';
 import './TeamPage.css';
 
 const RANK = Object.fromEntries(DRIVER_ORDER.map((code, i) => [code, i + 1]));
@@ -172,11 +173,17 @@ function TeamSpeed({ team }) {
   const target = useRef(0);
   const current = useRef(0);
   const roadX = useRef(0);
+  const engine = useRef(null);
   const gl = glAvailable();
+
+  // With sound on, a real F1 engine runs while the scene is pinned: the idle recording,
+  // pitched up and opened out as the speed rises.
+  useEffect(() => () => engine.current && engine.current.stop(0.2), []);
 
   const readout = useCallback((p, dt) => {
     const kmh = TOP_SPEED * easeInOut(Math.max(0, Math.min(1, (p - 0.05) / 0.8)));
     const k = kmh / TOP_SPEED;
+    if (engine.current) engine.current.set({ rate: 1 + k * 1.7, volume: 0.32 + k * 0.6, cutoff: 900 + k * k * 9000 });
     if (kmhEl.current) kmhEl.current.textContent = String(Math.round(kmh));
     if (gearEl.current) gearEl.current.textContent = String(SHIFTS.filter((g) => kmh >= g).length);
     if (barEl.current) barEl.current.style.transform = `scaleX(${k.toFixed(4)})`;
@@ -192,6 +199,13 @@ function TeamSpeed({ team }) {
   const onScroll = useCallback(
     (p) => {
       target.current = p;
+      const inside = p > 0.002 && p < 0.998;
+      const running = engine.current && !engine.current.stopped;
+      if (inside && !running && isSoundOn()) engine.current = play('idle', { loop: true, filter: true, volume: 0.32 });
+      else if (!inside && running) {
+        engine.current.stop(0.5);
+        engine.current = null;
+      }
       if (!gl) readout(p, 0);
     },
     [gl, readout]

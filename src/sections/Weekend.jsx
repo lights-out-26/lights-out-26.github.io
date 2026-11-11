@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import SplitText from '../components/SplitText';
 import { WEEKEND } from '../data/tech';
 import useProgress from '../hooks/useProgress';
 import { scrollToY } from '../lib/smooth';
 import { buildWeekend, towerAt, teamColour, lapText } from '../lib/session';
+import { isSoundOn, play, preloadSounds } from '../lib/sound';
 import './Weekend.css';
 
 const SLOTS = Array.from({ length: 22 }, (_, i) => i + 1);
@@ -96,6 +97,17 @@ export default function Weekend() {
   const { step, s } = pos;
   const stage = WEEKEND[step];
   const racing = stage.id === 'race';
+
+  // With sound on: fetch the launch during qualifying, play it on arriving at the race. Its cue
+  // (the car launching, 3.45 s in) lands as the lights go out and the grid leaves.
+  useEffect(() => {
+    if (step >= 3) preloadSounds(['launch']);
+  }, [step]);
+  useEffect(() => {
+    if (!racing || !isSoundOn()) return undefined;
+    const launch = play('launch', { sync: true });
+    return () => launch && launch.stop(0.6);
+  }, [racing]);
 
   const jump = (i) => {
     const el = ref.current;
