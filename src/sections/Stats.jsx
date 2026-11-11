@@ -312,7 +312,7 @@ export default function Stats() {
     <section id="records" className="stats">
       <div className="wrap">
         <header className="stats__head" ref={headRef} data-inview={headIn ? 'true' : 'false'}>
-          <h2 className="t-display">
+          <h2 className="t-display" data-skew="">
             <SplitText text="The numbers" styleName="rise" />
           </h2>
           <p className="t-lead rise" style={{ '--delay': '260ms' }}>

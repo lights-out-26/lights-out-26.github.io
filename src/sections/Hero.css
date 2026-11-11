@@ -139,15 +139,12 @@
 /* ---- a second car crossing behind ---- */
 
 .hero__pass {
-  --wheel-blur: 1;
-  --speed: 0.85;
-  --spin: 0.3s;
   position: absolute;
   left: 0;
   top: 31%;
   width: min(44vw, 72vh);
   opacity: 0.7;
-  filter: brightness(0.75) blur(1.2px);
+  filter: brightness(0.75) blur(1.6px);
   animation: hero-pass 1.15s cubic-bezier(0.35, 0.1, 0.6, 1) both;
 }
 
@@ -215,10 +212,10 @@
   transform-style: preserve-3d;
 }
 
+/* GSAP moves .hero__car (braking in, launching out); the WebGL scene inside
+   does the blur, the turning wheels, the heat haze and the brake glow. */
 .hero__car {
-  --wheel-blur: 0.6;
-  --spin: 0.42s;
-  --speed: 0;
+  will-change: transform;
 }
 
 .hero__car[data-phase='exit'] {
@@ -228,102 +225,6 @@
 
 .hero[data-live='false'] .hero__car {
   opacity: 0;
-}
-
-.hero[data-live='true'] .hero__car[data-phase='first'] {
-  animation: hero-car-in 1.5s var(--ease-brake) 0.25s both;
-}
-
-.hero__car[data-phase='enter'] {
-  animation: hero-car-in 1.35s var(--ease-brake) 0.18s both;
-}
-
-.hero__car[data-phase='exit'] {
-  animation: hero-car-out 0.9s var(--ease-launch) both;
-}
-
-/* Braking in from the right: stretched and smeared at first, then crisp. */
-@keyframes hero-car-in {
-  0% {
-    transform: translate3d(125vw, 0, 0) skewX(13deg) scaleX(1.12);
-    --speed: 1;
-    --wheel-blur: 1;
-  }
-  55% {
-    --speed: 0.7;
-  }
-  82% {
-    --speed: 0;
-  }
-  100% {
-    transform: none;
-    --speed: 0;
-    --wheel-blur: 0.6;
-  }
-}
-
-@keyframes hero-car-out {
-  0% {
-    transform: none;
-    --speed: 0;
-  }
-  18% {
-    transform: translate3d(1.2vw, 0, 0) skewX(3deg);
-  }
-  100% {
-    transform: translate3d(-160vw, 0, 0) skewX(-18deg) scaleX(1.2);
-    --speed: 1;
-    --wheel-blur: 1;
-  }
-}
-
-/* The four body sections and both wheels arrive a touch apart, so the
-   car reads as stretched by speed and pulls itself together as it stops. */
-.hero[data-live='true'] .hero__car[data-phase='first'] .pcar__slice,
-.hero__car[data-phase='enter'] .pcar__slice {
-  animation: hero-part-in 1.45s var(--ease-brake) 0.2s both;
-}
-
-.hero[data-live='true'] .hero__car[data-phase='first'] .pcar__wheel,
-.hero__car[data-phase='enter'] .pcar__wheel {
-  animation: hero-wheel-in 1.45s var(--ease-brake) 0.2s both;
-}
-
-.hero__car[data-phase='exit'] .pcar__slice {
-  animation: hero-part-out 0.9s var(--ease-launch) both;
-}
-
-.hero__car[data-phase='exit'] .pcar__wheel {
-  animation: hero-wheel-out 0.9s var(--ease-launch) both;
-}
-
-@keyframes hero-part-in {
-  from { transform: translate3d(calc(var(--si) * 9%), 0, 0); }
-  to { transform: none; }
-}
-
-@keyframes hero-wheel-in {
-  from { transform: translate3d(calc(var(--si) * 72%), 0, 0); }
-  to { transform: none; }
-}
-
-@keyframes hero-part-out {
-  from { transform: none; }
-  to { transform: translate3d(calc(var(--si) * 6%), 0, 0); }
-}
-
-@keyframes hero-wheel-out {
-  from { transform: none; }
-  to { transform: translate3d(calc(var(--si) * 48%), 0, 0); }
-}
-
-/* A faint engine shiver while it sits there at speed. */
-.hero__car .pcar__body {
-  animation: hero-buzz 0.14s steps(2, jump-none) infinite;
-}
-
-@keyframes hero-buzz {
-  to { translate: 0 0.7px; }
 }
 
 /* ---- light flares that cut across in front ---- */
@@ -589,7 +490,6 @@
   .hero__road i,
   .hero__flares i,
   .hero__scroll i::after,
-  .hero__car .pcar__body,
   .hero__pick[data-running] i {
     animation: none;
   }
@@ -597,19 +497,6 @@
   .hero__streaks,
   .hero__flares {
     display: none;
-  }
-
-  .hero__car {
-    --wheel-blur: 0;
-    --speed: 0;
-  }
-
-  .hero[data-live='true'] .hero__car[data-phase='first'],
-  .hero__car[data-phase='enter'],
-  .hero__car[data-phase='exit'],
-  .hero__car .pcar__slice,
-  .hero__car .pcar__wheel {
-    animation: none !important;
   }
 
   .hero__car[data-phase='exit'] {

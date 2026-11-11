@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import PhotoCar, { carSrc } from '../components/PhotoCar';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import GLCar, { carTextures } from '../components/GLCar';
+import PhotoCar from '../components/PhotoCar';
 import SplitText from '../components/SplitText';
 import { Credit } from '../components/Photo';
 import { Link } from '../router/router';
 import { TEAMS } from '../data/teams';
 import { AS_OF } from '../data/season';
+import { preloadTextures } from '../gl/engine';
 import { teamVars, standing, ordinal } from '../lib/team';
 import useProgress from '../hooks/useProgress';
 import useInView from '../hooks/useInView';
@@ -14,6 +17,7 @@ import './Hero.css';
 
 const DWELL = 6500; // how long each car stays on stage
 const PASS_EVERY = 5200; // how often another car flies past behind it
+const CAR_PAD = { t: 0.12, r: 0.55, b: 0.2, l: 0.06 }; // room for the light trail
 
 // A repeatable scatter of speed lines (no Math.random, so renders match).
 const rand = (n) => {
@@ -29,54 +33,125 @@ const STREAKS = Array.from({ length: 16 }, (_, i) => ({
   '--h': `${i % 5 === 0 ? 2 : 1}px`,
 }));
 
+/** The rolling-shot cruise: wheels turning, engine heat, no body blur. */
+const CRUISE = { speed: 0, spin: 0.85, wheelRate: 24, aberr: 0, heat: 0.7, sheen: 0.8 };
+
+/**
+ * One of the two cars on stage. The same instance brakes in, holds station,
+ * and launches off again, so its renderer state carries straight through.
+ */
+function HeroCar({ slot, live, boost }) {
+  const wrap = useRef(null);
+  const car = useRef(null);
+  const reduce = useReducedMotion();
+  const team = TEAMS[slot.team];
+  const { phase, n } = slot;
+
+  useLayoutEffect(() => {
+    if (reduce || (phase === 'first' && !live)) return undefined;
+    const s = car.current.s;
+    gsap.killTweensOf(s);
+    const tl = gsap.timeline();
+    if (phase === 'exit') {
+      tl.to(wrap.current, { xPercent: -170, skewX: -14, scaleX: 1.12, duration: 0.95, ease: 'power3.in' }, 0)
+        .to(s, { speed: 1, spin: 2.8, wheelRate: 95, aberr: 1, heat: 0, duration: 0.95, ease: 'power3.in' }, 0);
+    } else {
+      // Braking in from the right: smeared at first, the discs glowing, then crisp.
+      tl.delay(phase === 'first' ? 0.3 : 0.12)
+        .fromTo(wrap.current, { xPercent: 140, skewX: 14, scaleX: 1.12 }, { xPercent: 0, skewX: 0, scaleX: 1, duration: 1.55, ease: 'expo.out' }, 0)
+        .fromTo(s, { speed: 1, spin: 2.8, wheelRate: 90, aberr: 1, heat: 0, brake: 0 }, { ...CRUISE, heat: 0, duration: 1.45, ease: 'power3.out' }, 0)
+        .to(s, { brake: 1, duration: 0.3, ease: 'power2.out' }, 0.08)
+        .to(s, { brake: 0, duration: 1.4, ease: 'power2.in' }, 0.7)
+        .to(s, { heat: CRUISE.heat, duration: 1.2, ease: 'none' }, 0.8)
+        .fromTo(s, { sweep: -0.7 }, { sweep: 1.7, duration: 1.6, ease: 'power2.inOut', immediateRender: false }, 0.75)
+        .set(s, { sweep: -1 });
+    }
+    return () => tl.kill();
+  }, [phase, n, live, reduce]);
+
+  // Scrolling away from the hero launches the car with a growing trail.
+  const onFrame = useCallback(
+    (s, u) => {
+      const b = boost.current;
+      if (b < 0.001) return;
+      u.uSpeed = Math.min(1.25, u.uSpeed + b * b * 1.2);
+      u.uSpin = Math.min(3, u.uSpin + b * 2.2);
+      u.uAberr += b * 0.8;
+    },
+    [boost]
+  );
+
+  return (
+    <div className="hero__car" data-phase={phase} ref={wrap} aria-hidden={phase === 'exit' ? true : undefined}>
+      <GLCar
+        ref={car}
+        id={`${team.id}-a`}
+        tint={team.colors.accent}
+        alt={phase === 'exit' ? '' : `The ${team.chassisFull}, photographed from the side at the 2026 Austrian Grand Prix`}
+        hd
+        eager
+        pad={CAR_PAD}
+        initial={{ ...CRUISE, tilt: 0.007 }}
+        onFrame={onFrame}
+      />
+    </div>
+  );
+}
+
 export default function Hero({ booted }) {
   const reduce = useReducedMotion();
-  const [stage, setStage] = useState({ index: 0, leaving: null, n: 0 });
+  const [stage, setStage] = useState({ slots: [{ team: 0, phase: 'first', n: 0 }, null], front: 0 });
   const [pass, setPass] = useState(null);
   const [held, setHeld] = useState(false);
-  const scrollRef = useProgress('contain');
+  const boost = useRef(0);
+  const onScroll = useCallback((p) => {
+    boost.current = p;
+  }, []);
+  const scrollRef = useProgress('contain', onScroll);
   const [viewRef, inView] = useInView({ once: false, margin: '0px', threshold: 0.2 });
   const parallax = usePointerParallax({ ease: 0.07 });
 
-  const team = TEAMS[stage.index];
+  const current = stage.slots[stage.front].team;
+  const team = TEAMS[current];
   const place = standing(team.id);
   const running = booted && inView && !reduce && !held;
 
+  // The car on stage leaves; the other slot brings the chosen team in.
   const show = useCallback((index) => {
-    setStage((s) => (index === s.index ? s : { index, leaving: TEAMS[s.index].id, n: s.n + 1 }));
+    setStage((st) => {
+      const front = st.slots[st.front];
+      if (front.team === index) return st;
+      const back = 1 - st.front;
+      const slots = [...st.slots];
+      slots[st.front] = { ...front, phase: 'exit', n: front.n + 1 };
+      slots[back] = { team: index, phase: 'enter', n: (st.slots[back]?.n || 0) + 1 };
+      return { slots, front: back };
+    });
   }, []);
 
-  // Fetch the other ten cars once the page is up, so swaps are instant.
+  // Get the next car's textures onto the GPU while this one is on stage.
   useEffect(() => {
-    if (!booted) return undefined;
-    const t = window.setTimeout(() => TEAMS.forEach(({ id }) => (new Image().src = carSrc(`${id}-a`))), 600);
-    return () => window.clearTimeout(t);
-  }, [booted]);
+    if (!booted) return;
+    preloadTextures(carTextures(`${TEAMS[(current + 1) % TEAMS.length].id}-a`, true), DWELL * 2);
+  }, [booted, current]);
 
   // Move on to the next team after each dwell.
   useEffect(() => {
     if (!running) return undefined;
-    const t = window.setTimeout(() => show((stage.index + 1) % TEAMS.length), DWELL);
+    const t = window.setTimeout(() => show((current + 1) % TEAMS.length), DWELL);
     return () => window.clearTimeout(t);
-  }, [running, stage.index, show]);
-
-  // Clear the departing car once it has left the screen.
-  useEffect(() => {
-    if (!stage.leaving) return undefined;
-    const t = window.setTimeout(() => setStage((s) => ({ ...s, leaving: null })), 950);
-    return () => window.clearTimeout(t);
-  }, [stage.n, stage.leaving]);
+  }, [running, current, show]);
 
   // Every few seconds, a different team's car crosses the background.
-  const indexRef = useRef(0);
-  indexRef.current = stage.index;
+  const currentRef = useRef(0);
+  currentRef.current = current;
   useEffect(() => {
     if (!running) return undefined;
     let n = 0;
     const fire = () => {
       n += 1;
-      const pick = (indexRef.current + 2 + n * 3) % TEAMS.length;
-      setPass({ n, team: TEAMS[pick === indexRef.current ? (pick + 1) % TEAMS.length : pick] });
+      const pick = (currentRef.current + 2 + n * 3) % TEAMS.length;
+      setPass({ n, team: TEAMS[pick === currentRef.current ? (pick + 1) % TEAMS.length : pick] });
     };
     const first = window.setTimeout(fire, 2600);
     const loop = window.setInterval(fire, PASS_EVERY);
@@ -87,15 +162,15 @@ export default function Hero({ booted }) {
   }, [running]);
 
   return (
-    <section
-      id="home"
-      className="hero"
-      ref={scrollRef}
-      data-timeline="contain"
-      data-live={booted ? 'true' : 'false'}
-      style={teamVars(team)}
-    >
-      <div className="hero__stage" ref={(el) => { viewRef.current = el; parallax.current = el; }} data-inview={inView ? 'true' : 'false'}>
+    <section id="home" className="hero" ref={scrollRef} data-timeline="contain" data-live={booted ? 'true' : 'false'} style={teamVars(team)}>
+      <div
+        className="hero__stage"
+        ref={(el) => {
+          viewRef.current = el;
+          parallax.current = el;
+        }}
+        data-inview={inView ? 'true' : 'false'}
+      >
         <div className="hero__glow" aria-hidden="true" />
         <div className="hero__grid" aria-hidden="true" />
 
@@ -116,7 +191,7 @@ export default function Hero({ booted }) {
 
         {pass && (
           <div className="hero__pass" key={pass.n} style={teamVars(pass.team)} aria-hidden="true">
-            <PhotoCar id={`${pass.team.id}-a`} alt="" speed eager data-roll="" sizes="50vw" />
+            <PhotoCar id={`${pass.team.id}-a`} alt="" eager sizes="50vw" />
           </div>
         )}
 
@@ -126,21 +201,7 @@ export default function Hero({ booted }) {
 
         <div className="hero__carscroll scrub">
           <div className="hero__carpar">
-            {stage.leaving && (
-              <div className="hero__car" data-phase="exit" key={`out-${stage.n}`} aria-hidden="true">
-                <PhotoCar id={`${stage.leaving}-a`} alt="" sliced speed eager data-roll="" />
-              </div>
-            )}
-            <div className="hero__car" data-phase={stage.n === 0 ? 'first' : 'enter'} key={`in-${stage.n}`}>
-              <PhotoCar
-                id={`${team.id}-a`}
-                alt={`The ${team.chassisFull}, photographed from the side at the 2026 Austrian Grand Prix`}
-                sliced
-                speed
-                eager
-                data-roll=""
-              />
-            </div>
+            {stage.slots.map((slot, i) => (slot ? <HeroCar key={i} slot={slot} live={booted} boost={boost} /> : null))}
           </div>
         </div>
 
@@ -150,7 +211,9 @@ export default function Hero({ booted }) {
         </div>
 
         <div className="hero__flares" aria-hidden="true">
-          <i /><i /><i />
+          <i />
+          <i />
+          <i />
         </div>
 
         <div className="hero__foot wrap scrub">
@@ -195,8 +258,8 @@ export default function Hero({ booted }) {
                   className="hero__pick"
                   style={teamVars(t)}
                   aria-label={`Show the ${t.name} car`}
-                  aria-pressed={i === stage.index}
-                  data-running={i === stage.index && running ? '' : undefined}
+                  aria-pressed={i === current}
+                  data-running={i === current && running ? '' : undefined}
                   onClick={() => show(i)}
                 >
                   <i />

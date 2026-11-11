@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import PhotoCar from '../components/PhotoCar';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import GLCar from '../components/GLCar';
 import SplitText from '../components/SplitText';
 import { Link } from '../router/router';
 import { TEAMS } from '../data/teams';
@@ -8,11 +9,33 @@ import { AS_OF } from '../data/season';
 import { teamVars, standing, ordinal, ABBR } from '../lib/team';
 import useInView from '../hooks/useInView';
 import { useTilt } from '../hooks/usePointer';
+import useReducedMotion from '../hooks/useReducedMotion';
 import './Teams.css';
+
+const SLAT_PAD = { t: 0.1, r: 0.3, b: 0.16, l: 0.04 };
+const wide = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 900px)').matches;
 
 function Slat({ team, index, on, onPick, onHover }) {
   const place = standing(team.id);
   const tilt = useTilt({ max: 5 });
+  const car = useRef(null);
+  const reduce = useReducedMotion();
+
+  // The car rolls in as its door opens (the slide itself is CSS): wheels
+  // turning and a short trail, then the brakes, then a glint along the body.
+  useLayoutEffect(() => {
+    if (!on || reduce || !car.current) return undefined;
+    const s = car.current.s;
+    const tl = gsap
+      .timeline({ delay: wide() ? 0 : 0.15 })
+      .fromTo(s, { speed: 0.5, spin: 2.4, wheelRate: 62, aberr: 0.45, brake: 0 }, { speed: 0, spin: 0, wheelRate: 0, aberr: 0, duration: 1.25, ease: 'power3.out' }, 0)
+      .to(s, { brake: 1, duration: 0.25, ease: 'power2.out' }, 0.12)
+      .to(s, { brake: 0, duration: 1.2, ease: 'power2.in' }, 0.6)
+      .fromTo(s, { sweep: -0.7 }, { sweep: 1.7, duration: 1.4, ease: 'power2.inOut', immediateRender: false }, 0.75)
+      .set(s, { sweep: -1 });
+    return () => tl.kill();
+  }, [on, reduce]);
+
   return (
     <li
       className="slat"
@@ -85,7 +108,17 @@ function Slat({ team, index, on, onPick, onHover }) {
           </div>
 
           <div className="slat__car">
-            <PhotoCar id={`${team.id}-a`} alt={`The ${team.chassisFull}`} sizes="(max-width: 900px) 130vw, 60vw" />
+            <GLCar
+              ref={car}
+              id={`${team.id}-a`}
+              tint={team.colors.accent}
+              alt={`The ${team.chassisFull}`}
+              active={on}
+              hd={wide()}
+              pad={SLAT_PAD}
+              initial={{ heat: 0.3, sheen: 0.8, tilt: 0.006 }}
+              sizes="(max-width: 900px) 130vw, 60vw"
+            />
           </div>
         </div>
       </div>
@@ -120,7 +153,7 @@ export default function Teams() {
   return (
     <section id="teams" className="teams" style={teamVars(TEAMS[active])} ref={ref} data-inview={inView ? 'true' : 'false'}>
       <header className="teams__head wrap">
-        <h2 className="t-display">
+        <h2 className="t-display" data-skew="">
           <SplitText text="Eleven teams" styleName="brake" />
         </h2>
         <p className="t-lead rise" style={{ '--delay': '250ms' }}>

@@ -57,3 +57,27 @@
   letter-spacing: 0.01em;
   color: var(--muted);
 }
+
+/* ---- photos with depth (GLPhoto) ---- */
+
+.glphoto__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.4s linear;
+}
+
+.glphoto[data-gl='on'] .glphoto__canvas {
+  opacity: 1;
+}
+
+.glphoto[data-gl='on'] .photo__frame > img {
+  opacity: 0;
+}
+
+.glphoto[data-reveal='pending'] .photo__frame > img {
+  opacity: 0;
+  transition: none;
+}

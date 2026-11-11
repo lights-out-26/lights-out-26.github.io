@@ -1,0 +1,53 @@
+.glcar {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 6000 / 1540;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.glcar__poster,
+.glcar__canvas {
+  position: absolute;
+  max-width: none;
+  pointer-events: none;
+}
+
+.glcar__poster {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.3s linear;
+}
+
+.glcar[data-poster='loading'] .glcar__poster,
+.glcar[data-poster='failed'] .glcar__poster {
+  opacity: 0;
+}
+
+/* The canvas takes over once its first frame is ready. */
+.glcar__canvas {
+  opacity: 0;
+  transition: opacity 0.3s linear;
+}
+
+.glcar[data-gl='on'] .glcar__canvas {
+  opacity: 1;
+}
+
+.glcar[data-gl='on'] .glcar__poster,
+.glcar[data-gl='on'] .glcar__shadow {
+  opacity: 0;
+}
+
+/* The still photo's own contact shadow (the WebGL scene draws its own). */
+.glcar__shadow {
+  position: absolute;
+  left: 18%;
+  right: 6%;
+  bottom: 2%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.8), rgb(0 0 0 / 0.35) 60%, transparent);
+  transition: opacity 0.3s linear;
+}

@@ -24,8 +24,9 @@ export default function Footer() {
             Photographs
           </h2>
           <p className="footer__p">
-            Every photograph here comes from Wikimedia Commons under a Creative Commons licence. Each has been resized and cropped; the side-on car photos were also
-            cut out of their backgrounds, levelled, and split into separate wheel layers. These adapted versions are shared under the same licences as the originals.
+            Every photograph here comes from Wikimedia Commons under a Creative Commons licence. Each has been resized and cropped, and has a depth map estimated from
+            it; the side-on car photos were also cut out of their backgrounds and levelled. These adapted versions, depth maps included, are shared under the same
+            licences as the originals.
           </p>
           {CREDIT_GROUPS.map((g) => (
             <div key={`${g.author}-${g.licence.name}`} className="footer__group">
@@ -61,7 +62,11 @@ export default function Footer() {
             Results, standings and records are as they stood after round {AS_OF.round} of {AS_OF.of}, the {AS_OF.race} on {AS_OF.date}, compiled from Wikipedia’s season
             and records pages and checked against published standings.
           </p>
-          <p className="footer__p">Built with React and CSS. The animation is CSS throughout: keyframes, transitions, scroll-driven timelines and registered custom properties.</p>
+          <p className="footer__p">
+            Built with React, GSAP and WebGL, with smooth scrolling by Lenis. The cars are the original photographs, drawn by small shaders that use each photo’s depth
+            map for parallax, relighting, wheel spin, motion blur and heat haze. The depth maps were made with Depth Anything V2 Small (Apache License 2.0). Type is set
+            in Archivo (SIL Open Font License).
+          </p>
         </section>
       </div>
     </footer>

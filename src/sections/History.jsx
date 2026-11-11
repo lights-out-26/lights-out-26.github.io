@@ -1,9 +1,14 @@
-import Photo, { Credit } from '../components/Photo';
+import { Credit } from '../components/Photo';
+import GLPhoto from '../components/GLPhoto';
+import { glAvailable } from '../gl/engine';
 import SplitText from '../components/SplitText';
 import { ERAS } from '../data/history';
 import useProgress from '../hooks/useProgress';
 import useInView from '../hooks/useInView';
 import './History.css';
+
+/** The depth map that goes with a photo: eras/1978 -> depth/era-1978, action/mercedes -> depth/action-mercedes. */
+const depthOf = (photo) => `depth/${photo.replace('eras/', 'era-').replace('action/', 'action-')}`;
 
 function Era({ era, index, near }) {
   const [ref, inView] = useInView({ margin: '0px -18% 0px -18%', threshold: 0.2 });
@@ -13,7 +18,17 @@ function Era({ era, index, near }) {
         {era.year}
       </span>
       <div className="era__photo">
-        <Photo id={era.photo} alt={era.caption} ratio="16 / 10" className="wipe" eager={near} />
+        <GLPhoto
+          id={era.photo}
+          depth={depthOf(era.photo)}
+          alt={era.caption}
+          ratio="16 / 10"
+          className={glAvailable() ? '' : 'wipe'}
+          eager={near}
+          tint="#dfe3e8"
+          revealOnView
+          initial={{ focus: 0.55, zoom: 1.1, dolly: 0.12, tilt: 0.03 }}
+        />
         <Credit id={era.photo} />
       </div>
       <div className="era__copy">
@@ -51,7 +66,7 @@ export default function History() {
       <div className="history__pin">
         <div className="history__track scrub">
           <header className="history__head" ref={headRef} data-inview={headIn ? 'true' : 'false'}>
-            <h2 className="history__title t-display">
+            <h2 className="history__title t-display" data-skew="">
               <SplitText text="Seventy-six years, six cars" styleName="rise" />
             </h2>
             <p className="t-lead rise" style={{ '--delay': '400ms' }}>

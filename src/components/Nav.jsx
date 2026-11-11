@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useRouter } from '../router/router';
+import { lockScroll } from '../lib/smooth';
 import './Nav.css';
 
 const LINKS = [
@@ -40,6 +41,7 @@ export default function Nav() {
   }, [route]);
 
   useEffect(() => {
+    lockScroll(open);
     if (!open) return undefined;
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
     window.addEventListener('keydown', onKey);
