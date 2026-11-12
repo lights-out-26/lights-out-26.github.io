@@ -19,7 +19,7 @@ Node 20 or newer. The build uses relative paths, so `dist/` can be hosted from a
 
 | Section | Animation idea |
 | --- | --- |
-| Intro | Five start lights come on in turn, go out together, and the screen splits open; "Start with sound" runs them again at the real pace, a light a second with a beep for each over an engine whose revs climb with every light, then the car drives away as they go out |
+| Intro | Five start lights come on in turn, go out together, and the screen splits open; "Start with sound" runs them again at the real pace, a light a second with a beep for each over a real F1 car revving on the line, which launches as they go out |
 | Hero | A rolling shot: a real car brakes in with its discs glowing, holds station with the wheels turning while speed lines stream past, then launches off in a blur for the next team's car |
 | History | A pinned strip that scrolls sideways through six eras, with outlined years drifting behind the photographs |
 | Race weekend | One pinned screen that steps through practice, Q1, Q2, Q3 and the race while a 22-car grid thins out and launches |
@@ -57,11 +57,11 @@ gsap.timeline()
 
 ## Sound
 
-Sound is off until the viewer turns it on, from the intro or the switch in the navigation; the choice is remembered, and no sound file is fetched while it is off. The engines in the history section and at the race start are real Formula 1 cars from Wikimedia Commons; the start-light beeps and the flat-out engine are made in the browser.
+Sound is off until the viewer turns it on, from the intro or the switch in the navigation; the choice is remembered, and no sound file is fetched while it is off. The engines at the start lights, in the history section and at the race start are real Formula 1 cars from Wikimedia Commons; the start-light beeps and the flat-out engine are made in the browser.
 
 | Where | Sound |
 | --- | --- |
-| Intro (start lights) | A short beep as each red light comes on, a second apart, over an engine that fires up with the first light and climbs a step of revs with each one. Through the random hold it is held at launch revs, flaring; the clutch drops as the lights go out on screen and the car drives away, flat out through four upshifts, the note thinning, dropping a touch in pitch and drifting left as it pulls into the distance. All synthesised (the engine is the flat-out engine below), scheduled on the audio clock and released by the lights going out, so picture and sound stay together. The broadcast's own start-signal sound belongs to Formula 1 and has no free licence; to use a recording you have the rights to, put it in `public/sounds/` and set `START_SIGNAL_FILE` in `src/lib/sound.js` |
+| Intro (start lights) | A short beep as each red light comes on, a second apart, over a real F1 car on the line: Edvvc's recording of the Red Bull RB5 (2009) at Goodwood, idling as the first light comes on, the revs coming up and held, then the clutch dropping and the car pulling away up the hill. The clip starts at the first light from whichever point puts its launch (6.5 s in) on the lights going out, whatever the random hold. The beeps are synthesised: the broadcast's own start-signal sound belongs to Formula 1 and has no free licence; to use a recording you have the rights to, put it in `public/sounds/` and set `START_SIGNAL_FILE` in `src/lib/sound.js` |
 | Race weekend, race stage | Ferrari F60 (2009, Edvvc): idle, revs and launch, timed to the lights going out and the grid leaving (3.45 s) |
 | History | The era's own car where one was recorded: Mercedes-Benz W196 (1954) for the 1950s, the Lotus 79 (1978), the McLaren MP4/4 (1988) and a Cosworth V10 Red Bull RB1 (2005), all by Edvvc. The two hybrid eras use turbo-hybrid V6 cars recorded at 2021 races: racing at the Turkish Grand Prix (SAİT71) for 2014, and the grid leaving for the formation lap at the Russian Grand Prix (rubin16) for 2026. No 2026 car has been recorded under a free licence yet; the 2026 engines keep the 1.6-litre turbo V6 |
 | Team pages, flat out | A turbo V6 modelled sample by sample in an AudioWorklet (`src/lib/engine-worklet.js`): six uneven exhaust pulses per cycle ringing broad exhaust resonances, combustion noise, a turbo whistle, an ignition cut at each upshift and crackles on the overrun. The revs follow the gear readout (rising through each gear, dropping at every upshift) and the load follows the scroll: flat out while the speed rises, part throttle while it holds, lifted while it falls |
@@ -138,6 +138,6 @@ The images were resized and cropped; the 2026 car photos were also given depth m
 
 The typeface is Archivo (SIL Open Font License).
 
-Sounds: Edvvc, Goodwood Festival of Speed recordings, CC BY-SA 3.0 (Ferrari F60, Mercedes-Benz W196, Lotus 79, McLaren MP4/4, Red Bull RB1); SAİT71, 2021 Turkish Grand Prix, CC BY-SA 4.0; rubin16, 2021 Russian Grand Prix, CC BY-SA 4.0. The clips were cut, faded and loudness-normalised and are shared under the same licences.
+Sounds: Edvvc, Goodwood Festival of Speed recordings, CC BY-SA 3.0 (Red Bull RB5, Ferrari F60, Mercedes-Benz W196, Lotus 79, McLaren MP4/4, Red Bull RB1); SAİT71, 2021 Turkish Grand Prix, CC BY-SA 4.0; rubin16, 2021 Russian Grand Prix, CC BY-SA 4.0. The clips were cut, faded and loudness-normalised and are shared under the same licences.
 
 Depth maps: Depth Anything V2 Small (Apache License 2.0), by Lihe Yang et al. Libraries: React (MIT), GSAP (free standard licence), Lenis (MIT).

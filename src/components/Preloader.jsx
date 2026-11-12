@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { carSrc } from './PhotoCar';
-import { setSound, startBeeps, startGrid } from '../lib/sound';
+import { isSoundOn, play, preloadSounds, setSound, startBeeps } from '../lib/sound';
 import './Preloader.css';
 
 const LIGHTS = [0, 1, 2, 3, 4];
 const LIGHTS_OUT = 2450; // ms: the last lamp is on at 1.95 s, all five go out at 2.45 s
+/** In the start recording (scripts/sounds.json), the moment the lights should go out: revs held, the clutch about to drop. */
+const START_CUE = 6.5;
+/** The idle at the start of that recording is far quieter than the revs: lift it, back to level as the revs come up (3.2 s in). */
+const START_SHAPE = [[0, 4], [3.1, 4], [3.9, 1]];
 
 /**
  * The start with sound runs at the real pace: a red light every second, then
@@ -23,9 +27,9 @@ const realStart = () => {
  *
  * "Start with sound" turns sound on and runs the lights again from the first
  * lamp at the real pace, with the start signal: a beep as each red light comes
- * on, and an engine that fires up with the first light and climbs a step of
- * revs with each one, holds them through the hold, and drives away as the
- * lights go out (see startGrid).
+ * on, over a real F1 car on the line (a Red Bull RB5, recorded at Goodwood):
+ * idling as the first light comes on, the revs coming up and held through the
+ * lights, the clutch dropping as they go out and the car pulling away.
  */
 export default function Preloader({ onDone }) {
   const [phase, setPhase] = useState('lights'); // lights -> out -> gone
@@ -33,14 +37,16 @@ export default function Preloader({ onDone }) {
   const [start, setStart] = useState(null);
   const finished = useRef(false);
   const signal = useRef(null);
-  const grid = useRef(null);
+  const engine = useRef(null);
 
   const startWithSound = () => {
     setSound(true);
     const s = realStart();
     const lamps = LIGHTS.map((i) => s.first + i * s.step);
     signal.current = startBeeps(lamps);
-    grid.current = startGrid({ lamps });
+    // Start the recording at the first light, from the point that puts its launch on the lights going out.
+    const from = lamps[0] - 0.1;
+    engine.current = play('start', { at: from, offset: START_CUE - (s.out - from), fadeIn: 0.3, shape: START_SHAPE });
     setStart(s);
     setRun((n) => n + 1);
   };
@@ -53,16 +59,20 @@ export default function Preloader({ onDone }) {
     const finish = (skipped) => {
       if (finished.current) return;
       finished.current = true;
-      // Skipped part-way through: no more beeps.
+      // Skipped part-way through: no more beeps, and the car goes now.
       if (skipped && signal.current) signal.current.stop(0.04);
-      // The clutch drops as the lights go out on screen.
-      if (grid.current) grid.current.go();
+      if (skipped && engine.current) {
+        engine.current.stop(0.08);
+        engine.current = play('start', { offset: START_CUE - 0.05 });
+      }
       setPhase('out');
       onDone();
       timers.push(window.setTimeout(() => setPhase('gone'), reduce ? 50 : 1250));
     };
 
     if (run === 0) {
+      // Sound left on from an earlier visit: have the start recording ready for the button.
+      if (isSoundOn()) preloadSounds(['start']);
       const img = new Image();
       img.src = carSrc('mercedes-a');
       const assets = Promise.all([

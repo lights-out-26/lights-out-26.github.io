@@ -58,6 +58,7 @@ export const CREDITS = {
  */
 const BY_SA_3 = { name: 'CC BY-SA 3.0', url: 'https://creativecommons.org/licenses/by-sa/3.0/' };
 export const SOUND_CREDITS = [
+  ['start', 'Red Bull-Renault RB5 (2009).ogg', 'Red Bull RB5 (2009), driven by Adrian Newey', 'the start lights'],
   ['launch', 'Ferrari F60 (2009).ogg', 'Ferrari F60 (2009)', 'the race start'],
   ['era-1950', 'Mercedes-Benz W196 (1954).ogg', 'Mercedes-Benz W196 (1954), driven by Stirling Moss', 'history, 1950'],
   ['era-1978', 'Lotus-Cosworth 79 (1978).ogg', 'Lotus 79 (1978)', 'history, 1978'],

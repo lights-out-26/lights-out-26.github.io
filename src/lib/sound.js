@@ -221,23 +221,17 @@ let engineModule = null;
  * revs and load (0 off the throttle, 1 flat out) as often as you like.
  * Returns a handle: set({ rpm, load }), stop(fade), or null when sound is off.
  */
-export function engine({ volume = 0.5, manual = false } = {}) {
+export function engine({ volume = 0.5 } = {}) {
   if (!enabled) return null;
   const c = context();
   if (!c || !c.audioWorklet) return null;
   if (c.state !== 'running') c.resume().catch(() => {});
   const want = { rpm: 4500, load: 0.2 };
-  let resolveReady;
   const handle = {
     stopped: false,
     node: null,
     gain: null,
     tone: null,
-    pan: null,
-    volume,
-    ready: new Promise((resolve) => {
-      resolveReady = resolve;
-    }),
     set({ rpm, load } = {}) {
       if (rpm !== undefined) want.rpm = rpm;
       if (load !== undefined) want.load = load;
@@ -271,157 +265,18 @@ export function engine({ volume = 0.5, manual = false } = {}) {
       const tone = c.createBiquadFilter();
       tone.type = 'lowpass';
       tone.Q.value = 0.5;
-      const pan = c.createStereoPanner();
       const gain = c.createGain();
       gain.gain.value = 0;
-      node.connect(tone).connect(pan).connect(gain).connect(master);
-      Object.assign(handle, { node, tone, pan, gain });
-      if (!manual) {
-        gain.gain.linearRampToValueAtTime(volume, c.currentTime + 0.4);
-        handle.set(want);
-      }
-      resolveReady(handle);
+      gain.gain.linearRampToValueAtTime(volume, c.currentTime + 0.4);
+      node.connect(tone).connect(gain).connect(master);
+      Object.assign(handle, { node, tone, gain });
+      handle.set(want);
     })
     .catch(() => {
       engineModule = null;
       playing.delete(handle);
     });
   return handle;
-}
-
-/**
- * The grid through the start. The engine fires up with the first red light
- * and the driver brings the revs up a step with each light that follows, then
- * holds them at launch revs, flaring, through the hold. As the lights go out
- * the clutch drops and the car drives away: flat out through four upshifts,
- * the note thinning, dropping a touch in pitch and drifting off to the left
- * as it pulls away into the distance.
- *
- * `lamps` are the times the five lights come on, in seconds from now
- * (scheduled on the audio clock, like the beeps). The clutch drops when go()
- * is called: call it as the lights go out on screen, so sound and picture move
- * together even if the page is busy. Returns a handle: go(), stop(fade); or
- * null when sound is off.
- */
-export function startGrid({ lamps, volume = 0.34 }) {
-  const e = engine({ volume, manual: true });
-  if (!e) return null;
-  const c = ctx;
-  const asked = performance.now();
-  let endTimer = 0;
-  let gone = false;
-
-  // Schedule one value on a param: a ramp to it, or a jump.
-  const to = (param, t, v, jump = false) => (jump ? param.setValueAtTime(v, t) : param.linearRampToValueAtTime(v, t));
-  const params = () => ({
-    rpm: e.node.parameters.get('rpm'),
-    load: e.node.parameters.get('load'),
-    tone: e.tone.frequency,
-    pan: e.pan.pan,
-    gain: e.gain.gain,
-  });
-  const clear = (t) => {
-    Object.values(params()).forEach((p) => {
-      p.cancelScheduledValues(t);
-      p.setValueAtTime(p.value, t);
-    });
-  };
-
-  // From the clutch drop at L: away up the road.
-  const launch = (L) => {
-    const { rpm, load, tone, pan, gain } = params();
-    const v = e.volume;
-    // Moving away, the note sounds a little lower the faster the car goes.
-    const away = (d) => 1 - 0.12 * Math.min(1, d / 3);
-    const revs = (d, r, jump) => to(rpm, L + d, r * away(d), jump);
-    to(load, L, 1, true);
-    to(tone, L, 7500, true);
-    // Clutch drop: the revs sag as it bites, then climb flat out in first.
-    revs(0.05, 10100);
-    revs(0.5, 11800);
-    // Upshifts: each one a sudden drop (the engine cuts the ignition for it), then up again.
-    [
-      [0.52, 9300, 1.1],
-      [1.12, 9800, 1.8],
-      [1.82, 10200, 2.6],
-      [2.62, 10400, 3.6],
-    ].forEach(([d, r, next]) => {
-      revs(d, r, true);
-      revs(next, next < 3 ? 11800 : 11500);
-    });
-    // Into the distance: quieter, duller, drifting left.
-    to(gain, L + 0.15, v * 1.75);
-    to(gain, L + 0.8, v * 1.35);
-    to(gain, L + 1.6, v * 0.75);
-    to(gain, L + 2.5, v * 0.35);
-    to(gain, L + 3.3, v * 0.12);
-    to(gain, L + 4, 0);
-    to(tone, L + 1, 5500);
-    to(tone, L + 2, 3200);
-    to(tone, L + 3.2, 1600);
-    to(pan, L + 0.3, 0);
-    to(pan, L + 3.5, -0.45);
-    window.clearTimeout(endTimer);
-    endTimer = window.setTimeout(() => e.stop(0.05), (L - c.currentTime + 4.1) * 1000);
-  };
-
-  e.ready.then(() => {
-    if (e.stopped) return;
-    const now = c.currentTime;
-    const base = now - (performance.now() - asked) / 1000; // the audio time of the call
-    const at = lamps.map((t) => Math.max(now + 0.02, base + t));
-    const { rpm, load, tone, gain } = params();
-    const v = e.volume;
-    to(rpm, now, 4300, true);
-    to(load, now, 0.2, true);
-    to(tone, now, 2600, true);
-    to(gain, now, 0, true);
-    // Fired up with the first light...
-    to(gain, at[0] - 0.05, 0, true);
-    to(gain, at[0] + 0.15, v * 0.7);
-    // ...and a step more revs with each light, a flare between.
-    const steps = [6000, 7400, 8600, 9600, 10500];
-    at.forEach((t, i) => {
-      const r = steps[i];
-      to(rpm, t, i ? steps[i - 1] : 4300);
-      to(load, t + 0.3, 0.45 + i * 0.09);
-      to(tone, t + 0.3, 3000 + i * 550);
-      to(gain, t + 0.3, v * (0.72 + i * 0.07));
-      to(rpm, t + 0.3, r);
-      if (i < at.length - 1) {
-        to(rpm, t + 0.55, r - 350);
-        to(rpm, t + 0.8, r + 150);
-      }
-    });
-    // Held at launch revs, flaring, until the lights go out (go()), for up to four seconds.
-    const last = at[at.length - 1];
-    for (let t = last + 0.5, i = 0; t < last + 4; t += 0.22, i += 1) to(rpm, t, i % 2 ? 10700 : 10100);
-    if (gone) release();
-    else endTimer = window.setTimeout(() => e.stop(0.6), (last - now + 6) * 1000);
-  });
-
-  // The clutch drops now.
-  const release = () => {
-    const t = c.currentTime + 0.01;
-    clear(t);
-    const { rpm, load, gain } = params();
-    to(rpm, t, Math.max(rpm.value, 9000), true);
-    to(load, t, 0.8, true);
-    to(gain, t + 0.04, Math.max(gain.value, e.volume));
-    launch(t + 0.03);
-  };
-
-  return {
-    stop(fade) {
-      window.clearTimeout(endTimer);
-      e.stop(fade);
-    },
-    go() {
-      if (gone || e.stopped) return;
-      gone = true;
-      if (e.node) release();
-    },
-  };
 }
 
 /**
@@ -432,9 +287,16 @@ export function startGrid({ lamps, volume = 0.34 }) {
  *   filter   true to put a low-pass filter in the chain (see handle.set)
  *   sync     if loading takes a moment, skip ahead by that much so the sound
  *            stays in time with what started it
+ *   offset   start this many seconds into the sound
+ *   at       start this many seconds from now, on the audio clock (implies
+ *            sync: if it is not loaded by then, it starts as far in as it
+ *            would have reached)
+ *   fadeIn   seconds to fade in from silence
+ *   shape    [[seconds into the sound, gain], ...]: a volume curve over the
+ *            sound itself (multiplies volume), e.g. to lift a quiet stretch
  * Returns a handle: stop(fade), set({ rate, volume, cutoff }), or null when sound is off.
  */
-export function play(name, { volume = 1, loop = false, rate = 1, filter = false, sync = false } = {}) {
+export function play(name, { volume = 1, loop = false, rate = 1, filter = false, sync = false, offset = 0, at = 0, fadeIn = 0, shape = null } = {}) {
   if (!enabled) return null;
   const c = context();
   if (!c) return null;
@@ -473,7 +335,6 @@ export function play(name, { volume = 1, loop = false, rate = 1, filter = false,
       src.loop = loop;
       src.playbackRate.value = rate;
       const gain = c.createGain();
-      gain.gain.value = volume;
       let node = src;
       if (filter) {
         handle.lp = c.createBiquadFilter();
@@ -483,12 +344,29 @@ export function play(name, { volume = 1, loop = false, rate = 1, filter = false,
         node = handle.lp;
       }
       node.connect(gain).connect(master);
-      const late = sync ? Math.max(0, (performance.now() - asked) / 1000) : 0;
-      if (late > buffer.duration - 0.2) {
+      const elapsed = (performance.now() - asked) / 1000;
+      const wait = Math.max(0, at - elapsed);
+      const late = sync || at ? Math.max(0, elapsed - at) : 0;
+      const from = offset + late;
+      if (from > buffer.duration - 0.2) {
         playing.delete(handle);
         return;
       }
-      src.start(0, late);
+      const t0 = c.currentTime + wait;
+      // The volume curve at a position in the sound, as a gain.
+      const level = (pos) => {
+        if (!shape) return volume;
+        let k = shape.findIndex(([q]) => q > pos);
+        if (k === -1) return volume * shape[shape.length - 1][1];
+        if (k === 0) return volume * shape[0][1];
+        const [q0, g0] = shape[k - 1];
+        const [q1, g1] = shape[k];
+        return volume * (g0 + ((g1 - g0) * (pos - q0)) / (q1 - q0));
+      };
+      gain.gain.setValueAtTime(fadeIn ? 0 : level(from), t0);
+      if (fadeIn) gain.gain.linearRampToValueAtTime(level(from + fadeIn), t0 + fadeIn);
+      if (shape) shape.forEach(([q]) => q > from + fadeIn && gain.gain.linearRampToValueAtTime(level(q), t0 + (q - from) / rate));
+      src.start(t0, from);
       src.onended = () => playing.delete(handle);
       handle.src = src;
       handle.gain = gain;
