@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Photo, { Credit } from '../components/Photo';
+import { Credit } from '../components/Photo';
+import PitBox from './PitBox';
+import { TEAMS } from '../data/teams';
 import SplitText from '../components/SplitText';
 import useInView from '../hooks/useInView';
 import useReducedMotion from '../hooks/useReducedMotion';
@@ -45,7 +47,7 @@ function SoundLine({ name, label }) {
 /**
  * The pit stop. Identity: two words on the radio, then two seconds of work.
  * As the section arrives the engineer calls the car in, the driver answers,
- * the picture cuts to the car in the box, the wheel guns go, the jacks drop
+ * a 2026 car brakes into its box (PitBox), the wheel guns go, the jacks drop
  * and the light goes green. A stopwatch runs from the car stopping to the
  * release. With sound on, the guns and the car leaving are real recordings
  * (see scripts/prepare-pitstop.py); the radio voices are real people too,
@@ -55,17 +57,15 @@ export default function Pitstop() {
   const reduce = useReducedMotion();
   const soundOn = useSound();
   const [phase, setPhase] = useState(reduce ? 'go' : 'idle');
+  const [stop, setStop] = useState({ n: 0, team: 0 });
   const [ref, inView] = useInView({ threshold: 0.5 });
   const [nearRef, near] = useInView({ margin: '100% 0px 100% 0px', threshold: 0 });
   const clock = useRef(null);
-  const timers = useRef([]);
   const raf = useRef(0);
   const audio = useRef(null);
   const ran = useRef(false);
 
   const halt = useCallback(() => {
-    timers.current.forEach(window.clearTimeout);
-    timers.current = [];
     window.cancelAnimationFrame(raf.current);
   }, []);
 
@@ -73,20 +73,28 @@ export default function Pitstop() {
     if (clock.current) clock.current.textContent = Math.max(0, Math.min(STOP_TIME, t)).toFixed(2);
   };
 
-  const run = useCallback(() => {
+  const run = useCallback((next = false) => {
     halt();
+    // Each call from the button brings the next team's car in.
+    setStop((st) => ({ n: st.n + 1, team: next ? (st.team + 1) % TEAMS.length : st.team }));
     if (audio.current) audio.current.stop(0.08);
     // `sync`: if the sound takes a moment to load it joins part-way, still in step with the picture.
     audio.current = play('pitstop', { sync: true });
     const t0 = performance.now();
     setPhase('idle');
     showClock(0);
-    PHASES.slice(1).forEach((p) => {
-      timers.current.push(window.setTimeout(() => setPhase(p), PIT_CUES[p] * 1000));
-    });
+    // One clock for the picture: each frame reads the time since the call and
+    // shows the phase it has reached, so the phases, the stopwatch and the car
+    // (a GSAP timeline started at the same moment) cannot drift apart.
+    let shown = 'idle';
     const tick = () => {
       const t = (performance.now() - t0) / 1000;
       showClock(t - PIT_CUES.stop);
+      const now = PHASES.reduce((p, q) => (q !== 'idle' && t >= PIT_CUES[q] ? q : p), 'idle');
+      if (now !== shown) {
+        shown = now;
+        setPhase(now);
+      }
       if (t < PIT_CUES.go + 0.1) raf.current = window.requestAnimationFrame(tick);
     };
     raf.current = window.requestAnimationFrame(tick);
@@ -115,7 +123,7 @@ export default function Pitstop() {
   const again = () => {
     // The button says so: with sound off, it turns sound on for the replay.
     if (!soundOn) setSound(true);
-    run();
+    run(true);
   };
 
   const at = PHASES.indexOf(phase);
@@ -146,22 +154,9 @@ export default function Pitstop() {
         </header>
 
         <div className="pit__stage">
-          <div className="pit__frame" data-cut={inBox ? 'box' : 'wait'}>
+          <div className="pit__frame">
             <div className="pit__shot">
-              <Photo
-                id="pit/haas-wait"
-                alt="The Haas pit crew in position, waiting for the car, at the 2017 United States Grand Prix"
-                ratio="3 / 2"
-                className="pit__photo pit__photo--wait"
-                eager={near}
-              />
-              <Photo
-                id="pit/haas-stop"
-                alt="The Haas car stopped in its box with the crew changing all four wheels, at the 2017 United States Grand Prix"
-                ratio="3 / 2"
-                className="pit__photo pit__photo--stop"
-                eager={near}
-              />
+              <PitBox team={TEAMS[stop.team]} phase={phase} run={stop.n} cues={PIT_CUES} reduce={reduce} />
 
               <div className="pit__hud" aria-hidden="true">
                 <p className="pit__clock">
@@ -226,7 +221,7 @@ export default function Pitstop() {
               {soundOn ? 'Box, box again' : 'Box, box again, with sound'}
             </button>
             <p className="pit__credits">
-              <Credit id="pit/haas-wait" />
+              <Credit id={`${TEAMS[stop.team].id}-a`} />
               <SoundLine name="pitstop" label="Wheel guns" />
               <SoundLine name="pit-engineer" label="Engineer" />
               <SoundLine name="pit-driver" label="Driver" />

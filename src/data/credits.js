@@ -10,7 +10,6 @@
  */
 const BY_SA_4 = { name: 'CC BY-SA 4.0', url: 'https://creativecommons.org/licenses/by-sa/4.0/' };
 const BY_SA_2 = { name: 'CC BY-SA 2.0', url: 'https://creativecommons.org/licenses/by-sa/2.0/' };
-const BY_2 = { name: 'CC BY 2.0', url: 'https://creativecommons.org/licenses/by/2.0/' };
 
 const page = (file) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file.replace(/ /g, '_')).replace(/%2C/g, ',')}`;
 
@@ -35,8 +34,6 @@ const ARCHIVE = [
   ['eras/1988', 'McLaren MP4-4 at Goodwood 2014 003.jpg', 'Nic Redhead', BY_SA_2, 'McLaren MP4/4'],
   ['eras/2004', 'Ferrari F2004 (8925316574).jpg', 'emperornie', BY_SA_2, 'Ferrari F2004'],
   ['eras/2014', 'Lewis Hamilton 2014 China Race.jpg', 'emperornie', BY_SA_2, 'Mercedes F1 W05 Hybrid'],
-  ['pit/haas-wait', 'Haas F1 Team 2017 United States GP (37946707226).jpg', 'Curt Smith', BY_2, 'Haas pit crew waiting, 2017 United States GP'],
-  ['pit/haas-stop', 'Haas F1 Team 2017 United States GP (38000068891).jpg', 'Curt Smith', BY_2, 'Haas pit stop, 2017 United States GP'],
 ];
 
 export const CREDITS = {

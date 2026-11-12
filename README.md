@@ -23,7 +23,7 @@ Node 20 or newer. The build uses relative paths, so `dist/` can be hosted from a
 | Hero | A rolling shot: a real car brakes in with its discs glowing, holds station with the wheels turning while speed lines stream past, then launches off in a blur for the next team's car |
 | History | A pinned strip that scrolls sideways through six eras, with outlined years drifting behind the photographs |
 | Race weekend | One pinned screen that steps through practice, Q1, Q2, Q3 and the race while a 22-car grid thins out and launches |
-| Pit stop | "Box, box" on the team radio, a hard cut to the car in the box, four wheels going amber then green with the wheel guns, a stopwatch and the release light, all on the sound's own clock |
+| Pit stop | "Box, box" on the team radio, then a real 2026 car brakes into its painted box in front of the team's garage, goes up on the jacks while rings spin on the wheels with the guns, drops and is gone on the green light; a stopwatch runs on the stationary time, all on the sound's own clock. Each replay brings the next team's car in |
 | The machine | A blueprint of the car (edges and depth contours) that a scan line turns back into the photograph as you scroll, then callouts for each 2026 rule change |
 | Teams | Eleven slanted "garage doors" that swing open in the team's colours while the car rolls in and brakes |
 | Drivers | Cards that tilt toward the pointer, flood with colour and flip over |
@@ -135,7 +135,6 @@ All photographs come from Wikimedia Commons under Creative Commons licences. The
 - Lotus 79: Legends Of Motorsports, CC BY-SA 2.0
 - McLaren MP4/4: Nic Redhead, CC BY-SA 2.0
 - Ferrari F2004 and Mercedes W05: emperornie, CC BY-SA 2.0
-- Haas pit stop, 2017 United States GP: Curt Smith, CC BY 2.0
 
 The images were resized and cropped; the 2026 car photos were also given depth maps, and the side-on ones were cut out and levelled. Because the licences are ShareAlike, the adapted images and depth maps in `public/photos/` are offered under the same licence as their originals. If you publish the site, keep the credits section.
 

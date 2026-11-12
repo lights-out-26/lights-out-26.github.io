@@ -43,7 +43,7 @@
   gap: clamp(20px, 3vw, 48px);
 }
 
-/* ---- the picture: crew waiting, then a hard cut to the car in the box ---- */
+/* ---- the picture: a 2026 car in its pit box (PitBox) ---- */
 
 .pit__frame {
   position: relative;
@@ -58,49 +58,171 @@
   overflow: hidden;
 }
 
-.pit__photo {
-  margin: 0;
+.pitbox {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--team-deep);
 }
 
-.pit__photo--stop {
+/* The garage behind: the team's colours, panelled, lit from above, its mark painted large. */
+.pitbox__garage {
   position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: scale(1.06);
-  transition: opacity 0s linear 0s, transform 0.9s var(--ease-brake);
+  inset: 0 0 38% 0;
+  overflow: hidden;
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 0.1), transparent 8%),
+    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 1px), rgb(0 0 0 / 0.28) calc(12.5% - 1px) 12.5%),
+    linear-gradient(to bottom, color-mix(in srgb, var(--team-deep) 70%, #fff 6%), var(--team-deep));
 }
 
-.pit__frame[data-cut='box'] .pit__photo--stop {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.pit__photo--wait {
-  transition: transform 2.6s linear;
-}
-
-.pit[data-phase='box'] .pit__photo--wait,
-.pit[data-phase='copy'] .pit__photo--wait {
-  transform: scale(1.04);
-}
-
-/* a short flash on the cut */
-.pit__shot::after {
+.pitbox__garage::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: #fff;
-  opacity: 0;
+  inset: auto 0 0 0;
+  height: 7%;
+  background: var(--team);
+}
+
+.pitbox__mark {
+  position: absolute;
+  right: 3%;
+  bottom: 4%;
+  font-size: clamp(4rem, 17vw, 15rem);
+  line-height: 0.8;
+  color: var(--team);
+  opacity: 0.16;
+  white-space: nowrap;
+}
+
+.pitbox__name {
+  position: absolute;
+  top: 6%;
+  right: 3%;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.55);
+}
+
+/* The pit lane in front: asphalt, the box painted on it. */
+.pitbox__lane {
+  position: absolute;
+  inset: 62% 0 0 0;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgb(255 255 255 / 0.06), transparent 60%),
+    linear-gradient(to bottom, #222429, #121316);
+}
+
+.pitbox__line {
+  position: absolute;
+  top: 18%;
+  bottom: 0;
+  width: 1.1%;
+  background: rgb(255 255 255 / 0.78);
+  transform: skewX(-24deg);
+  transform-origin: top;
+}
+
+.pitbox__line--front { left: 8%; }
+.pitbox__line--rear { right: 7%; }
+
+.pitbox__stripe {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8%;
+  height: 3%;
+  background: rgb(255 255 255 / 0.5);
+}
+
+.pitbox__car {
+  position: absolute;
+  left: 9%;
+  width: 82%;
+  bottom: 9%;
+}
+
+/* Rings on the wheels: amber and spinning while a gun is on, green when done. */
+.pitbox__gun {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s linear;
 }
 
-.pit[data-phase='stop'] .pit__shot::after {
-  animation: pit-flash 0.35s ease-out;
+.pitbox__gun::before {
+  content: '';
+  position: absolute;
+  inset: -6%;
+  border-radius: 50%;
+  border: 3px dashed currentColor;
 }
 
-@keyframes pit-flash {
-  from { opacity: 0.18; }
-  to { opacity: 0; }
+.pitbox__gun[data-state='off'] {
+  color: var(--amber);
+  opacity: 1;
+  filter: drop-shadow(0 0 10px var(--amber));
+}
+
+.pitbox__gun[data-state='off']::before {
+  animation: pitbox-gun 0.18s linear infinite;
+}
+
+.pitbox__gun[data-state='on'] {
+  color: var(--done);
+  opacity: 1;
+  filter: drop-shadow(0 0 10px var(--done));
+}
+
+.pitbox[data-phase='go'] .pitbox__gun {
+  opacity: 0;
+}
+
+@keyframes pitbox-gun {
+  to { transform: rotate(360deg); }
+}
+
+/* The jacks, at the nose and under the gearbox. */
+.pitbox__jack {
+  position: absolute;
+  bottom: -4%;
+  width: 5%;
+  height: 9%;
+  border-radius: 2px;
+  background: linear-gradient(var(--silver), var(--alloy));
+  opacity: 0;
+  transform: translate3d(0, 40%, 0);
+  transition: opacity 0.1s linear, transform 0.12s var(--ease-out);
+}
+
+.pitbox__jack[data-up='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .pitbox {
+    aspect-ratio: 4 / 3;
+  }
+
+  .pitbox__garage {
+    inset: 0 0 34% 0;
+  }
+
+  .pitbox__lane {
+    inset: 66% 0 0 0;
+  }
+
+  .pitbox__car {
+    left: 3%;
+    width: 94%;
+    bottom: 14%;
+  }
 }
 
 /* ---- team radio ---- */
@@ -197,15 +319,13 @@
 /* ---- stopwatch, wheels and release light ---- */
 
 .pit__hud {
-  position: absolute;
-  inset: auto 0 0 0;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: clamp(36px, 6vw, 80px) clamp(12px, 1.8vw, 24px) clamp(10px, 1.6vw, 20px);
-  background: linear-gradient(to top, rgb(0 0 0 / 0.82), transparent);
-  pointer-events: none;
+  padding: clamp(10px, 1.4vw, 18px) clamp(12px, 1.8vw, 24px);
+  border-top: 1px solid var(--line);
+  background: var(--graphite);
 }
 
 .pit__clock {
@@ -215,7 +335,7 @@
 }
 
 .pit__clock b {
-  font-size: clamp(2.4rem, 6vw, 5.5rem);
+  font-size: clamp(2.2rem, 4.6vw, 4.4rem);
   font-weight: 900;
   font-stretch: 112%;
   font-style: italic;
@@ -238,7 +358,7 @@
 .pit__car {
   position: relative;
   flex: none;
-  width: clamp(48px, 6vw, 72px);
+  width: clamp(32px, 3.4vw, 44px);
   aspect-ratio: 1 / 2.1;
 }
 
@@ -421,8 +541,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pit__photo--stop,
-  .pit__photo--wait,
   .pit__line,
   .pit__wheel {
     transition: none;
@@ -430,7 +548,7 @@
 
   .pit__wheel[data-state='off'],
   .pit__radio[data-live='true'] .pit__wave b,
-  .pit[data-phase='stop'] .pit__shot::after {
+  .pitbox__gun[data-state='off']::before {
     animation: none;
   }
 }
