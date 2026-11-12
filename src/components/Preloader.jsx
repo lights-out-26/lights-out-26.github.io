@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { carSrc } from './PhotoCar';
-import { setSound, startBeeps } from '../lib/sound';
+import { setSound, startBeeps, startGrid } from '../lib/sound';
 import './Preloader.css';
 
 const LIGHTS = [0, 1, 2, 3, 4];
@@ -12,8 +12,8 @@ const LIGHTS_OUT = 2450; // ms: the last lamp is on at 1.95 s, all five go out a
  */
 const REAL = { first: 0.6, step: 1 };
 const realStart = () => {
-  const hold = 0.6 + Math.random() * 1.6;
-  return { ...REAL, out: REAL.first + 4 * REAL.step + hold };
+  const hold = 0.9 + Math.random() * 1.4;
+  return { ...REAL, out: REAL.first + 4 * REAL.step + hold, at: performance.now() };
 };
 
 /**
@@ -23,7 +23,9 @@ const realStart = () => {
  *
  * "Start with sound" turns sound on and runs the lights again from the first
  * lamp at the real pace, with the start signal: a beep as each red light comes
- * on, and silence when they go out.
+ * on. When the last beep has gone, the engine comes up to launch revs through
+ * the hold; the clutch drops as the lights go out, and the sound carries on
+ * into the home screen with its first car (see startGrid).
  */
 export default function Preloader({ onDone }) {
   const [phase, setPhase] = useState('lights'); // lights -> out -> gone
@@ -31,11 +33,14 @@ export default function Preloader({ onDone }) {
   const [start, setStart] = useState(null);
   const finished = useRef(false);
   const signal = useRef(null);
+  const grid = useRef(null);
 
   const startWithSound = () => {
     setSound(true);
     const s = realStart();
-    signal.current = startBeeps(LIGHTS.map((i) => s.first + i * s.step));
+    const lamps = LIGHTS.map((i) => s.first + i * s.step);
+    signal.current = startBeeps(lamps);
+    grid.current = startGrid({ revAt: lamps[4] + 0.3 });
     setStart(s);
     setRun((n) => n + 1);
   };
@@ -45,11 +50,13 @@ export default function Preloader({ onDone }) {
     const timers = [];
     const wait = (ms) => new Promise((resolve) => timers.push(window.setTimeout(resolve, ms)));
 
-    const finish = () => {
+    const finish = (skipped) => {
       if (finished.current) return;
       finished.current = true;
-      // Skipped part-way through: no more beeps once the lights have gone.
-      if (signal.current) signal.current.stop(0.04);
+      // Skipped part-way through: no more beeps.
+      if (skipped && signal.current) signal.current.stop(0.04);
+      // The clutch drops as the lights go out on screen.
+      if (grid.current) grid.current.go();
       setPhase('out');
       onDone();
       timers.push(window.setTimeout(() => setPhase('gone'), reduce ? 50 : 1250));
@@ -63,15 +70,16 @@ export default function Preloader({ onDone }) {
         document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve(),
       ]);
       // Never hold the page hostage: give up waiting after four seconds.
-      Promise.all([wait(reduce ? 250 : LIGHTS_OUT), Promise.race([assets, wait(4000)])]).then(finish);
+      Promise.all([wait(reduce ? 250 : LIGHTS_OUT), Promise.race([assets, wait(4000)])]).then(() => finish(false));
     } else {
       // Lights restarted with sound: they go out after the random hold.
-      wait(reduce ? 250 : start.out * 1000).then(finish);
+      // Timed from the click, like the beeps.
+      wait(reduce ? 250 : Math.max(0, start.out * 1000 - (performance.now() - start.at))).then(() => finish(reduce));
     }
 
     const skip = (e) => {
       if (e.target && e.target.closest && e.target.closest('.pre__sound')) return;
-      finish();
+      finish(true);
     };
     window.addEventListener('keydown', skip);
     window.addEventListener('pointerdown', skip);

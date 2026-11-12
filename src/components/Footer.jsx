@@ -54,8 +54,8 @@ export default function Footer() {
           </h2>
           <p className="footer__p">
             The engines in the history section and at the race start are real Formula 1 cars, from recordings shared on Wikimedia Commons; the clips were cut, faded
-            and levelled, and are shared under the same licences. The start-light beeps and the flat-out engine on the team pages are made in your browser as you
-            scroll. Sound stays off until you turn it on.
+            and levelled, and are shared under the same licences. The start-light beeps, the engine at the start and the flat-out engine on the team pages are made
+            in your browser. Sound stays off until you turn it on.
           </p>
           {SOUND_GROUPS.map((g) => (
             <div key={`${g.author}-${g.licence.name}`} className="footer__group">
