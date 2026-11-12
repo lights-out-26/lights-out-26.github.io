@@ -10,6 +10,7 @@
  */
 const BY_SA_4 = { name: 'CC BY-SA 4.0', url: 'https://creativecommons.org/licenses/by-sa/4.0/' };
 const BY_SA_2 = { name: 'CC BY-SA 2.0', url: 'https://creativecommons.org/licenses/by-sa/2.0/' };
+const BY_2 = { name: 'CC BY 2.0', url: 'https://creativecommons.org/licenses/by/2.0/' };
 
 const page = (file) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file.replace(/ /g, '_')).replace(/%2C/g, ',')}`;
 
@@ -34,6 +35,8 @@ const ARCHIVE = [
   ['eras/1988', 'McLaren MP4-4 at Goodwood 2014 003.jpg', 'Nic Redhead', BY_SA_2, 'McLaren MP4/4'],
   ['eras/2004', 'Ferrari F2004 (8925316574).jpg', 'emperornie', BY_SA_2, 'Ferrari F2004'],
   ['eras/2014', 'Lewis Hamilton 2014 China Race.jpg', 'emperornie', BY_SA_2, 'Mercedes F1 W05 Hybrid'],
+  ['pit/haas-wait', 'Haas F1 Team 2017 United States GP (37946707226).jpg', 'Curt Smith', BY_2, 'Haas pit crew waiting, 2017 United States GP'],
+  ['pit/haas-stop', 'Haas F1 Team 2017 United States GP (38000068891).jpg', 'Curt Smith', BY_2, 'Haas pit stop, 2017 United States GP'],
 ];
 
 export const CREDITS = {
@@ -51,12 +54,14 @@ export const CREDITS = {
 /**
  * Sound credits. Real recordings from Wikimedia Commons (scripts/sounds.json):
  * Edvvc's at the Goodwood Festival of Speed hillclimb (CC BY-SA 3.0), and the
- * soundtracks of two videos filmed at 2021 Grands Prix (CC BY-SA 4.0). The
+ * soundtracks of videos filmed at 2021 Grands Prix and a 2015 pit stop practice
+ * (CC BY-SA 4.0), and two spoken words for the pit stop radio. The
  * clips were cut, faded and loudness-normalised, and the adapted clips are
  * shared under the same licences. The start-light beeps and the flat-out
  * engine are made in the browser and have no source.
  */
 const BY_SA_3 = { name: 'CC BY-SA 3.0', url: 'https://creativecommons.org/licenses/by-sa/3.0/' };
+const CC0 = { name: 'CC0', url: 'https://creativecommons.org/publicdomain/zero/1.0/' };
 export const SOUND_CREDITS = [
   ['start', '2021 Russian Grand Prix - start for warm-up.webm', 'Turbo-hybrid V6 grid leaving for the formation lap, 2021 Russian Grand Prix', 'the start lights', 'rubin16', BY_SA_4],
   ['launch', 'Ferrari F60 (2009).ogg', 'Ferrari F60 (2009)', 'the race start'],
@@ -66,6 +71,9 @@ export const SOUND_CREDITS = [
   ['era-2004', 'Red Bull-Cosworth RB1 (2005).ogg', 'Red Bull RB1 (2005, Cosworth V10), driven by Mark Webber', 'history, 2004'],
   ['era-2014', 'Formula 1 Turkish GP 2021.ogg', 'Turbo-hybrid V6 cars, 2021 Turkish Grand Prix', 'history, 2014', 'SAİT71', BY_SA_4],
   ['era-2026', 'Formula 1 Turkish GP 2021 - 2.ogg', 'Turbo-hybrid V6 cars, 2021 Turkish Grand Prix (second video)', 'history, 2026', 'SAİT71', BY_SA_4],
+  ['pitstop', 'Red Bull Racing Pit Stop Practice.webm', 'Red Bull Racing pit stop practice, Mexico City 2015 (wheel guns)', 'the pit stop', 'ProtoplasmaKid', BY_SA_4],
+  ['pit-engineer', 'LL-Q1860 (eng)-Vealhurl-box.wav', '"Box", spoken (the engineer, through a radio)', 'the pit stop', 'Vealhurl', BY_SA_4],
+  ['pit-driver', 'LL-Q1860 (eng)-Grendelkhan-copy.wav', '"Copy", spoken (the driver, through a radio)', 'the pit stop', 'Grendelkhan', CC0],
 ].map(([key, file, car, where, author = 'Edvvc', licence = BY_SA_3]) => ({ key, file, car, where, author, licence, url: page(file) }));
 
 /** Sound credits grouped by author, for the credits list. */

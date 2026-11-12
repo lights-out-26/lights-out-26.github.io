@@ -1,0 +1,436 @@
+.pit {
+  position: relative;
+  padding-block: var(--section-y);
+  background: radial-gradient(70% 60% at 30% 60%, #15171b, transparent 70%), var(--carbon);
+  /* pit-wall colours: amber while a gun is on the wheel, green when it is done (the start-light red stays with the gantry) */
+  --amber: #ffb020;
+  --done: #39d98a;
+  --hold: #f2554a;
+}
+
+.pit__inner {
+  display: grid;
+  gap: clamp(28px, 4vw, 64px);
+}
+
+.pit__head {
+  display: grid;
+  gap: clamp(12px, 1.6vw, 22px);
+  max-width: 62rem;
+}
+
+.pit__kicker {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.pit__title {
+  font-size: var(--fs-display);
+}
+
+.pit__lead {
+  max-width: 40rem;
+  font-size: var(--fs-lead);
+  line-height: 1.4;
+  color: var(--silver);
+}
+
+.pit__stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(20px, 3vw, 48px);
+}
+
+/* ---- the picture: crew waiting, then a hard cut to the car in the box ---- */
+
+.pit__frame {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--graphite);
+}
+
+.pit__shot {
+  position: relative;
+  overflow: hidden;
+}
+
+.pit__photo {
+  margin: 0;
+}
+
+.pit__photo--stop {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 0s linear 0s, transform 0.9s var(--ease-brake);
+}
+
+.pit__frame[data-cut='box'] .pit__photo--stop {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.pit__photo--wait {
+  transition: transform 2.6s linear;
+}
+
+.pit[data-phase='box'] .pit__photo--wait,
+.pit[data-phase='copy'] .pit__photo--wait {
+  transform: scale(1.04);
+}
+
+/* a short flash on the cut */
+.pit__shot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pit[data-phase='stop'] .pit__shot::after {
+  animation: pit-flash 0.35s ease-out;
+}
+
+@keyframes pit-flash {
+  from { opacity: 0.18; }
+  to { opacity: 0; }
+}
+
+/* ---- team radio ---- */
+
+.pit__radio {
+  position: absolute;
+  top: clamp(10px, 1.6vw, 20px);
+  left: clamp(10px, 1.6vw, 20px);
+  display: grid;
+  gap: 6px;
+  min-width: min(15rem, 60%);
+  padding: 10px 14px 12px;
+  border-radius: 4px;
+  background: rgb(5 6 8 / 0.78);
+  box-shadow: inset 0 0 0 1px var(--line);
+  backdrop-filter: blur(6px);
+  font-stretch: 82%;
+}
+
+.pit__radio-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pit__radio-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--steel);
+  transition: background-color 0.15s linear, box-shadow 0.15s linear;
+}
+
+.pit__radio[data-live='true'] .pit__radio-dot {
+  background: var(--amber);
+  box-shadow: 0 0 10px var(--amber);
+}
+
+.pit__wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+  margin-left: auto;
+}
+
+.pit__wave b {
+  width: 3px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--silver);
+  opacity: 0.5;
+}
+
+.pit__radio[data-live='true'] .pit__wave b {
+  opacity: 1;
+  animation: pit-wave 0.32s ease-in-out calc(var(--i) * -0.07s) infinite alternate;
+}
+
+@keyframes pit-wave {
+  from { height: 3px; }
+  to { height: 14px; }
+}
+
+.pit__line {
+  display: flex;
+  gap: 10px;
+  font-size: clamp(1rem, 1.4vw, 1.3rem);
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: 0;
+  transform: translate3d(0, 6px, 0);
+  transition: opacity 0.2s linear, transform 0.35s var(--ease-out);
+}
+
+.pit__line span {
+  min-width: 4.6rem;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  line-height: 1.9;
+  color: var(--muted);
+}
+
+.pit__line[data-on='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- stopwatch, wheels and release light ---- */
+
+.pit__hud {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(36px, 6vw, 80px) clamp(12px, 1.8vw, 24px) clamp(10px, 1.6vw, 20px);
+  background: linear-gradient(to top, rgb(0 0 0 / 0.82), transparent);
+  pointer-events: none;
+}
+
+.pit__clock {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.pit__clock b {
+  font-size: clamp(2.4rem, 6vw, 5.5rem);
+  font-weight: 900;
+  font-stretch: 112%;
+  font-style: italic;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.pit__clock span {
+  font-size: var(--fs-small);
+  font-stretch: 80%;
+  color: var(--silver);
+}
+
+.pit[data-phase='go'] .pit__clock b {
+  color: var(--done);
+}
+
+/* The car from above: nose up, four wheels, a jack at each end. */
+.pit__car {
+  position: relative;
+  flex: none;
+  width: clamp(48px, 6vw, 72px);
+  aspect-ratio: 1 / 2.1;
+}
+
+.pit__body {
+  position: absolute;
+  inset: 8% 32%;
+  border-radius: 40% 40% 18% 18%;
+  background: var(--steel);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.pit__wheel {
+  position: absolute;
+  width: 26%;
+  height: 22%;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1.5px var(--alloy);
+  transition: background-color 0.12s linear var(--d), box-shadow 0.12s linear var(--d);
+}
+
+.pit__wheel--fl { top: 14%; left: 0; }
+.pit__wheel--fr { top: 14%; right: 0; }
+.pit__wheel--rl { bottom: 8%; left: 0; }
+.pit__wheel--rr { bottom: 8%; right: 0; }
+
+.pit__wheel[data-state='off'] {
+  background: var(--amber);
+  box-shadow: 0 0 12px var(--amber);
+  animation: pit-gun 0.12s linear infinite alternate;
+}
+
+.pit__wheel[data-state='on'] {
+  background: var(--done);
+  box-shadow: 0 0 10px var(--done);
+}
+
+@keyframes pit-gun {
+  to { opacity: 0.55; }
+}
+
+.pit__jack {
+  position: absolute;
+  left: 38%;
+  width: 24%;
+  height: 5%;
+  border-radius: 2px;
+  background: var(--steel);
+  transition: background-color 0.15s linear, transform 0.25s var(--ease-out);
+}
+
+.pit__jack--front { top: 0; }
+.pit__jack--rear { bottom: 0; }
+
+.pit__jack[data-up='true'] {
+  background: var(--silver);
+}
+
+.pit__light {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--silver);
+}
+
+.pit__light i {
+  width: clamp(18px, 2.4vw, 28px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--hold);
+  box-shadow: 0 0 14px var(--hold);
+  transition: background-color 0.1s linear, box-shadow 0.1s linear;
+}
+
+.pit[data-phase='idle'] .pit__light i,
+.pit[data-phase='box'] .pit__light i,
+.pit[data-phase='copy'] .pit__light i {
+  background: var(--steel);
+  box-shadow: none;
+}
+
+.pit__light[data-go='true'] i {
+  background: var(--done);
+  box-shadow: 0 0 18px var(--done);
+}
+
+/* ---- facts, replay, credits ---- */
+
+.pit__side {
+  display: grid;
+  gap: clamp(18px, 2.4vw, 32px);
+  min-width: 0;
+}
+
+.pit__facts {
+  display: grid;
+  gap: clamp(14px, 1.8vw, 24px);
+  margin: 0;
+}
+
+.pit__facts div {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.pit__facts dt {
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pit__facts dd {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  color: var(--silver);
+}
+
+.pit__again {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 0.6em;
+  min-height: 44px;
+  padding: 0 1.15em 0 0.95em;
+  border-radius: 999px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  font-stretch: 90%;
+  color: var(--white);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  transition: background-color 0.25s linear, color 0.25s linear;
+}
+
+.pit__again:hover,
+.pit__again:focus-visible {
+  background: var(--white);
+  color: #000;
+}
+
+.pit__again svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pit__credits {
+  display: grid;
+  gap: 4px;
+}
+
+@media (max-width: 860px) {
+  .pit__stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+}
+
+/* On a phone the radio sits under the picture instead of over it. */
+@media (max-width: 640px) {
+  .pit__radio {
+    position: static;
+    min-width: 0;
+    border-radius: 0;
+    backdrop-filter: none;
+    box-shadow: none;
+    background: var(--graphite);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pit__photo--stop,
+  .pit__photo--wait,
+  .pit__line,
+  .pit__wheel {
+    transition: none;
+  }
+
+  .pit__wheel[data-state='off'],
+  .pit__radio[data-live='true'] .pit__wave b,
+  .pit[data-phase='stop'] .pit__shot::after {
+    animation: none;
+  }
+}
