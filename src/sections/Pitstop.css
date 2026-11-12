@@ -1,22 +1,45 @@
+/* The pit stop: the same sideways strip as the history section (History.css), through the five steps of a stop. */
+
 .pit {
   position: relative;
-  padding-block: var(--section-y);
-  background: radial-gradient(70% 60% at 30% 60%, #15171b, transparent 70%), var(--carbon);
-  /* pit-wall colours: amber while a gun is on the wheel, green when it is done (the start-light red stays with the gantry) */
-  --amber: #ffb020;
-  --done: #39d98a;
-  --hold: #f2554a;
+  /* one screen, plus the distance the strip has to travel (five steps) */
+  height: calc(100vh + 390vw);
+  height: calc(100svh + 390vw);
+  background: var(--black);
 }
 
-.pit__inner {
-  display: grid;
-  gap: clamp(28px, 4vw, 64px);
+.pit__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.pit__track {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  height: 100%;
+  padding-inline: max(var(--gutter), env(safe-area-inset-left, 0px)) 14vw;
+  animation-name: pit-track;
+  will-change: transform;
+}
+
+@keyframes pit-track {
+  to { transform: translate3d(calc(-100% + 100vw), 0, 0); }
 }
 
 .pit__head {
   display: grid;
-  gap: clamp(12px, 1.6vw, 22px);
-  max-width: 62rem;
+  align-content: center;
+  gap: clamp(18px, 2.4vw, 32px);
+  width: min(88vw, 84rem);
+  padding-right: 10vw;
+}
+
+.pit__title {
+  font-size: min(7.2vw, 15vh);
 }
 
 .pit__kicker {
@@ -25,530 +48,223 @@
   color: var(--muted);
 }
 
-.pit__title {
-  font-size: var(--fs-display);
-}
-
-.pit__lead {
-  max-width: 40rem;
-  font-size: var(--fs-lead);
-  line-height: 1.4;
-  color: var(--silver);
-}
-
-.pit__stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
-  align-items: end;
-  gap: clamp(20px, 3vw, 48px);
-}
-
-/* ---- the picture: a 2026 car in its pit box (PitBox) ---- */
-
-.pit__frame {
-  position: relative;
-  min-width: 0;
-  overflow: hidden;
-  border-radius: 6px;
-  background: var(--graphite);
-}
-
-.pit__shot {
-  position: relative;
-  overflow: hidden;
-}
-
-.pitbox {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  background: var(--team-deep);
-}
-
-/* The garage behind: the team's colours, panelled, lit from above, its mark painted large. */
-.pitbox__garage {
-  position: absolute;
-  inset: 0 0 38% 0;
-  overflow: hidden;
-  background:
-    linear-gradient(to bottom, rgb(255 255 255 / 0.1), transparent 8%),
-    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 1px), rgb(0 0 0 / 0.28) calc(12.5% - 1px) 12.5%),
-    linear-gradient(to bottom, color-mix(in srgb, var(--team-deep) 70%, #fff 6%), var(--team-deep));
-}
-
-.pitbox__garage::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 7%;
-  background: var(--team);
-}
-
-.pitbox__mark {
-  position: absolute;
-  right: 3%;
-  bottom: 4%;
-  font-size: clamp(4rem, 17vw, 15rem);
-  line-height: 0.8;
-  color: var(--team);
-  opacity: 0.16;
-  white-space: nowrap;
-}
-
-.pitbox__name {
-  position: absolute;
-  top: 6%;
-  right: 3%;
-  font-size: var(--fs-micro);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgb(255 255 255 / 0.55);
-}
-
-/* The pit lane in front: asphalt, the box painted on it. */
-.pitbox__lane {
-  position: absolute;
-  inset: 62% 0 0 0;
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgb(255 255 255 / 0.06), transparent 60%),
-    linear-gradient(to bottom, #222429, #121316);
-}
-
-.pitbox__line {
-  position: absolute;
-  top: 18%;
-  bottom: 0;
-  width: 1.1%;
-  background: rgb(255 255 255 / 0.78);
-  transform: skewX(-24deg);
-  transform-origin: top;
-}
-
-.pitbox__line--front { left: 8%; }
-.pitbox__line--rear { right: 7%; }
-
-.pitbox__stripe {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 8%;
-  height: 3%;
-  background: rgb(255 255 255 / 0.5);
-}
-
-.pitbox__car {
-  position: absolute;
-  left: 9%;
-  width: 82%;
-  bottom: 9%;
-}
-
-/* Rings on the wheels: amber and spinning while a gun is on, green when done. */
-.pitbox__gun {
-  position: absolute;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.12s linear;
-}
-
-.pitbox__gun::before {
-  content: '';
-  position: absolute;
-  inset: -6%;
-  border-radius: 50%;
-  border: 3px dashed currentColor;
-}
-
-.pitbox__gun[data-state='off'] {
-  color: var(--amber);
-  opacity: 1;
-  filter: drop-shadow(0 0 10px var(--amber));
-}
-
-.pitbox__gun[data-state='off']::before {
-  animation: pitbox-gun 0.18s linear infinite;
-}
-
-.pitbox__gun[data-state='on'] {
-  color: var(--done);
-  opacity: 1;
-  filter: drop-shadow(0 0 10px var(--done));
-}
-
-.pitbox[data-phase='go'] .pitbox__gun {
-  opacity: 0;
-}
-
-@keyframes pitbox-gun {
-  to { transform: rotate(360deg); }
-}
-
-/* The jacks, at the nose and under the gearbox. */
-.pitbox__jack {
-  position: absolute;
-  bottom: -4%;
-  width: 5%;
-  height: 9%;
-  border-radius: 2px;
-  background: linear-gradient(var(--silver), var(--alloy));
-  opacity: 0;
-  transform: translate3d(0, 40%, 0);
-  transition: opacity 0.1s linear, transform 0.12s var(--ease-out);
-}
-
-.pitbox__jack[data-up='true'] {
-  opacity: 1;
-  transform: none;
-}
-
-@media (max-width: 640px) {
-  .pitbox {
-    aspect-ratio: 4 / 3;
-  }
-
-  .pitbox__garage {
-    inset: 0 0 34% 0;
-  }
-
-  .pitbox__lane {
-    inset: 66% 0 0 0;
-  }
-
-  .pitbox__car {
-    left: 3%;
-    width: 94%;
-    bottom: 14%;
-  }
-}
-
-/* ---- team radio ---- */
-
-.pit__radio {
-  position: absolute;
-  top: clamp(10px, 1.6vw, 20px);
-  left: clamp(10px, 1.6vw, 20px);
-  display: grid;
-  gap: 6px;
-  min-width: min(15rem, 60%);
-  padding: 10px 14px 12px;
-  border-radius: 4px;
-  background: rgb(5 6 8 / 0.78);
-  box-shadow: inset 0 0 0 1px var(--line);
-  backdrop-filter: blur(6px);
-  font-stretch: 82%;
-}
-
-.pit__radio-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-micro);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.pit__radio-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--steel);
-  transition: background-color 0.15s linear, box-shadow 0.15s linear;
-}
-
-.pit__radio[data-live='true'] .pit__radio-dot {
-  background: var(--amber);
-  box-shadow: 0 0 10px var(--amber);
-}
-
-.pit__wave {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  height: 14px;
-  margin-left: auto;
-}
-
-.pit__wave b {
-  width: 3px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--silver);
-  opacity: 0.5;
-}
-
-.pit__radio[data-live='true'] .pit__wave b {
-  opacity: 1;
-  animation: pit-wave 0.32s ease-in-out calc(var(--i) * -0.07s) infinite alternate;
-}
-
-@keyframes pit-wave {
-  from { height: 3px; }
-  to { height: 14px; }
-}
-
-.pit__line {
-  display: flex;
-  gap: 10px;
-  font-size: clamp(1rem, 1.4vw, 1.3rem);
-  font-weight: 700;
-  line-height: 1.2;
-  opacity: 0;
-  transform: translate3d(0, 6px, 0);
-  transition: opacity 0.2s linear, transform 0.35s var(--ease-out);
-}
-
-.pit__line span {
-  min-width: 4.6rem;
-  font-size: var(--fs-micro);
-  font-weight: 600;
-  line-height: 1.9;
-  color: var(--muted);
-}
-
-.pit__line[data-on='true'] {
-  opacity: 1;
-  transform: none;
-}
-
-/* ---- stopwatch, wheels and release light ---- */
-
-.pit__hud {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: clamp(10px, 1.4vw, 18px) clamp(12px, 1.8vw, 24px);
-  border-top: 1px solid var(--line);
-  background: var(--graphite);
-}
-
-.pit__clock {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.pit__clock b {
-  font-size: clamp(2.2rem, 4.6vw, 4.4rem);
-  font-weight: 900;
-  font-stretch: 112%;
-  font-style: italic;
-  line-height: 0.9;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
-
-.pit__clock span {
+.pit__hint {
   font-size: var(--fs-small);
-  font-stretch: 80%;
-  color: var(--silver);
-}
-
-.pit[data-phase='go'] .pit__clock b {
-  color: var(--done);
-}
-
-/* The car from above: nose up, four wheels, a jack at each end. */
-.pit__car {
-  position: relative;
-  flex: none;
-  width: clamp(32px, 3.4vw, 44px);
-  aspect-ratio: 1 / 2.1;
-}
-
-.pit__body {
-  position: absolute;
-  inset: 8% 32%;
-  border-radius: 40% 40% 18% 18%;
-  background: var(--steel);
-  box-shadow: inset 0 0 0 1px var(--line-strong);
-}
-
-.pit__wheel {
-  position: absolute;
-  width: 26%;
-  height: 22%;
-  border-radius: 3px;
-  box-shadow: inset 0 0 0 1.5px var(--alloy);
-  transition: background-color 0.12s linear var(--d), box-shadow 0.12s linear var(--d);
-}
-
-.pit__wheel--fl { top: 14%; left: 0; }
-.pit__wheel--fr { top: 14%; right: 0; }
-.pit__wheel--rl { bottom: 8%; left: 0; }
-.pit__wheel--rr { bottom: 8%; right: 0; }
-
-.pit__wheel[data-state='off'] {
-  background: var(--amber);
-  box-shadow: 0 0 12px var(--amber);
-  animation: pit-gun 0.12s linear infinite alternate;
-}
-
-.pit__wheel[data-state='on'] {
-  background: var(--done);
-  box-shadow: 0 0 10px var(--done);
-}
-
-@keyframes pit-gun {
-  to { opacity: 0.55; }
-}
-
-.pit__jack {
-  position: absolute;
-  left: 38%;
-  width: 24%;
-  height: 5%;
-  border-radius: 2px;
-  background: var(--steel);
-  transition: background-color 0.15s linear, transform 0.25s var(--ease-out);
-}
-
-.pit__jack--front { top: 0; }
-.pit__jack--rear { bottom: 0; }
-
-.pit__jack[data-up='true'] {
-  background: var(--silver);
-}
-
-.pit__light {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  font-size: var(--fs-micro);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--silver);
-}
-
-.pit__light i {
-  width: clamp(18px, 2.4vw, 28px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--hold);
-  box-shadow: 0 0 14px var(--hold);
-  transition: background-color 0.1s linear, box-shadow 0.1s linear;
-}
-
-.pit[data-phase='idle'] .pit__light i,
-.pit[data-phase='box'] .pit__light i,
-.pit[data-phase='copy'] .pit__light i {
-  background: var(--steel);
-  box-shadow: none;
-}
-
-.pit__light[data-go='true'] i {
-  background: var(--done);
-  box-shadow: 0 0 18px var(--done);
-}
-
-/* ---- facts, replay, credits ---- */
-
-.pit__side {
-  display: grid;
-  gap: clamp(18px, 2.4vw, 32px);
-  min-width: 0;
-}
-
-.pit__facts {
-  display: grid;
-  gap: clamp(14px, 1.8vw, 24px);
-  margin: 0;
-}
-
-.pit__facts div {
-  display: grid;
-  gap: 4px;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
-}
-
-.pit__facts dt {
-  font-size: var(--fs-micro);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-stretch: 78%;
+  font-weight: 600;
   color: var(--muted);
 }
 
-.pit__facts dd {
-  margin: 0;
-  font-size: var(--fs-body);
-  line-height: 1.45;
-  color: var(--silver);
+/* ---- one step ---- */
+
+.pstep {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 50vw) minmax(0, 28rem);
+  align-items: end;
+  gap: clamp(24px, 3.2vw, 56px);
+  width: 86vw;
+  max-width: 1500px;
+  padding-block: calc(var(--nav-h) + 4vh) 16vh;
+  margin-right: 6vw;
 }
 
-.pit__again {
-  display: inline-flex;
-  align-items: center;
-  justify-self: start;
-  gap: 0.6em;
-  min-height: 44px;
-  padding: 0 1.15em 0 0.95em;
+/* The step's figure is scenery: enormous, outlined, and drifting slower than the photo. */
+.pstep__mark {
+  position: absolute;
+  left: -3vw;
+  top: calc(var(--nav-h) + 1vh);
+  font-size: min(27vw, 46vh);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-style: italic;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.34);
+  white-space: nowrap;
+  pointer-events: none;
+  /* --p runs 0..1 over the whole strip; each step is centred at a different point */
+  transform: translate3d(calc((var(--p, 0) * 5.4 - var(--i) - 1.2) * -9vw), 0, 0);
+}
+
+.pstep__photo {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  align-self: end;
+}
+
+.pstep__credits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+}
+
+.pstep__photo .photo__frame {
+  box-shadow: 0 40px 80px -20px rgb(0 0 0 / 0.9);
+}
+
+/* The picture eases back inside its frame as the frame is uncovered. */
+html.js .pstep .photo__frame > img {
+  transform: scale(1.18);
+  transition: opacity 0.6s linear, transform 1.8s var(--ease-out);
+}
+
+html.js .pstep[data-inview='true'] .photo__frame > img {
+  transform: none;
+}
+
+.pstep__copy {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 28px;
+}
+
+.pstep__label {
+  font-size: var(--fs-small);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.pstep__label .t-num {
+  color: var(--fg);
+  margin-right: 0.5em;
+}
+
+.pstep__title {
+  font-size: clamp(1.6rem, 2.9vw, 3rem);
+  font-stretch: 116%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.pstep__body {
+  color: var(--silver);
+  max-width: 34em;
+}
+
+.pstep__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pstep__facts li {
+  padding: 0.4em 0.9em;
+  border: 1px solid var(--line-strong);
   border-radius: 999px;
   font-size: var(--fs-small);
-  font-weight: 700;
-  font-stretch: 90%;
-  color: var(--white);
-  box-shadow: inset 0 0 0 1px var(--line-strong);
-  transition: background-color 0.25s linear, color 0.25s linear;
+  font-stretch: 82%;
+  font-weight: 600;
 }
 
-.pit__again:hover,
-.pit__again:focus-visible {
-  background: var(--white);
-  color: #000;
-}
+/* ---- ruler ---- */
 
-.pit__again svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.pit__credits {
+.pit__ruler {
+  position: absolute;
+  inset: auto max(var(--gutter), env(safe-area-inset-right, 0px)) clamp(20px, 4vh, 44px) max(var(--gutter), env(safe-area-inset-left, 0px));
   display: grid;
-  gap: 4px;
+  gap: 10px;
+}
+
+.pit__ticks {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 16%;
+  font-size: var(--fs-micro);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.pit__bar {
+  height: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.pit__bar i {
+  display: block;
+  height: 100%;
+  background: var(--white);
+  transform-origin: 0 50%;
+  animation-name: pit-bar;
+}
+
+@keyframes pit-bar {
+  from { transform: scaleX(0); }
+  to { transform: none; }
+}
+
+/* ---- narrow screens, or reduced motion: a plain vertical list ---- */
+
+@media (max-width: 860px), (prefers-reduced-motion: reduce) {
+  .pit {
+    height: auto;
+  }
+
+  .pit__pin {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .pit__track {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 72px;
+    width: auto;
+    height: auto;
+    padding: var(--section-y) max(var(--gutter), env(safe-area-inset-right, 0px)) 72px max(var(--gutter), env(safe-area-inset-left, 0px));
+    animation: none !important;
+    transform: none;
+  }
+
+  .pit__head {
+    width: auto;
+    padding-right: 0;
+  }
+
+  .pit__hint,
+  .pit__ruler {
+    display: none;
+  }
+
+  .pstep {
+    width: auto;
+    max-width: none;
+    margin-right: 0;
+    padding-block: 15vw 0;
+  }
+
+  .pstep__mark {
+    left: -1vw;
+    top: 0;
+    transform: none;
+  }
+
+  html.js .pstep .photo__frame > img {
+    transform: none;
+  }
 }
 
 @media (max-width: 860px) {
-  .pit__stage {
+  .pit__title {
+    font-size: clamp(2.1rem, 10.4vw, 5rem);
+  }
+
+  .pstep {
     grid-template-columns: minmax(0, 1fr);
   }
 
-}
-
-/* On a phone the radio sits under the picture instead of over it. */
-@media (max-width: 640px) {
-  .pit__radio {
-    position: static;
-    min-width: 0;
-    border-radius: 0;
-    backdrop-filter: none;
-    box-shadow: none;
-    background: var(--graphite);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pit__line,
-  .pit__wheel {
-    transition: none;
+  .pstep__mark {
+    font-size: 30vw;
   }
 
-  .pit__wheel[data-state='off'],
-  .pit__radio[data-live='true'] .pit__wave b,
-  .pitbox__gun[data-state='off']::before {
-    animation: none;
+  .pstep__copy {
+    padding-bottom: 0;
   }
 }

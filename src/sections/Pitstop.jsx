@@ -1,33 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Credit } from '../components/Photo';
-import PitBox from './PitBox';
-import { TEAMS } from '../data/teams';
+import { useEffect } from 'react';
+import Photo, { Credit } from '../components/Photo';
 import SplitText from '../components/SplitText';
-import useInView from '../hooks/useInView';
-import useReducedMotion from '../hooks/useReducedMotion';
-import { play, preloadSounds, setSound, useSound } from '../lib/sound';
+import { STEPS } from '../data/pitstop';
 import { soundCreditFor } from '../data/credits';
+import useProgress from '../hooks/useProgress';
+import useInView from '../hooks/useInView';
+import { isSoundOn, play, preloadSounds } from '../lib/sound';
 import './Pitstop.css';
 
-/**
- * Moments in the pit stop sound, in seconds from its start
- * (scripts/prepare-pitstop.py builds it and prints these):
- * the call, the reply, the car stopping, the wheel guns taking the wheels off
- * and doing the new ones up, the jacks dropping, and the release.
- */
-export const PIT_CUES = { box: 0.22, copy: 1.52, stop: 2.6, off: 2.66, on: 3.62, done: 4.12, down: 4.42, go: 4.9, end: 7.9 };
+// One step's sound at a time: the next one takes over from the last.
+let current = null;
+function playStep(name) {
+  if (current) current.stop(0.4);
+  current = play(name, { volume: 0.95 });
+}
 
-const STOP_TIME = PIT_CUES.go - PIT_CUES.stop;
-const PHASES = ['idle', 'box', 'copy', 'stop', 'off', 'on', 'done', 'down', 'go'];
-/** The four corners finish a few hundredths apart, as they do. */
-const WHEELS = [
-  ['fl', 'Front left', 0.02],
-  ['fr', 'Front right', 0.09],
-  ['rl', 'Rear left', 0],
-  ['rr', 'Rear right', 0.13],
-];
-
-function SoundLine({ name, label }) {
+function SoundCredit({ name, label }) {
   const c = soundCreditFor(name);
   if (!c) return null;
   return (
@@ -44,189 +32,100 @@ function SoundLine({ name, label }) {
   );
 }
 
+function Step({ step, index, near }) {
+  const [ref, inView] = useInView({ margin: '0px -18% 0px -18%', threshold: 0.2 });
+
+  // With sound on, the step's sound plays once as its photo arrives.
+  useEffect(() => {
+    if (inView && step.sound && isSoundOn()) playStep(step.sound);
+  }, [inView, step.sound]);
+
+  return (
+    <article className="pstep" ref={ref} data-inview={inView ? 'true' : 'false'} style={{ '--i': index }}>
+      <span className="pstep__mark t-num" aria-hidden="true">
+        {step.mark}
+      </span>
+      <div className="pstep__photo">
+        <Photo id={step.photo} alt={step.caption} ratio="16 / 10" className="wipe" eager={near} />
+        <p className="pstep__credits">
+          <Credit id={step.photo} />
+          {(step.credits || []).map(([name, label]) => (
+            <SoundCredit key={name} name={name} label={label} />
+          ))}
+        </p>
+      </div>
+      <div className="pstep__copy">
+        <p className="pstep__label rise" style={{ '--delay': '120ms' }}>
+          <span className="t-num">{String(index + 1).padStart(2, '0')}</span> {step.label}
+        </p>
+        <h3 className="pstep__title">
+          <SplitText text={step.title} styleName="rise" delay={180} />
+        </h3>
+        <p className="pstep__body rise" style={{ '--delay': '320ms' }}>
+          {step.body}
+        </p>
+        <ul className="pstep__facts rise" style={{ '--delay': '420ms' }}>
+          {step.fact.map((f) => (
+            <li key={f}>{f}</li>
+          ))}
+        </ul>
+      </div>
+    </article>
+  );
+}
+
 /**
- * The pit stop. Identity: two words on the radio, then two seconds of work.
- * As the section arrives the engineer calls the car in, the driver answers,
- * a 2026 car brakes into its box (PitBox), the wheel guns go, the jacks drop
- * and the light goes green. A stopwatch runs from the car stopping to the
- * release. With sound on, the guns and the car leaving are real recordings
- * (see scripts/prepare-pitstop.py); the radio voices are real people too,
- * put through a radio.
+ * The pit stop. Identity: the same sideways journey as the history section,
+ * through the five steps of a stop, one photograph each, with the figure that
+ * defines each step painted behind it. With sound on, the radio call, the
+ * wheel guns and the car leaving play as their steps arrive. On narrow
+ * screens it becomes an ordinary vertical list.
  */
 export default function Pitstop() {
-  const reduce = useReducedMotion();
-  const soundOn = useSound();
-  const [phase, setPhase] = useState(reduce ? 'go' : 'idle');
-  const [stop, setStop] = useState({ n: 0, team: 0 });
-  const [ref, inView] = useInView({ threshold: 0.5 });
+  const ref = useProgress('contain');
+  const [headRef, headIn] = useInView();
   const [nearRef, near] = useInView({ margin: '100% 0px 100% 0px', threshold: 0 });
-  const clock = useRef(null);
-  const raf = useRef(0);
-  const audio = useRef(null);
-  const ran = useRef(false);
-
-  const halt = useCallback(() => {
-    window.cancelAnimationFrame(raf.current);
-  }, []);
-
-  const showClock = (t) => {
-    if (clock.current) clock.current.textContent = Math.max(0, Math.min(STOP_TIME, t)).toFixed(2);
-  };
-
-  const run = useCallback((next = false) => {
-    halt();
-    // Each call from the button brings the next team's car in.
-    setStop((st) => ({ n: st.n + 1, team: next ? (st.team + 1) % TEAMS.length : st.team }));
-    if (audio.current) audio.current.stop(0.08);
-    // `sync`: if the sound takes a moment to load it joins part-way, still in step with the picture.
-    audio.current = play('pitstop', { sync: true });
-    const t0 = performance.now();
-    setPhase('idle');
-    showClock(0);
-    // One clock for the picture: each frame reads the time since the call and
-    // shows the phase it has reached, so the phases, the stopwatch and the car
-    // (a GSAP timeline started at the same moment) cannot drift apart.
-    let shown = 'idle';
-    const tick = () => {
-      const t = (performance.now() - t0) / 1000;
-      showClock(t - PIT_CUES.stop);
-      const now = PHASES.reduce((p, q) => (q !== 'idle' && t >= PIT_CUES[q] ? q : p), 'idle');
-      if (now !== shown) {
-        shown = now;
-        setPhase(now);
-      }
-      if (t < PIT_CUES.go + 0.1) raf.current = window.requestAnimationFrame(tick);
-    };
-    raf.current = window.requestAnimationFrame(tick);
-  }, [halt]);
-
-  // Fetch the sound a screen early; call the car in the first time the section is on screen.
   useEffect(() => {
-    if (near) preloadSounds(['pitstop']);
+    if (near) preloadSounds(STEPS.filter((s) => s.sound).map((s) => s.sound));
   }, [near]);
-  useEffect(() => {
-    if (!inView || ran.current || reduce) return;
-    ran.current = true;
-    run();
-  }, [inView, reduce, run]);
-  useEffect(() => {
-    if (reduce) showClock(STOP_TIME);
-  }, [reduce]);
-  useEffect(
-    () => () => {
-      halt();
-      if (audio.current) audio.current.stop(0.1);
-    },
-    [halt]
-  );
-
-  const again = () => {
-    // The button says so: with sound off, it turns sound on for the replay.
-    if (!soundOn) setSound(true);
-    run(true);
-  };
-
-  const at = PHASES.indexOf(phase);
-  const past = (p) => at >= PHASES.indexOf(p);
-  const inBox = past('stop');
-  const wheel = () => (past('done') ? 'on' : past('off') ? 'off' : 'wait');
-
   return (
     <section
       id="pitstop"
-      className="pit"
+      className="pit p-drive"
       ref={(el) => {
         ref.current = el;
         nearRef.current = el;
       }}
-      data-phase={phase}
+      data-timeline="contain"
       aria-labelledby="pit-title"
     >
-      <div className="pit__inner wrap">
-        <header className="pit__head" data-inview={inView || ran.current ? 'true' : 'false'}>
-          <p className="pit__kicker">Pit stop</p>
-          <h2 id="pit-title" className="pit__title t-display" data-skew="">
-            <SplitText text="Box, box" styleName="rise" />
-          </h2>
-          <p className="pit__lead rise" style={{ '--delay': '260ms' }}>
-            Two words on the radio, and a crew of about twenty has the car on four new tyres and back on its way in a little over two seconds.
-          </p>
-        </header>
-
-        <div className="pit__stage">
-          <div className="pit__frame">
-            <div className="pit__shot">
-              <PitBox team={TEAMS[stop.team]} phase={phase} run={stop.n} cues={PIT_CUES} reduce={reduce} />
-
-              <div className="pit__hud" aria-hidden="true">
-                <p className="pit__clock">
-                  <b className="t-num" ref={clock}>
-                    0.00
-                  </b>
-                  <span>s stationary</span>
-                </p>
-                <div className="pit__car">
-                  {WHEELS.map(([id, name, delay]) => (
-                    <i key={id} className={`pit__wheel pit__wheel--${id}`} data-state={wheel()} style={{ '--d': `${delay}s` }} title={name} />
-                  ))}
-                  <i className="pit__body" />
-                  <i className="pit__jack pit__jack--front" data-up={inBox && !past('down') ? 'true' : 'false'} />
-                  <i className="pit__jack pit__jack--rear" data-up={inBox && !past('down') ? 'true' : 'false'} />
-                </div>
-                <p className="pit__light" data-go={past('go') ? 'true' : 'false'}>
-                  <i />
-                  {past('go') ? 'Go' : inBox ? 'Hold' : 'Pit lane'}
-                </p>
-              </div>
-            </div>
-
-            <div className="pit__radio" data-live={phase === 'box' || phase === 'copy' ? 'true' : 'false'} aria-live="polite">
-              <p className="pit__radio-head">
-                <i className="pit__radio-dot" aria-hidden="true" />
-                Team radio
-                <span className="pit__wave" aria-hidden="true">
-                  {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-                    <b key={i} style={{ '--i': i }} />
-                  ))}
-                </span>
-              </p>
-              <p className="pit__line" data-on={past('box') ? 'true' : 'false'}>
-                <span>Engineer</span> Box, box.
-              </p>
-              <p className="pit__line" data-on={past('copy') ? 'true' : 'false'}>
-                <span>Driver</span> Copy.
-              </p>
-            </div>
-          </div>
-
-          <div className="pit__side">
-            <dl className="pit__facts">
-              <div>
-                <dt>On each wheel</dt>
-                <dd>Three people: one on the wheel gun, one pulling the old wheel off, one putting the new one on.</dd>
-              </div>
-              <div>
-                <dt>Around them</dt>
-                <dd>A jack at each end, two people steadying the car, and one watching for traffic before giving the release.</dd>
-              </div>
-              <div>
-                <dt>The clock</dt>
-                <dd>Runs from the car stopping to the release. The best crews are done in about two seconds.</dd>
-              </div>
-            </dl>
-            <button type="button" className="pit__again" onClick={again}>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" />
-              </svg>
-              {soundOn ? 'Box, box again' : 'Box, box again, with sound'}
-            </button>
-            <p className="pit__credits">
-              <Credit id={`${TEAMS[stop.team].id}-a`} />
-              <SoundLine name="pitstop" label="Wheel guns" />
-              <SoundLine name="pit-engineer" label="Engineer" />
-              <SoundLine name="pit-driver" label="Driver" />
-              <SoundLine name="start" label="Car leaving" />
+      <div className="pit__pin">
+        <div className="pit__track scrub">
+          <header className="pit__head" ref={headRef} data-inview={headIn ? 'true' : 'false'}>
+            <p className="pit__kicker rise">Pit stop</p>
+            <h2 id="pit-title" className="pit__title t-display" data-skew="">
+              <SplitText text="Box, box" styleName="rise" />
+            </h2>
+            <p className="t-lead rise" style={{ '--delay': '400ms' }}>
+              Two words on the radio, and about twenty people have the car on four new tyres and back on its way in a little over two seconds. This is how.
             </p>
+            <p className="pit__hint rise" style={{ '--delay': '520ms' }}>
+              Keep scrolling. The car is coming in.
+            </p>
+          </header>
+          {STEPS.map((step, i) => (
+            <Step key={step.label} step={step} index={i} near={near} />
+          ))}
+        </div>
+
+        <div className="pit__ruler" aria-hidden="true">
+          <div className="pit__ticks">
+            {STEPS.map((step) => (
+              <span key={step.label}>{step.label}</span>
+            ))}
+          </div>
+          <div className="pit__bar">
+            <i className="scrub" />
           </div>
         </div>
       </div>

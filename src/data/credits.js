@@ -10,6 +10,8 @@
  */
 const BY_SA_4 = { name: 'CC BY-SA 4.0', url: 'https://creativecommons.org/licenses/by-sa/4.0/' };
 const BY_SA_2 = { name: 'CC BY-SA 2.0', url: 'https://creativecommons.org/licenses/by-sa/2.0/' };
+const BY_2 = { name: 'CC BY 2.0', url: 'https://creativecommons.org/licenses/by/2.0/' };
+const PD = { name: 'Public domain', url: 'https://creativecommons.org/publicdomain/mark/1.0/' };
 
 const page = (file) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file.replace(/ /g, '_')).replace(/%2C/g, ',')}`;
 
@@ -34,6 +36,11 @@ const ARCHIVE = [
   ['eras/1988', 'McLaren MP4-4 at Goodwood 2014 003.jpg', 'Nic Redhead', BY_SA_2, 'McLaren MP4/4'],
   ['eras/2004', 'Ferrari F2004 (8925316574).jpg', 'emperornie', BY_SA_2, 'Ferrari F2004'],
   ['eras/2014', 'Lewis Hamilton 2014 China Race.jpg', 'emperornie', BY_SA_2, 'Mercedes F1 W05 Hybrid'],
+  ['pit/crew-waiting', 'Haas F1 Team 2017 United States GP (37946707226).jpg', 'Curt Smith', BY_2, 'Haas pit crew, 2017 United States GP'],
+  ['pit/astonmartin-2021', 'Aston Martin pit USGP 2021.jpg', 'Declan M Martin', PD, 'Aston Martin AMR21 in its pit box, 2021 United States GP'],
+  ['pit/redbull-2015', 'Daniil Kvyat-Red Bull-2015 (5).JPG', 'Alberto-g-rovi', BY_SA_4, 'Red Bull practice pit stop, Barcelona testing 2015'],
+  ['pit/wheel-gun', 'Formula One Wheel Gun.jpg', 'Rich Jones', BY_2, 'A Formula One wheel gun'],
+  ['pit/ferrari-2017', 'Kimi Raikkonen 2017 United States GP (37946719176).jpg', 'Curt Smith', BY_2, 'Ferrari pit crew, 2017 United States GP'],
 ];
 
 export const CREDITS = {
@@ -68,7 +75,8 @@ export const SOUND_CREDITS = [
   ['era-2004', 'Red Bull-Cosworth RB1 (2005).ogg', 'Red Bull RB1 (2005, Cosworth V10), driven by Mark Webber', 'history, 2004'],
   ['era-2014', 'Formula 1 Turkish GP 2021.ogg', 'Turbo-hybrid V6 cars, 2021 Turkish Grand Prix', 'history, 2014', 'SAİT71', BY_SA_4],
   ['era-2026', 'Formula 1 Turkish GP 2021 - 2.ogg', 'Turbo-hybrid V6 cars, 2021 Turkish Grand Prix (second video)', 'history, 2026', 'SAİT71', BY_SA_4],
-  ['pitstop', 'Red Bull Racing Pit Stop Practice.webm', 'Red Bull Racing pit stop practice, Mexico City 2015 (wheel guns)', 'the pit stop', 'ProtoplasmaKid', BY_SA_4],
+  ['pit-guns', 'Red Bull Racing Pit Stop Practice.webm', 'Red Bull Racing pit stop practice, Mexico City 2015 (wheel guns)', 'the pit stop', 'ProtoplasmaKid', BY_SA_4],
+  ['pit-release', '2021 Russian Grand Prix - start for warm-up.webm', 'Turbo-hybrid V6 pulling away, 2021 Russian Grand Prix', 'the pit stop', 'rubin16', BY_SA_4],
   ['pit-engineer', 'LL-Q1860 (eng)-Vealhurl-box.wav', '"Box", spoken (the engineer, through a radio)', 'the pit stop', 'Vealhurl', BY_SA_4],
   ['pit-driver', 'LL-Q1860 (eng)-Grendelkhan-copy.wav', '"Copy", spoken (the driver, through a radio)', 'the pit stop', 'Grendelkhan', CC0],
 ].map(([key, file, car, where, author = 'Edvvc', licence = BY_SA_3]) => ({ key, file, car, where, author, licence, url: page(file) }));

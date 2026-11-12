@@ -1,4 +1,11 @@
-"""Build the pit stop sound (public/sounds/pitstop.mp3) from real recordings.
+"""Build the pit stop sounds from real recordings.
+
+One stop is put together on a single timeline, then cut into the three
+clips the pit stop section plays as its steps arrive:
+  public/sounds/pit-radio.mp3    the call and the reply
+  public/sounds/pit-guns.mp3     the wheel guns, off and on
+  public/sounds/pit-release.mp3  the car leaving
+
 
   0.0 s   team radio: the engineer calls "Box, box", the driver answers "Copy"
           (two real people, recorded for Lingua Libre, put through a radio:
@@ -8,7 +15,7 @@
           over that recording's own pit-lane sound
   4.9 s   the release: a turbo-hybrid V6 pulling away (2021 Russian GP grid)
 
-Prints the cue times that src/sections/Pitstop.jsx uses (PIT_CUES).
+Prints the cue times of the whole stop.
 
 usage: python scripts/prepare-pitstop.py <dir with the originals> [public/sounds]
   The originals keep their Commons names, with spaces or underscores (a video
@@ -208,13 +215,16 @@ def main():
     wav = out / 'pitstop.tmp.wav'
     subprocess.run([FFMPEG, '-v', 'error', '-y', '-f', 'f64le', '-ar', str(SR), '-ac', '1', '-i', '-',
                     '-af', 'loudnorm=I=-17:TP=-1.5:LRA=11', '-ar', str(SR), str(wav)], input=y.tobytes(), check=True)
-    dst = out / 'pitstop.mp3'
-    subprocess.run([FFMPEG, '-v', 'error', '-y', '-i', str(wav), '-ac', '2', '-c:a', 'libmp3lame', '-b:a', '128k', str(dst)], check=True)
+    clips = {'pit-radio': (0.0, 2.35), 'pit-guns': (STOP - 0.1, done + 0.35), 'pit-release': (go - 0.1, total)}
+    for name, (a, b) in clips.items():
+        dst = out / f'{name}.mp3'
+        subprocess.run([FFMPEG, '-v', 'error', '-y', '-ss', f'{a:.3f}', '-to', f'{b:.3f}', '-i', str(wav), '-af',
+                        f'afade=t=in:d=0.02,afade=t=out:st={b - a - 0.12:.3f}:d=0.12', '-ac', '2', '-c:a', 'libmp3lame', '-b:a', '128k', str(dst)], check=True)
+        print(f'{dst}: {a:.2f}-{b:.2f} s, {dst.stat().st_size / 1024:.0f} KB')
     wav.unlink()
     cues = {'box': 0.22, 'copy': 1.52, 'stop': STOP, 'off': GUNS_OFF, 'on': GUNS_ON, 'done': round(done, 2),
             'down': round(done + DROP, 2), 'go': round(go, 2), 'end': round(total, 2)}
-    print(f'{dst}: {dst.stat().st_size / 1024:.0f} KB')
-    print('PIT_CUES =', json.dumps(cues))
+    print('cues =', json.dumps(cues))
 
 
 main()
