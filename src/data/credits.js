@@ -58,14 +58,14 @@ export const CREDITS = {
  */
 const BY_SA_3 = { name: 'CC BY-SA 3.0', url: 'https://creativecommons.org/licenses/by-sa/3.0/' };
 export const SOUND_CREDITS = [
-  ['start', 'Red Bull-Renault RB5 (2009).ogg', 'Red Bull RB5 (2009), driven by Adrian Newey', 'the start lights'],
+  ['start', '2021 Russian Grand Prix - start for warm-up.webm', 'Turbo-hybrid V6 grid leaving for the formation lap, 2021 Russian Grand Prix', 'the start lights', 'rubin16', BY_SA_4],
   ['launch', 'Ferrari F60 (2009).ogg', 'Ferrari F60 (2009)', 'the race start'],
   ['era-1950', 'Mercedes-Benz W196 (1954).ogg', 'Mercedes-Benz W196 (1954), driven by Stirling Moss', 'history, 1950'],
   ['era-1978', 'Lotus-Cosworth 79 (1978).ogg', 'Lotus 79 (1978)', 'history, 1978'],
   ['era-1988', 'McLaren-Honda MP4 4 (1988) driven by Bruno Senna.ogg', 'McLaren MP4/4 (1988), driven by Bruno Senna', 'history, 1988'],
   ['era-2004', 'Red Bull-Cosworth RB1 (2005).ogg', 'Red Bull RB1 (2005, Cosworth V10), driven by Mark Webber', 'history, 2004'],
   ['era-2014', 'Formula 1 Turkish GP 2021.ogg', 'Turbo-hybrid V6 cars, 2021 Turkish Grand Prix', 'history, 2014', 'SAİT71', BY_SA_4],
-  ['era-2026', '2021 Russian Grand Prix - start for warm-up.webm', 'Turbo-hybrid V6 grid leaving for the formation lap, 2021 Russian Grand Prix', 'history, 2026', 'rubin16', BY_SA_4],
+  ['era-2026', 'Formula 1 Turkish GP 2021 - 2.ogg', 'Turbo-hybrid V6 cars, 2021 Turkish Grand Prix (second video)', 'history, 2026', 'SAİT71', BY_SA_4],
 ].map(([key, file, car, where, author = 'Edvvc', licence = BY_SA_3]) => ({ key, file, car, where, author, licence, url: page(file) }));
 
 /** Sound credits grouped by author, for the credits list. */

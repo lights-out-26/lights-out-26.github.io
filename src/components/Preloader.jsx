@@ -5,10 +5,10 @@ import './Preloader.css';
 
 const LIGHTS = [0, 1, 2, 3, 4];
 const LIGHTS_OUT = 2450; // ms: the last lamp is on at 1.95 s, all five go out at 2.45 s
-/** In the start recording (scripts/sounds.json), the moment the lights should go out: revs held, the clutch about to drop. */
-const START_CUE = 6.5;
-/** The idle at the start of that recording is far quieter than the revs: lift it, back to level as the revs come up (3.2 s in). */
-const START_SHAPE = [[0, 4], [3.1, 4], [3.9, 1]];
+/** In the start recording (scripts/sounds.json), the moment the grid pulls away: the lights go out here. */
+const START_CUE = 6.95;
+/** The grid a little under the beeps while they run, then up as the cars pull away. */
+const START_SHAPE = [[0, 0.8], [6.8, 0.8], [7.1, 1.3], [9.5, 1.15]];
 
 /**
  * The start with sound runs at the real pace: a red light every second, then
@@ -27,9 +27,8 @@ const realStart = () => {
  *
  * "Start with sound" turns sound on and runs the lights again from the first
  * lamp at the real pace, with the start signal: a beep as each red light comes
- * on, over a real F1 car on the line (a Red Bull RB5, recorded at Goodwood):
- * idling as the first light comes on, the revs coming up and held through the
- * lights, the clutch dropping as they go out and the car pulling away.
+ * on, over a real grid of turbo-hybrid V6 cars (the 2021 Russian Grand Prix):
+ * idling under the lights and pulling away as they go out.
  */
 export default function Preloader({ onDone }) {
   const [phase, setPhase] = useState('lights'); // lights -> out -> gone
