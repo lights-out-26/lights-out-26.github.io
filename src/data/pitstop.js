@@ -1,7 +1,8 @@
 /**
  * The pit stop in five steps, each told through one photograph, like the
  * history section. `mark` is the figure painted behind the step: something
- * true about it, not a number for its own sake. `photo` points at
+ * true about it, not a number for its own sake. `kind` picks the step's own
+ * graphic (radio, speed sign, crew plan, wheel, release light). `photo` points at
  * public/photos/pit/<photo>.webp; `sound` is the clip that plays as the step
  * arrives (scripts/prepare-pitstop.py) and `credits` the sound credits.
  *
@@ -11,6 +12,7 @@
 export const STEPS = [
   {
     mark: 'Box',
+    kind: 'call',
     label: 'The call',
     title: 'Two words on the radio',
     photo: 'pit/crew-waiting',
@@ -25,6 +27,7 @@ export const STEPS = [
   },
   {
     mark: '80',
+    kind: 'lane',
     label: 'Pit lane',
     title: 'On the limiter',
     photo: 'pit/astonmartin-2021',
@@ -34,6 +37,7 @@ export const STEPS = [
   },
   {
     mark: '20',
+    kind: 'crew',
     label: 'The crew',
     title: 'Twenty people, one car',
     photo: 'pit/redbull-2015',
@@ -45,6 +49,7 @@ export const STEPS = [
   },
   {
     mark: '1',
+    kind: 'gun',
     label: 'The wheel gun',
     title: 'One nut a wheel',
     photo: 'pit/wheel-gun',
@@ -54,6 +59,7 @@ export const STEPS = [
   },
   {
     mark: '2.0',
+    kind: 'release',
     label: 'The release',
     title: 'Green light',
     photo: 'pit/ferrari-2017',

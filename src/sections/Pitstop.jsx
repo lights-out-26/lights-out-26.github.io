@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import Photo, { Credit } from '../components/Photo';
 import SplitText from '../components/SplitText';
+import PitDeco from './PitDeco';
 import { STEPS } from '../data/pitstop';
 import { soundCreditFor } from '../data/credits';
 import useProgress from '../hooks/useProgress';
@@ -41,12 +42,15 @@ function Step({ step, index, near }) {
   }, [inView, step.sound]);
 
   return (
-    <article className="pstep" ref={ref} data-inview={inView ? 'true' : 'false'} style={{ '--i': index }}>
+    <article className="pstep" ref={ref} data-kind={step.kind} data-inview={inView ? 'true' : 'false'} style={{ '--i': index }}>
       <span className="pstep__mark t-num" aria-hidden="true">
         {step.mark}
       </span>
       <div className="pstep__photo">
         <Photo id={step.photo} alt={step.caption} ratio="16 / 10" className="wipe" eager={near} />
+        {/* Painted pit box corners and the step's own graphic, laid over the photo. */}
+        <i className="pstep__corners" aria-hidden="true" />
+        <PitDeco kind={step.kind} />
         <p className="pstep__credits">
           <Credit id={step.photo} />
           {(step.credits || []).map(([name, label]) => (
@@ -56,7 +60,7 @@ function Step({ step, index, near }) {
       </div>
       <div className="pstep__copy">
         <p className="pstep__label rise" style={{ '--delay': '120ms' }}>
-          <span className="t-num">{String(index + 1).padStart(2, '0')}</span> {step.label}
+          <span className="pstep__box t-num">{String(index + 1).padStart(2, '0')}</span> {step.label}
         </p>
         <h3 className="pstep__title">
           <SplitText text={step.title} styleName="rise" delay={180} />
@@ -100,9 +104,20 @@ export default function Pitstop() {
       aria-labelledby="pit-title"
     >
       <div className="pit__pin">
+        {/* The pit lane behind it all: the pit wall's hazard stripe above, painted lines below. */}
+        <div className="pit__scene" aria-hidden="true">
+          <i className="pit__wall" />
+          <i className="pit__lane" />
+          <i className="pit__glow" />
+        </div>
         <div className="pit__track scrub">
           <header className="pit__head" ref={headRef} data-inview={headIn ? 'true' : 'false'}>
-            <p className="pit__kicker rise">Pit stop</p>
+            <span className="pit__tyre" aria-hidden="true">
+              <i />
+            </span>
+            <p className="pit__kicker rise">
+              <span className="pit__tag">Pit lane</span> Pit stop
+            </p>
             <h2 id="pit-title" className="pit__title t-display" data-skew="">
               <SplitText text="Box, box" styleName="rise" />
             </h2>
@@ -120,13 +135,17 @@ export default function Pitstop() {
 
         <div className="pit__ruler" aria-hidden="true">
           <div className="pit__ticks">
-            {STEPS.map((step) => (
-              <span key={step.label}>{step.label}</span>
+            {STEPS.map((step, i) => (
+              <span key={step.label}>
+                <b className="t-num">{String(i + 1).padStart(2, '0')}</b>
+                {step.label}
+              </span>
             ))}
           </div>
           <div className="pit__bar">
             <i className="scrub" />
           </div>
+          <i className="pit__marker" />
         </div>
       </div>
     </section>
