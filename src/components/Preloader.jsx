@@ -23,9 +23,9 @@ const realStart = () => {
  *
  * "Start with sound" turns sound on and runs the lights again from the first
  * lamp at the real pace, with the start signal: a beep as each red light comes
- * on. When the last beep has gone, the engine comes up to launch revs through
- * the hold; the clutch drops as the lights go out, and the sound carries on
- * into the home screen with its first car (see startGrid).
+ * on, and an engine that fires up with the first light and climbs a step of
+ * revs with each one, holds them through the hold, and drives away as the
+ * lights go out (see startGrid).
  */
 export default function Preloader({ onDone }) {
   const [phase, setPhase] = useState('lights'); // lights -> out -> gone
@@ -40,7 +40,7 @@ export default function Preloader({ onDone }) {
     const s = realStart();
     const lamps = LIGHTS.map((i) => s.first + i * s.step);
     signal.current = startBeeps(lamps);
-    grid.current = startGrid({ revAt: lamps[4] + 0.3 });
+    grid.current = startGrid({ lamps });
     setStart(s);
     setRun((n) => n + 1);
   };

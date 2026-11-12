@@ -290,19 +290,20 @@ export function engine({ volume = 0.5, manual = false } = {}) {
 }
 
 /**
- * The grid, after the start signal. Once the fifth beep has gone, the engine
- * is brought up to launch revs and held there, flaring, through the hold. As
- * the lights go out the clutch drops; then, in step with the first car on the
- * home screen (which arrives from the right, braking hard, and holds station),
- * the note sweeps in from the right, lifts and crackles through three
- * downshifts, settles and fades.
+ * The grid through the start. The engine fires up with the first red light
+ * and the driver brings the revs up a step with each light that follows, then
+ * holds them at launch revs, flaring, through the hold. As the lights go out
+ * the clutch drops and the car drives away: flat out through four upshifts,
+ * the note thinning, dropping a touch in pitch and drifting off to the left
+ * as it pulls away into the distance.
  *
- * `revAt` is when the revs come up, in seconds from now (scheduled on the
- * audio clock, like the beeps). The clutch drops when go() is called: call it
- * as the lights go out on screen, so sound and picture move together even if
- * the page is busy. Returns a handle: go(), stop(fade); or null when sound is off.
+ * `lamps` are the times the five lights come on, in seconds from now
+ * (scheduled on the audio clock, like the beeps). The clutch drops when go()
+ * is called: call it as the lights go out on screen, so sound and picture move
+ * together even if the page is busy. Returns a handle: go(), stop(fade); or
+ * null when sound is off.
  */
-export function startGrid({ revAt, volume = 0.34 }) {
+export function startGrid({ lamps, volume = 0.34 }) {
   const e = engine({ volume, manual: true });
   if (!e) return null;
   const c = ctx;
@@ -326,65 +327,77 @@ export function startGrid({ revAt, volume = 0.34 }) {
     });
   };
 
-  // From the clutch drop at L to the fade on the home screen.
+  // From the clutch drop at L: away up the road.
   const launch = (L) => {
     const { rpm, load, tone, pan, gain } = params();
     const v = e.volume;
-    // Clutch drop: the revs sag as it bites, then climb flat out.
+    // Moving away, the note sounds a little lower the faster the car goes.
+    const away = (d) => 1 - 0.12 * Math.min(1, d / 3);
+    const revs = (d, r, jump) => to(rpm, L + d, r * away(d), jump);
     to(load, L, 1, true);
-    to(tone, L, 7000, true);
-    to(rpm, L + 0.05, 10100);
-    to(rpm, L + 0.36, 11800);
-    to(gain, L + 0.12, v * 1.25);
-    // The car on screen sweeps in from the right...
-    to(pan, L + 0.1, 0);
-    to(pan, L + 0.32, 0.6);
-    to(pan, L + 0.95, 0.12);
-    to(pan, L + 1.8, 0);
-    // ...braking: off the throttle, three downshifts, the exhaust popping.
-    to(load, L + 0.36, 1);
-    to(load, L + 0.42, 0);
-    to(tone, L + 0.5, 3200);
-    [0.42, 0.62, 0.84].forEach((d, i) => {
-      to(rpm, L + d + 0.13, 10200 - i * 500);
-      to(rpm, L + d + 0.16, 11400 - i * 400, true); // blip on the downshift
+    to(tone, L, 7500, true);
+    // Clutch drop: the revs sag as it bites, then climb flat out in first.
+    revs(0.05, 10100);
+    revs(0.5, 11800);
+    // Upshifts: each one a sudden drop (the engine cuts the ignition for it), then up again.
+    [
+      [0.52, 9300, 1.1],
+      [1.12, 9800, 1.8],
+      [1.82, 10200, 2.6],
+      [2.62, 10400, 3.6],
+    ].forEach(([d, r, next]) => {
+      revs(d, r, true);
+      revs(next, next < 3 ? 11800 : 11500);
     });
-    to(rpm, L + 1.2, 9600);
-    to(gain, L + 0.55, v * 1.15);
-    // Holding station: part throttle, then away into the background.
-    to(load, L + 1.25, 0);
-    to(load, L + 1.45, 0.35);
-    to(rpm, L + 1.6, 9400);
-    to(gain, L + 1.7, v * 0.95);
-    to(gain, L + 3.6, 0);
+    // Into the distance: quieter, duller, drifting left.
+    to(gain, L + 0.15, v * 1.75);
+    to(gain, L + 0.8, v * 1.35);
+    to(gain, L + 1.6, v * 0.75);
+    to(gain, L + 2.5, v * 0.35);
+    to(gain, L + 3.3, v * 0.12);
+    to(gain, L + 4, 0);
+    to(tone, L + 1, 5500);
+    to(tone, L + 2, 3200);
+    to(tone, L + 3.2, 1600);
+    to(pan, L + 0.3, 0);
+    to(pan, L + 3.5, -0.45);
     window.clearTimeout(endTimer);
-    endTimer = window.setTimeout(() => e.stop(0.05), (L - c.currentTime + 3.7) * 1000);
+    endTimer = window.setTimeout(() => e.stop(0.05), (L - c.currentTime + 4.1) * 1000);
   };
 
   e.ready.then(() => {
     if (e.stopped) return;
     const now = c.currentTime;
     const base = now - (performance.now() - asked) / 1000; // the audio time of the call
-    const R = Math.max(now + 0.02, base + revAt);
+    const at = lamps.map((t) => Math.max(now + 0.02, base + t));
     const { rpm, load, tone, gain } = params();
     const v = e.volume;
     to(rpm, now, 4300, true);
-    to(load, now, 0.15, true);
-    to(tone, now, 2400, true);
+    to(load, now, 0.2, true);
+    to(tone, now, 2600, true);
     to(gain, now, 0, true);
-    // Revs up: in fast, then held around launch revs with the driver flaring them.
-    to(rpm, R, 4300, true);
-    to(gain, R, 0, true);
-    to(gain, R + 0.12, v);
-    const up = 0.5;
-    to(load, R + up * 0.3, 0.8);
-    to(tone, R + up, 5200);
-    to(rpm, R + up, 10600);
-    to(gain, R + up, v * 1.05);
-    // Held there, flaring, until the lights go out (go()), for up to four seconds.
-    for (let t = R + up + 0.18, i = 0; t < R + 4; t += 0.22, i += 1) to(rpm, t, i % 2 ? 10700 : 10100);
+    // Fired up with the first light...
+    to(gain, at[0] - 0.05, 0, true);
+    to(gain, at[0] + 0.15, v * 0.7);
+    // ...and a step more revs with each light, a flare between.
+    const steps = [6000, 7400, 8600, 9600, 10500];
+    at.forEach((t, i) => {
+      const r = steps[i];
+      to(rpm, t, i ? steps[i - 1] : 4300);
+      to(load, t + 0.3, 0.45 + i * 0.09);
+      to(tone, t + 0.3, 3000 + i * 550);
+      to(gain, t + 0.3, v * (0.72 + i * 0.07));
+      to(rpm, t + 0.3, r);
+      if (i < at.length - 1) {
+        to(rpm, t + 0.55, r - 350);
+        to(rpm, t + 0.8, r + 150);
+      }
+    });
+    // Held at launch revs, flaring, until the lights go out (go()), for up to four seconds.
+    const last = at[at.length - 1];
+    for (let t = last + 0.5, i = 0; t < last + 4; t += 0.22, i += 1) to(rpm, t, i % 2 ? 10700 : 10100);
     if (gone) release();
-    else endTimer = window.setTimeout(() => e.stop(0.6), (R - now + 6) * 1000);
+    else endTimer = window.setTimeout(() => e.stop(0.6), (last - now + 6) * 1000);
   });
 
   // The clutch drops now.
