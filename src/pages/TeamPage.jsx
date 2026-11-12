@@ -18,7 +18,7 @@ import useProgress from '../hooks/useProgress';
 import { usePointerParallax } from '../hooks/usePointer';
 import useReducedMotion from '../hooks/useReducedMotion';
 import { glAvailable } from '../gl/engine';
-import { isSoundOn, play } from '../lib/sound';
+import { engine as startEngine, isSoundOn } from '../lib/sound';
 import './TeamPage.css';
 
 const RANK = Object.fromEntries(DRIVER_ORDER.map((code, i) => [code, i + 1]));
@@ -155,6 +155,20 @@ function TeamStory({ team }) {
 const TOP_SPEED = 340;
 /** Illustrative upshift points (km/h) for an eight-speed gearbox. */
 const SHIFTS = [0, 70, 112, 152, 190, 228, 264, 300];
+/** Engine revs: idle, the clutch slipping off the line, and the upshift point. */
+const RPM = { idle: 4500, launch: 8800, shift: 11800 };
+
+/**
+ * Revs for a speed: in each gear they rise with the speed up to the shift point,
+ * then drop as the next gear goes in. Off the line the clutch holds them up.
+ */
+function revsAt(kmh, load) {
+  const gear = SHIFTS.filter((g) => kmh >= g).length;
+  const top = gear < SHIFTS.length ? SHIFTS[gear] : TOP_SPEED;
+  let rpm = (kmh / top) * RPM.shift;
+  if (gear === 1) rpm = Math.max(rpm, RPM.idle + load * (RPM.launch - RPM.idle));
+  return Math.max(RPM.idle, rpm);
+}
 const SPEED_PAD = { t: 0.1, r: 0.5, b: 0.18, l: 0.05 };
 const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
 
@@ -174,16 +188,30 @@ function TeamSpeed({ team }) {
   const current = useRef(0);
   const roadX = useRef(0);
   const engine = useRef(null);
+  const throttle = useRef({ kmh: 0, at: 0, load: 0.15 });
   const gl = glAvailable();
 
-  // With sound on, a real F1 engine runs while the scene is pinned: the idle recording,
-  // pitched up and opened out as the speed rises.
+  // With sound on, an engine runs while the scene is pinned. Its revs climb through each
+  // gear and drop at every upshift, in step with the gear readout; the load comes from
+  // how hard the speed is rising (flat out), holding (part throttle) or falling (lifted).
   useEffect(() => () => engine.current && engine.current.stop(0.2), []);
 
   const readout = useCallback((p, dt) => {
     const kmh = TOP_SPEED * easeInOut(Math.max(0, Math.min(1, (p - 0.05) / 0.8)));
     const k = kmh / TOP_SPEED;
-    if (engine.current) engine.current.set({ rate: 1 + k * 1.7, volume: 0.32 + k * 0.6, cutoff: 900 + k * k * 9000 });
+    if (engine.current) {
+      const th = throttle.current;
+      const now = performance.now();
+      const step = Math.min(0.25, (now - th.at) / 1000);
+      if (step > 0) {
+        const accel = (kmh - th.kmh) / step; // km/h per second
+        const want = kmh < 0.5 && accel <= 0 ? 0.15 : accel > 3 ? Math.min(1, 0.6 + accel / 150) : accel < -3 ? 0 : 0.3;
+        th.load += (want - th.load) * Math.min(1, step * 6);
+        th.kmh = kmh;
+        th.at = now;
+      }
+      engine.current.set({ rpm: revsAt(kmh, th.load), load: th.load });
+    }
     if (kmhEl.current) kmhEl.current.textContent = String(Math.round(kmh));
     if (gearEl.current) gearEl.current.textContent = String(SHIFTS.filter((g) => kmh >= g).length);
     if (barEl.current) barEl.current.style.transform = `scaleX(${k.toFixed(4)})`;
@@ -201,7 +229,10 @@ function TeamSpeed({ team }) {
       target.current = p;
       const inside = p > 0.002 && p < 0.998;
       const running = engine.current && !engine.current.stopped;
-      if (inside && !running && isSoundOn()) engine.current = play('idle', { loop: true, filter: true, volume: 0.32 });
+      if (inside && !running && isSoundOn()) {
+        throttle.current = { kmh: 0, at: performance.now(), load: 0.15 };
+        engine.current = startEngine({ volume: 0.3 });
+      }
       else if (!inside && running) {
         engine.current.stop(0.5);
         engine.current = null;

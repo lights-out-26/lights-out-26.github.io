@@ -73,9 +73,9 @@
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
 }
 
-/* Each column switches on in turn, as the real ones do, a beat apart. */
+/* Each column switches on in turn, as the real ones do, a beat apart (a second apart on the start with sound). */
 .pre[data-phase='lights'] .pre__lamp i {
-  animation: lamp-on 0.01s linear calc(0.35s + var(--i) * 0.4s) forwards;
+  animation: lamp-on 0.01s linear calc(var(--lamp-first, 0.35s) + var(--i) * var(--lamp-step, 0.4s)) forwards;
 }
 
 @keyframes lamp-on {

@@ -1,4 +1,4 @@
-import { CREDIT_GROUPS, SOUND_CREDITS } from '../data/credits';
+import { CREDIT_GROUPS, SOUND_GROUPS } from '../data/credits';
 import { AS_OF } from '../data/season';
 import useInView from '../hooks/useInView';
 import './Footer.css';
@@ -53,27 +53,29 @@ export default function Footer() {
             Sounds
           </h2>
           <p className="footer__p">
-            Every engine you can hear is a real Formula 1 car, recorded at the Goodwood Festival of Speed and shared on Wikimedia Commons. The clips were cut, faded
-            and levelled, and the flat-out engine note is pitched to the speed; the adapted clips are shared under the same licence. Sound stays off until you turn
-            it on.
+            The engines in the history section and at the race start are real Formula 1 cars, from recordings shared on Wikimedia Commons; the clips were cut, faded
+            and levelled, and are shared under the same licences. The start-light beeps and the flat-out engine on the team pages are made in your browser as you
+            scroll. Sound stays off until you turn it on.
           </p>
-          <div className="footer__group">
-            <p className="footer__author">
-              Edvvc,{' '}
-              <a className="link" href={SOUND_CREDITS[0].licence.url} target="_blank" rel="noreferrer">
-                {SOUND_CREDITS[0].licence.name}
-              </a>
-            </p>
-            <ul>
-              {SOUND_CREDITS.map((c) => (
-                <li key={c.key}>
-                  <a className="link" href={c.url} target="_blank" rel="noreferrer">
-                    {c.car} ({c.where})
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {SOUND_GROUPS.map((g) => (
+            <div key={`${g.author}-${g.licence.name}`} className="footer__group">
+              <p className="footer__author">
+                {g.author},{' '}
+                <a className="link" href={g.licence.url} target="_blank" rel="noreferrer">
+                  {g.licence.name}
+                </a>
+              </p>
+              <ul>
+                {g.items.map((c) => (
+                  <li key={c.key}>
+                    <a className="link" href={c.url} target="_blank" rel="noreferrer">
+                      {c.car} ({c.where})
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </section>
 
         <section className="footer__about" aria-labelledby="about-title">

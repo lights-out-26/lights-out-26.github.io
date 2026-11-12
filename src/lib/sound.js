@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import engineWorklet from './engine-worklet.js?url';
 
 /**
- * Sound: real Formula 1 cars recorded at Goodwood (see scripts/sounds.json).
+ * Sound: real Formula 1 cars from Wikimedia Commons (see scripts/sounds.json),
+ * plus two sounds made here: the start-light beeps and the flat-out engine.
  *
  * Off until the viewer turns it on; the choice is remembered. Browsers only
  * let a page start audio after a click or key press, so the audio context is
@@ -111,6 +113,147 @@ function load(name) {
 export function preloadSounds(names) {
   if (!enabled || !context()) return;
   names.forEach((n) => load(n).catch(() => {}));
+}
+
+/**
+ * The start-light signal: one short electronic beep for each red light as it
+ * comes on, as on the race broadcast, and silence when they go out. The tones
+ * are made here rather than fetched, so they land exactly on the lamps.
+ * `times` are seconds from now. Returns a handle with stop(fade), or null
+ * when sound is off.
+ */
+export function startBeeps(times, { freq = 880, length = 0.26, volume = 0.42 } = {}) {
+  if (!enabled) return null;
+  const c = context();
+  if (!c) return null;
+  const asked = performance.now();
+  const bus = c.createGain();
+  bus.connect(master);
+  const oscs = [];
+  const handle = {
+    stopped: false,
+    stop(fade = 0.05) {
+      if (this.stopped) return;
+      this.stopped = true;
+      playing.delete(this);
+      const t = c.currentTime;
+      bus.gain.cancelScheduledValues(t);
+      bus.gain.setValueAtTime(bus.gain.value, t);
+      bus.gain.linearRampToValueAtTime(0, t + fade);
+      oscs.forEach((o) => {
+        try {
+          o.stop(t + fade + 0.02);
+        } catch {
+          /* already stopped */
+        }
+      });
+    },
+  };
+  playing.add(handle);
+
+  const schedule = () => {
+    if (handle.stopped || !enabled) return;
+    // If the audio took a moment to wake up, keep the beeps on the lamps' clock.
+    const late = (performance.now() - asked) / 1000;
+    const now = c.currentTime;
+    times.forEach((at) => {
+      const t = now + at - late;
+      if (t < now - 0.03) return;
+      const t0 = Math.max(now, t);
+      const env = c.createGain();
+      env.gain.setValueAtTime(0, t0);
+      env.gain.linearRampToValueAtTime(volume, t0 + 0.006);
+      env.gain.setValueAtTime(volume, t0 + length - 0.07);
+      env.gain.exponentialRampToValueAtTime(0.0001, t0 + length);
+      env.connect(bus);
+      // A plain sine with a quiet octave above it: a clean timing-system tone.
+      [
+        [freq, 1],
+        [freq * 2, 0.12],
+      ].forEach(([f, level]) => {
+        const o = c.createOscillator();
+        o.type = 'sine';
+        o.frequency.value = f;
+        const g = c.createGain();
+        g.gain.value = level;
+        o.connect(g).connect(env);
+        o.start(t0);
+        o.stop(t0 + length + 0.02);
+        oscs.push(o);
+      });
+    });
+    const last = Math.max(...times) - late + length + 0.1;
+    window.setTimeout(() => playing.delete(handle), Math.max(0, last * 1000));
+  };
+  if (c.state === 'running') schedule();
+  else c.resume().then(schedule, () => playing.delete(handle));
+  return handle;
+}
+
+let engineModule = null;
+
+/**
+ * A running engine for the flat-out scene, modelled in engine-worklet.js
+ * rather than played from a recording, so it can follow the scroll: set its
+ * revs and load (0 off the throttle, 1 flat out) as often as you like.
+ * Returns a handle: set({ rpm, load }), stop(fade), or null when sound is off.
+ */
+export function engine({ volume = 0.5 } = {}) {
+  if (!enabled) return null;
+  const c = context();
+  if (!c || !c.audioWorklet) return null;
+  if (c.state !== 'running') c.resume().catch(() => {});
+  const want = { rpm: 4500, load: 0.2 };
+  const handle = {
+    stopped: false,
+    node: null,
+    gain: null,
+    tone: null,
+    set({ rpm, load } = {}) {
+      if (rpm !== undefined) want.rpm = rpm;
+      if (load !== undefined) want.load = load;
+      if (!this.node) return;
+      const t = c.currentTime;
+      // Revs go straight in (the worklet smooths them), so an upshift arrives as a sudden drop.
+      this.node.parameters.get('rpm').setTargetAtTime(want.rpm, t, 0.006);
+      this.node.parameters.get('load').setTargetAtTime(want.load, t, 0.04);
+      // Off the throttle the note goes duller; flat out it opens right up.
+      this.tone.frequency.setTargetAtTime(1800 + want.load * 5200, t, 0.06);
+    },
+    stop(fade = 0.3) {
+      if (this.stopped) return;
+      this.stopped = true;
+      playing.delete(this);
+      if (!this.node) return;
+      const t = c.currentTime;
+      const { node, gain } = this;
+      gain.gain.cancelScheduledValues(t);
+      gain.gain.setValueAtTime(gain.gain.value, t);
+      gain.gain.linearRampToValueAtTime(0, t + fade);
+      window.setTimeout(() => node.disconnect(), (fade + 0.1) * 1000);
+    },
+  };
+  playing.add(handle);
+  if (!engineModule) engineModule = c.audioWorklet.addModule(engineWorklet);
+  engineModule
+    .then(() => {
+      if (handle.stopped || !enabled) return;
+      const node = new AudioWorkletNode(c, 'f1-engine', { outputChannelCount: [1] });
+      const tone = c.createBiquadFilter();
+      tone.type = 'lowpass';
+      tone.Q.value = 0.5;
+      const gain = c.createGain();
+      gain.gain.value = 0;
+      gain.gain.linearRampToValueAtTime(volume, c.currentTime + 0.4);
+      node.connect(tone).connect(gain).connect(master);
+      Object.assign(handle, { node, tone, gain });
+      handle.set(want);
+    })
+    .catch(() => {
+      engineModule = null;
+      playing.delete(handle);
+    });
+  return handle;
 }
 
 /**

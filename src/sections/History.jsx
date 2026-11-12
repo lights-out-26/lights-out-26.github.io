@@ -8,8 +8,11 @@ import useInView from '../hooks/useInView';
 import { isSoundOn, play, preloadSounds } from '../lib/sound';
 import './History.css';
 
-/** Eras with a recording of a car of that time (the 2014 and 2026 hybrids have none on Commons). */
-const ERA_SOUND = { 1950: 'era-1950', 1978: 'era-1978', 1988: 'era-1988', 2004: 'era-2004' };
+/**
+ * Each era's sound: a car of that time where one was recorded. The hybrid eras use
+ * 2021 race recordings of the turbo-hybrid V6, which the 2026 engines keep.
+ */
+const ERA_SOUND = { 1950: 'era-1950', 1978: 'era-1978', 1988: 'era-1988', 2004: 'era-2004', 2014: 'era-2014', 2026: 'era-2026' };
 
 // One era sound at a time: the next era's car takes over from the last.
 let current = null;
