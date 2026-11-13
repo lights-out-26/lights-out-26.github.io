@@ -5,9 +5,10 @@ import engineWorklet from './engine-worklet.js?url';
  * Sound: real Formula 1 cars from Wikimedia Commons (see scripts/sounds.json),
  * plus two sounds made here: the start-light beeps and the flat-out engine.
  *
- * Off until the viewer turns it on; the choice is remembered. Browsers only
- * let a page start audio after a click or key press, so the audio context is
- * created and resumed from those. Files are fetched only once sound is on.
+ * On unless the viewer turns it off; the choice is remembered. Browsers only
+ * let a page start audio after a click or key press (the intro's start button
+ * is the first), so the audio context is resumed from those. Nothing is
+ * fetched while sound is off.
  */
 
 const BASE = `${import.meta.env.BASE_URL}sounds/`;
@@ -22,9 +23,9 @@ const playing = new Set();
 
 function read() {
   try {
-    return typeof window !== 'undefined' && window.localStorage.getItem(KEY) === 'on';
+    return typeof window !== 'undefined' && window.localStorage.getItem(KEY) !== 'off';
   } catch {
-    return false;
+    return true;
   }
 }
 

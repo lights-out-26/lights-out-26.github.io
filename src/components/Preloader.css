@@ -73,7 +73,7 @@
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
 }
 
-/* Each column switches on in turn, as the real ones do, a beat apart (a second apart on the start with sound). */
+/* Each column switches on in turn, as the real ones do, a second apart once start is pressed. */
 .pre[data-phase='lights'] .pre__lamp i {
   animation: lamp-on 0.01s linear calc(var(--lamp-first, 0.35s) + var(--i) * var(--lamp-step, 0.4s)) forwards;
 }
@@ -101,39 +101,60 @@
   animation: pulse 1.4s ease-in-out infinite;
 }
 
-.pre__sound {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55em;
-  min-height: 44px;
-  padding: 0 1.1em 0 0.9em;
-  border-radius: 999px;
-  font-size: var(--fs-small);
-  font-weight: 700;
-  font-stretch: 90%;
+/* The start button: a red push button under the dark lights, its ring pulsing until pressed. */
+.pre__start {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(84px, 11vw, 108px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 32%, #ff5a5a, var(--signal) 52%, #8c0909);
   color: var(--white);
-  box-shadow: inset 0 0 0 1px var(--line-strong);
-  transition: background-color 0.25s linear, color 0.25s linear;
+  font-size: clamp(0.85rem, 1.3vw, 1rem);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
+  box-shadow: 0 0 0 6px #050506, 0 0 0 8px var(--line-strong), 0 12px 44px rgb(255 30 30 / 0.35), inset 0 -6px 12px rgb(0 0 0 / 0.35);
+  transition: transform 0.15s var(--ease-in-out), box-shadow 0.25s linear;
 }
 
-.pre__sound:hover,
-.pre__sound:focus-visible {
-  background: var(--white);
-  color: #000;
+.pre__start::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgb(255 30 30 / 0.6);
+  animation: start-ring 1.6s var(--ease-out, ease-out) infinite;
+  pointer-events: none;
 }
 
-.pre__sound svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
+.pre__start:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 0 6px #050506, 0 0 0 8px var(--white), 0 12px 54px rgb(255 30 30 / 0.55), inset 0 -6px 12px rgb(0 0 0 / 0.35);
 }
 
-.pre__sound svg path:first-child {
-  fill: currentColor;
-  stroke: none;
+.pre__start:active {
+  transform: scale(0.95);
+}
+
+.pre__start:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 14px;
+}
+
+@keyframes start-ring {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.45);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -146,7 +167,8 @@
     animation-delay: 0s;
   }
 
-  .pre__hint {
+  .pre__hint,
+  .pre__start::after {
     animation: none;
   }
 }

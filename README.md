@@ -19,7 +19,7 @@ Node 20 or newer. The build uses relative paths, so `dist/` can be hosted from a
 
 | Section | Animation idea |
 | --- | --- |
-| Intro | Five start lights come on in turn, go out together, and the screen splits open; "Start with sound" runs them again at the real pace, a light a second with a beep for each over a real turbo-hybrid V6 grid, which pulls away as they go out |
+| Intro | The start lights wait, dark, over a red start button; pressing it runs the start at the real pace, a light a second with a beep for each over a real turbo-hybrid V6 grid, which pulls away as the lights go out together and the screen splits open |
 | Hero | A rolling shot: a real car brakes in with its discs glowing, holds station with the wheels turning while speed lines stream past, then launches off in a blur for the next team's car |
 | History | A pinned strip that scrolls sideways through six eras, with outlined years drifting behind the photographs |
 | Race weekend | One pinned screen that steps through practice, Q1, Q2, Q3 and the race while a 22-car grid thins out and launches |
@@ -59,7 +59,7 @@ gsap.timeline()
 
 ## Sound
 
-Sound is off until the viewer turns it on, from the intro or the switch in the navigation; the choice is remembered, and no sound file is fetched while it is off. The engines at the start lights, in the history section and at the race start are real Formula 1 cars from Wikimedia Commons; the start-light beeps and the flat-out engine are made in the browser.
+Sound is on from the start; the switch in the navigation turns it off, the choice is remembered, and no sound file is fetched while it is off. Browsers only let a page play sound after a click, so the intro waits for its start button rather than running on its own. The engines at the start lights, in the history section and at the race start are real Formula 1 cars from Wikimedia Commons; the start-light beeps and the flat-out engine are made in the browser.
 
 | Where | Sound |
 | --- | --- |

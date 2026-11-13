@@ -37,7 +37,7 @@
   --alloy: #8a9099;
   --silver: #c8cdd4;
   --white: #f5f6f7;
-  --signal: #ff1e1e; /* start-light red: used for the five lights only */
+  --signal: #ff1e1e; /* start-light red: the five lights and the start button only */
 
   /* the current team; components override these three */
   --team: var(--silver);
