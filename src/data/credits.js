@@ -72,13 +72,15 @@ export const CREDITS = {
  * Sound credits. Real recordings from Wikimedia Commons (scripts/sounds.json):
  * Edvvc's at the Goodwood Festival of Speed hillclimb (CC BY-SA 3.0), and the
  * soundtracks of videos filmed at 2021 Grands Prix and a 2015 pit stop practice
- * (CC BY-SA 4.0), and two spoken words for the pit stop radio. The
- * clips were cut, faded and loudness-normalised, and the adapted clips are
- * shared under the same licences. The start-light beeps and the flat-out
- * engine are made in the browser and have no source.
+ * (CC BY-SA 4.0). The clips were cut, faded and loudness-normalised, and the
+ * adapted clips are shared under the same licences. The pit stop radio is the
+ * exception: a "Box, box" clip downloaded from Myinstants, where it was
+ * uploaded with no source or licence stated, used as it is. The start-light
+ * beeps and the flat-out engine are made in the browser and have no source.
  */
 const BY_SA_3 = { name: 'CC BY-SA 3.0', url: 'https://creativecommons.org/licenses/by-sa/3.0/' };
-const CC0 = { name: 'CC0', url: 'https://creativecommons.org/publicdomain/zero/1.0/' };
+const MYINSTANTS = 'https://www.myinstants.com/en/instant/formula-1-box-box-27468/';
+const UNKNOWN = { name: 'licence unknown', url: MYINSTANTS };
 export const SOUND_CREDITS = [
   ['start', '2021 Russian Grand Prix - start for warm-up.webm', 'Turbo-hybrid V6 grid leaving for the formation lap, 2021 Russian Grand Prix', 'the start lights', 'rubin16', BY_SA_4],
   ['launch', 'Ferrari F60 (2009).ogg', 'Ferrari F60 (2009)', 'the race start'],
@@ -90,9 +92,8 @@ export const SOUND_CREDITS = [
   ['era-2026', 'Formula 1 Turkish GP 2021 - 2.ogg', 'Turbo-hybrid V6 cars, 2021 Turkish Grand Prix (second video)', 'history, 2026', 'SAİT71', BY_SA_4],
   ['pit-guns', 'Red Bull Racing Pit Stop Practice.webm', 'Red Bull Racing pit stop practice, Mexico City 2015 (wheel guns)', 'the pit stop', 'ProtoplasmaKid', BY_SA_4],
   ['pit-release', '2021 Russian Grand Prix - start for warm-up.webm', 'Turbo-hybrid V6 pulling away, 2021 Russian Grand Prix', 'the pit stop', 'rubin16', BY_SA_4],
-  ['pit-engineer', 'LL-Q1860 (eng)-Vealhurl-box.wav', '"Box", spoken (the engineer, through a radio)', 'the pit stop', 'Vealhurl', BY_SA_4],
-  ['pit-driver', 'LL-Q1860 (eng)-Grendelkhan-copy.wav', '"Copy", spoken (the driver, through a radio)', 'the pit stop', 'Grendelkhan', CC0],
-].map(([key, file, car, where, author = 'Edvvc', licence = BY_SA_3]) => ({ key, file, car, where, author, licence, url: page(file) }));
+  ['pit-radio', 'formula 1 box box', '"Box, box" on the team radio', 'the pit stop', 'blue828 on Myinstants', UNKNOWN, MYINSTANTS],
+].map(([key, file, car, where, author = 'Edvvc', licence = BY_SA_3, url = page(file)]) => ({ key, file, car, where, author, licence, url }));
 
 /** Sound credits grouped by author, for the credits list. */
 export const SOUND_GROUPS = Object.values(

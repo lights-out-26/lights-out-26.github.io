@@ -21,10 +21,8 @@ export const STEPS = [
     body: 'The strategists on the pit wall pick the lap, weighing the tyres, the gaps to the cars around and whether a safety car is coming. Then the race engineer calls the driver in: “Box, box.” The crew is out and in place before the car arrives.',
     fact: ['Called on the team radio', 'The driver confirms'],
     sound: 'pit-radio',
-    credits: [
-      ['pit-engineer', 'Engineer'],
-      ['pit-driver', 'Driver'],
-    ],
+    volume: 0.6, // this clip is mastered louder than the others
+    credits: [['pit-radio', 'Radio']],
   },
   {
     mark: '80',

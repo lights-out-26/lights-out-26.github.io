@@ -2,7 +2,8 @@
 
 One stop is put together on a single timeline, then cut into the three
 clips the pit stop section plays as its steps arrive:
-  public/sounds/pit-radio.mp3    the call and the reply
+  (public/sounds/pit-radio.mp3, the radio call, is a downloaded clip and is
+  not written here; the call is still built so the timeline keeps its cues)
   public/sounds/pit-guns.mp3     the wheel guns, off and on
   public/sounds/pit-release.mp3  the car leaving
 
@@ -215,7 +216,7 @@ def main():
     wav = out / 'pitstop.tmp.wav'
     subprocess.run([FFMPEG, '-v', 'error', '-y', '-f', 'f64le', '-ar', str(SR), '-ac', '1', '-i', '-',
                     '-af', 'loudnorm=I=-17:TP=-1.5:LRA=11', '-ar', str(SR), str(wav)], input=y.tobytes(), check=True)
-    clips = {'pit-radio': (0.0, 2.35), 'pit-guns': (STOP - 0.1, done + 0.35), 'pit-release': (go - 0.1, total)}
+    clips = {'pit-guns': (STOP - 0.1, done + 0.35), 'pit-release': (go - 0.1, total)}
     for name, (a, b) in clips.items():
         dst = out / f'{name}.mp3'
         subprocess.run([FFMPEG, '-v', 'error', '-y', '-ss', f'{a:.3f}', '-to', f'{b:.3f}', '-i', str(wav), '-af',

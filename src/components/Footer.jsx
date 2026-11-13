@@ -54,9 +54,9 @@ export default function Footer() {
           </h2>
           <p className="footer__p">
             The engines at the start lights, in the history section and at the race start are real Formula 1 cars, and the pit stop's wheel guns come from a real
-            team's practice, all from recordings shared on Wikimedia Commons; the pit stop radio is two real people, recorded for Lingua Libre, put through a radio.
-            The clips were cut, faded and levelled, and are shared under the same licences. The start-light beeps and the flat-out engine on the team pages are made
-            in your browser. Sound stays off until you turn it on.
+            team's practice, all from recordings shared on Wikimedia Commons; those clips were cut, faded and levelled, and are shared under the same licences.
+            The pit stop radio is a clip from Myinstants, uploaded there with no source or licence stated. The start-light beeps and the flat-out engine on the team
+            pages are made in your browser. Sound is on from the start; the switch in the navigation turns it off.
           </p>
           {SOUND_GROUPS.map((g) => (
             <div key={`${g.author}-${g.licence.name}`} className="footer__group">
