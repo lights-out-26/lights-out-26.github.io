@@ -1,4 +1,4 @@
-import { CREDIT_GROUPS } from '../data/credits';
+import { CREDIT_GROUPS, SOUND_GROUPS } from '../data/credits';
 import { AS_OF } from '../data/season';
 import useInView from '../hooks/useInView';
 import './Footer.css';
@@ -24,7 +24,7 @@ export default function Footer() {
             Photographs
           </h2>
           <p className="footer__p">
-            Every photograph here comes from Wikimedia Commons under a Creative Commons licence. Each has been resized and cropped; the 2026 car photos also have depth
+            Every photograph here comes from Wikimedia Commons, under a Creative Commons licence or in the public domain. Each has been resized and cropped; the 2026 car photos also have depth
             maps estimated from them, and the side-on ones were cut out of their backgrounds and levelled. These adapted versions, depth maps included, are shared under
             the same licences as the originals.
           </p>
@@ -42,6 +42,35 @@ export default function Footer() {
                     <a className="link" href={item.url} target="_blank" rel="noreferrer">
                       {item.subject}
                       {g.items.length > 5 ? ` (${item.key.startsWith('action/') ? 'on track' : 'side'})` : ''}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          <h2 id="sounds-title" className="footer__h footer__h--sub">
+            Sounds
+          </h2>
+          <p className="footer__p">
+            The engines at the start lights, in the history section and at the race start are real Formula 1 cars, and the pit stop's wheel guns come from a real
+            team's practice, all from recordings shared on Wikimedia Commons; the pit stop radio is two real people, recorded for Lingua Libre, put through a radio.
+            The clips were cut, faded and levelled, and are shared under the same licences. The start-light beeps and the flat-out engine on the team pages are made
+            in your browser. Sound stays off until you turn it on.
+          </p>
+          {SOUND_GROUPS.map((g) => (
+            <div key={`${g.author}-${g.licence.name}`} className="footer__group">
+              <p className="footer__author">
+                {g.author},{' '}
+                <a className="link" href={g.licence.url} target="_blank" rel="noreferrer">
+                  {g.licence.name}
+                </a>
+              </p>
+              <ul>
+                {g.items.map((c) => (
+                  <li key={c.key}>
+                    <a className="link" href={c.url} target="_blank" rel="noreferrer">
+                      {c.car} ({c.where})
                     </a>
                   </li>
                 ))}

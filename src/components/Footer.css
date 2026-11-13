@@ -51,6 +51,10 @@
   letter-spacing: -0.02em;
 }
 
+.footer__h--sub {
+  margin-top: clamp(32px, 4vw, 56px);
+}
+
 .footer__p {
   max-width: 44em;
   margin-bottom: 14px;

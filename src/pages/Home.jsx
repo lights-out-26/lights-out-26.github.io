@@ -1,6 +1,7 @@
 import Hero from '../sections/Hero';
 import History from '../sections/History';
 import Weekend from '../sections/Weekend';
+import Pitstop from '../sections/Pitstop';
 import Machine from '../sections/Machine';
 import Teams from '../sections/Teams';
 import Drivers from '../sections/Drivers';
@@ -13,6 +14,7 @@ export default function Home({ booted }) {
       <Hero booted={booted} />
       <History />
       <Weekend />
+      <Pitstop />
       <Machine />
       <Teams />
       <Drivers />

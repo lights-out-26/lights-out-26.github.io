@@ -94,7 +94,14 @@
   -webkit-text-stroke: 1px var(--white);
 }
 
+.nav__end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .nav__links {
+  margin-left: auto;
   display: flex;
   gap: clamp(18px, 2.4vw, 40px);
 }
