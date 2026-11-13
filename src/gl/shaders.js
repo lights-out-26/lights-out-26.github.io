@@ -8,6 +8,9 @@
  * photo  a full photograph with a depth map: a 2.5D camera (parallax and
  *        dolly zoom), panning blur on the background only, a reveal that
  *        travels from near to far, grain and vignette.
+ * seq    a burst of photos of one car: crossfades from frame to frame with
+ *        motion blur along the way the car is moving in each (a streak
+ *        across the picture, or a zoom blur when it comes at the camera).
  *
  * Texture coordinates use a top-left origin, matching how images upload.
  */
@@ -314,4 +317,77 @@ void main() {
   fragColor = vec4(col * alpha, alpha);
 }`;
 
-export const PROGRAMS = { car: CAR, photo: PHOTO };
+export const SEQ = /* glsl */ `#version 300 es
+precision highp float;
+in vec2 vUv;
+out vec4 fragColor;
+
+uniform sampler2D uF0;      // the frames of one burst, in shooting order
+uniform sampler2D uF1;
+uniform sampler2D uF2;
+uniform sampler2D uF3;
+uniform vec2 uRes;
+uniform float uImgAspect;   // frame width / height (every frame has the same size)
+uniform vec2 uFrameTexel;   // 1 / frame size
+uniform float uTime;
+uniform int uA;             // the frame shown at uMix = 0
+uniform int uB;             // the frame shown at uMix = 1
+uniform float uMix;         // 0..1: crossfade from A to B
+uniform float uBlurA;       // motion blur on each frame, in frame widths
+uniform float uBlurB;
+uniform vec3 uMotA;         // how the car moves in each frame: xy = direction across
+uniform vec3 uMotB;         //   the picture, z = towards the camera (a zoom blur)
+uniform vec2 uCarA;         // the car's centre in each frame (uv): the push-in and
+uniform vec2 uCarB;         //   the zoom blur are centred on it
+uniform float uZoomA;       // camera push on each frame (>= 1)
+uniform float uZoomB;
+uniform vec2 uDrift;        // parallax offset from the pointer and the scroll
+uniform float uGrain;
+uniform float uVignette;
+uniform float uExposure;
+${NOISE}
+
+vec3 frameAt(int k, vec2 uv, float lod) {
+  if (k == 0) return textureLod(uF0, uv, lod).rgb;
+  if (k == 1) return textureLod(uF1, uv, lod).rgb;
+  if (k == 2) return textureLod(uF2, uv, lod).rgb;
+  return textureLod(uF3, uv, lod).rgb;
+}
+
+// One frame, pushed in about the car and smeared along the way it is moving.
+vec3 shot(int k, vec2 c, float zoom, vec3 mot, vec2 car, float amt, float lod, float j) {
+  vec2 uv = car + (0.5 + c - car) / zoom + uDrift;
+  if (amt < 0.0005) return frameAt(k, clamp(uv, vec2(0.001), vec2(0.999)), lod);
+  int n = clamp(int(amt * 420.0) + 4, 4, 22);
+  vec3 acc = vec3(0.0);
+  for (int i = 0; i < 22; i++) {
+    if (i >= n) break;
+    float t = (float(i) + j) / float(n) - 0.5;
+    vec2 o = mot.xy * vec2(1.0, uImgAspect) * t * amt + (uv - car) * mot.z * t * amt * 1.6;
+    acc += frameAt(k, clamp(uv + o, vec2(0.001), vec2(0.999)), lod + 0.25);
+  }
+  return acc / float(n);
+}
+
+void main() {
+  float va = uRes.x / uRes.y;
+  vec2 c = vUv - 0.5;
+  if (va > uImgAspect) c.y *= uImgAspect / va;
+  else c.x *= va / uImgAspect;
+
+  // Mip level from the scale the frames are drawn at (see the car shader).
+  vec2 span = vec2(1.0) / uFrameTexel * fwidth(c);
+  float lod = max(0.0, log2(max(span.x, span.y)));
+  float j = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+
+  vec3 col;
+  if (uMix < 0.002) col = shot(uA, c, uZoomA, uMotA, uCarA, uBlurA, lod, j);
+  else if (uMix > 0.998) col = shot(uB, c, uZoomB, uMotB, uCarB, uBlurB, lod, j);
+  else col = mix(shot(uA, c, uZoomA, uMotA, uCarA, uBlurA, lod, j), shot(uB, c, uZoomB, uMotB, uCarB, uBlurB, lod, j), uMix);
+
+  col *= 1.0 - uVignette * smoothstep(0.25, 0.85, length(vUv - 0.5) * 1.25);
+  col += (hash(gl_FragCoord.xy + floor(uTime * 24.0) * 13.1) - 0.5) * uGrain;
+  fragColor = vec4(max(col * uExposure, 0.0), 1.0);
+}`;
+
+export const PROGRAMS = { car: CAR, photo: PHOTO, seq: SEQ };
