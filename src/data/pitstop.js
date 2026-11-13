@@ -4,7 +4,8 @@
  * true about it, not a number for its own sake. `kind` picks the step's own
  * graphic (radio, speed sign, crew plan, wheel, release light). `photo` points at
  * public/photos/pit/<photo>.webp; `sound` is the clip that plays as the step
- * arrives (scripts/prepare-pitstop.py) and `credits` the sound credits.
+ * arrives (scripts/prepare-pitstop.py), `volume` its level (default 0.95) and
+ * `credits` the sound credits.
  *
  * No freely licensed photograph of a 2026 pit stop exists yet, so these are
  * the most recent ones that do (2015 to 2021), all from Wikimedia Commons.

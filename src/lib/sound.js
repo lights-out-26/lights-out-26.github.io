@@ -89,17 +89,27 @@ export function useSound() {
   return on;
 }
 
+function fetchBuffer(c, url, name) {
+  return fetch(url)
+    .then((res) => {
+      if (!res.ok) throw new Error(`${res.status} ${name}`);
+      return res.arrayBuffer();
+    })
+    .then((data) => new Promise((resolve, reject) => c.decodeAudioData(data, resolve, reject)));
+}
+
+/*
+ * Local overrides: in development only, a file in public/sounds/local/ (which
+ * is gitignored and removed from builds) replaces the one of the same name.
+ * Use it to try recordings you may not publish; anything missing falls back.
+ */
 function load(name) {
   if (!buffers.has(name)) {
     const c = context();
+    const own = () => fetchBuffer(c, `${BASE}${name}.mp3`, name);
     buffers.set(
       name,
-      fetch(`${BASE}${name}.mp3`)
-        .then((res) => {
-          if (!res.ok) throw new Error(`${res.status} ${name}`);
-          return res.arrayBuffer();
-        })
-        .then((data) => new Promise((resolve, reject) => c.decodeAudioData(data, resolve, reject)))
+      (import.meta.env.DEV ? fetchBuffer(c, `${BASE}local/${name}.mp3`, name).catch(own) : own())
         .catch((err) => {
           buffers.delete(name);
           throw err;

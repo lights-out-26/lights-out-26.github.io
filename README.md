@@ -70,7 +70,7 @@ Sound is off until the viewer turns it on, from the intro or the switch in the n
 
 The flat-out engine is modelled rather than recorded because it has to follow the scroll: speeding up a recording to raise its pitch also speeds up everything in it, and an idle recording played at nearly three times the speed turns into chatter.
 
-`src/lib/sound.js` plays everything with the Web Audio API (fetched on demand, kept in time with the animation even when a file arrives late, paused while the tab is hidden). The recorded clips are cut from the originals with:
+`src/lib/sound.js` plays everything with the Web Audio API (fetched on demand, kept in time with the animation even when a file arrives late, paused while the tab is hidden). To try a recording you cannot publish, put it in `public/sounds/local/` under the same name: the dev server plays it instead, the folder is gitignored and the build leaves it out. The recorded clips are cut from the originals with:
 
 ```bash
 FFMPEG=/path/to/ffmpeg python scripts/prepare-sounds.py <folder with the originals> public/sounds [name ...]

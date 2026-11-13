@@ -11,9 +11,9 @@ import './Pitstop.css';
 
 // One step's sound at a time: the next one takes over from the last.
 let current = null;
-function playStep(name) {
+function playStep(name, volume = 0.95) {
   if (current) current.stop(0.4);
-  current = play(name, { volume: 0.95 });
+  current = play(name, { volume });
 }
 
 function SoundCredit({ name, label }) {
@@ -38,8 +38,8 @@ function Step({ step, index, near }) {
 
   // With sound on, the step's sound plays once as its photo arrives.
   useEffect(() => {
-    if (inView && step.sound && isSoundOn()) playStep(step.sound);
-  }, [inView, step.sound]);
+    if (inView && step.sound && isSoundOn()) playStep(step.sound, step.volume);
+  }, [inView, step.sound, step.volume]);
 
   return (
     <article className="pstep" ref={ref} data-kind={step.kind} data-inview={inView ? 'true' : 'false'} style={{ '--i': index }}>
