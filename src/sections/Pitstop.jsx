@@ -85,6 +85,13 @@ function Step({ step, index, near }) {
  * wheel guns and the car leaving play as their steps arrive. On narrow
  * screens it becomes an ordinary vertical list.
  */
+/**
+ * Lewis Hamilton's Ferrari SF-26 seen from above, nose to the right: Ferrari's
+ * own 2026 launch image, cut out of its background, with the race number
+ * changed from 16 to 44 (see the credits).
+ */
+const TOP_CAR = `${import.meta.env.BASE_URL}photos/pit/sf26-top.webp`;
+
 export default function Pitstop() {
   const ref = useProgress('contain');
   const [headRef, headIn] = useInView();
@@ -145,7 +152,9 @@ export default function Pitstop() {
           <div className="pit__bar">
             <i className="scrub" />
           </div>
-          <i className="pit__marker" />
+          <span className="pit__marker">
+            <img className="pit__car" src={TOP_CAR} alt="" width="480" height="170" loading="lazy" decoding="async" />
+          </span>
         </div>
       </div>
     </section>

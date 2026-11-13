@@ -32,7 +32,7 @@ Node 20 or newer. The build uses relative paths, so `dist/` can be hosted from a
 
 ## How the car animation works
 
-Every car is a real photograph (see credits below); nothing is modelled or redrawn, so the liveries and sponsor marks are the real ones. Side-on photos are cut out of their background and levelled onto one shared canvas, so both axles land in the same place in every image.
+Every car is a real photograph (see credits below); nothing is modelled or redrawn, so the liveries and sponsor marks are the real ones. The one exception is the pit stop's progress marker: Lewis Hamilton's Ferrari from above. No freely licensed top-down photograph of the 2026 car exists, so it is Ferrari's own launch image (found on F1-Fansite, not freely licensed), cut out of its background with the race number changed from 16 to 44. Side-on photos are cut out of their background and levelled onto one shared canvas, so both axles land in the same place in every image.
 
 Each photo also has a **depth map**, estimated offline with Depth Anything V2 Small (`scripts/make-depth.py`). In the browser, the photo and its depth map go to a WebGL2 shader (`src/gl/`) that draws:
 

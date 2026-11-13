@@ -831,7 +831,7 @@ html.js .pstep[data-inview='true'] .photo__frame > img {
   position: absolute;
   inset: auto max(var(--gutter), env(safe-area-inset-right, 0px)) clamp(20px, 4vh, 44px) max(var(--gutter), env(safe-area-inset-left, 0px));
   display: grid;
-  gap: 10px;
+  gap: 26px; /* room for the car between the labels and the line */
 }
 
 .pit__ticks {
@@ -879,20 +879,21 @@ html.js .pstep[data-inview='true'] .photo__frame > img {
   to { transform: none; }
 }
 
-/* A small tyre rolling along the line with the scroll. */
+/* Hamilton's Ferrari, seen from above, driving down the line with the scroll. */
 .pit__marker {
   position: absolute;
-  bottom: -7px;
+  bottom: -19px;
   left: calc(var(--p, 0) * 100%);
-  width: 17px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  translate: -50% 0;
-  rotate: calc(var(--p, 0) * 2880deg);
-  background:
-    radial-gradient(circle, var(--hazard) 0 22%, transparent 24% 46%, var(--soft) 48% 58%, transparent 60%),
-    repeating-conic-gradient(#1a1b1f 0 30deg, #050506 30deg 60deg);
-  box-shadow: 0 0 0 2px #050506, 0 4px 10px rgb(0 0 0 / 0.6);
+  width: clamp(96px, 8.4vw, 124px);
+  translate: -62% 0;
+  filter: drop-shadow(0 5px 7px rgb(0 0 0 / 0.7));
+  pointer-events: none;
+}
+
+.pit__car {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* ---- narrow screens, or reduced motion: a plain vertical list ---- */

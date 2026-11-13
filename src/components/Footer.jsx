@@ -26,7 +26,8 @@ export default function Footer() {
           <p className="footer__p">
             Every photograph here comes from Wikimedia Commons, under a Creative Commons licence or in the public domain. Each has been resized and cropped; the 2026 car photos also have depth
             maps estimated from them, the side-on ones were cut out of their backgrounds and levelled, and the frames of each burst sequence were aligned on the car
-            and matched for exposure and colour. These adapted versions, depth maps included, are shared under the same licences as the originals.
+            and matched for exposure and colour. These adapted versions, depth maps included, are shared under the same licences as the originals. The one exception is
+            the top-down Ferrari on the pit stop's ruler: Ferrari's own 2026 launch image, not freely licensed, cut out and with its number changed from 16 to 44.
           </p>
           {CREDIT_GROUPS.map((g) => (
             <div key={`${g.author}-${g.licence.name}`} className="footer__group">

@@ -8,6 +8,10 @@
  * wheel layers; the frames of each burst sequence were aligned on the car and
  * matched for exposure and colour. Under the ShareAlike terms, these adapted
  * images are offered under the same licence as the originals.
+ *
+ * One exception: the pit stop's top-down car is Ferrari's own 2026 launch
+ * image (found on F1-Fansite), which is not freely licensed. It was cut out
+ * of its background and its race number changed from 16 to 44.
  */
 import SEQUENCES from './sequences.json';
 
@@ -56,6 +60,14 @@ export const CREDITS = {
   ...Object.fromEntries(
     ARCHIVE.map(([key, file, author, licence, subject]) => [key, { file, author, licence, url: page(file), subject }])
   ),
+  // The pit stop's top-down car: Ferrari's launch image, not freely licensed.
+  'pit/sf26-top': {
+    file: null,
+    author: 'Scuderia Ferrari, 2026 launch image (via F1-Fansite)',
+    licence: { name: 'not freely licensed', url: 'https://www.f1-fansite.com/f1-wallpaper/2026-ferrari-sf-26-f1-car-launch-photos/' },
+    url: 'https://www.f1-fansite.com/f1-wallpaper/2026-ferrari-sf-26-f1-car-launch-photos/',
+    subject: 'Ferrari SF-26 from above (pit stop marker; number changed from 16 to 44)',
+  },
   // Steffen Prößdorf's bursts from the 2026 Dutch Grand Prix (scripts/sequences.json): aligned on the car and colour-matched.
   ...Object.fromEntries(
     Object.values(SEQUENCES.sets).flatMap((s) =>
