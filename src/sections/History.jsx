@@ -39,13 +39,13 @@ function SoundCredit({ name }) {
 }
 
 function Era({ era, index, near }) {
-  const [ref, inView] = useInView({ margin: '0px -18% 0px -18%', threshold: 0.2 });
+  const [ref, inView, visible] = useInView({ track: true, margin: '0px -18% 0px -18%', threshold: 0.2 });
   const sound = ERA_SOUND[era.year];
 
-  // With sound on, the era's engine plays once as its photo arrives.
+  // With sound on, the era's engine plays as its photo arrives, every time it does.
   useEffect(() => {
-    if (inView && sound && isSoundOn()) playEra(sound);
-  }, [inView, sound]);
+    if (visible && sound && isSoundOn()) playEra(sound);
+  }, [visible, sound]);
   return (
     <article className="era" ref={ref} data-inview={inView ? 'true' : 'false'} style={{ '--i': index }}>
       <span className="era__year t-num" aria-hidden="true">

@@ -34,12 +34,12 @@ function SoundCredit({ name, label }) {
 }
 
 function Step({ step, index, near }) {
-  const [ref, inView] = useInView({ margin: '0px -18% 0px -18%', threshold: 0.2 });
+  const [ref, inView, visible] = useInView({ track: true, margin: '0px -18% 0px -18%', threshold: 0.2 });
 
-  // With sound on, the step's sound plays once as its photo arrives.
+  // With sound on, the step's sound plays as its photo arrives, every time it does.
   useEffect(() => {
-    if (inView && step.sound && isSoundOn()) playStep(step.sound, step.volume);
-  }, [inView, step.sound, step.volume]);
+    if (visible && step.sound && isSoundOn()) playStep(step.sound, step.volume);
+  }, [visible, step.sound, step.volume]);
 
   return (
     <article className="pstep" ref={ref} data-kind={step.kind} data-inview={inView ? 'true' : 'false'} style={{ '--i': index }}>

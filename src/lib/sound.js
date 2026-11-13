@@ -92,10 +92,12 @@ export function useSound() {
 function fetchBuffer(c, url, name) {
   return fetch(url)
     .then((res) => {
-      if (!res.ok) throw new Error(`${res.status} ${name}`);
+      // The dev server answers a missing file with the page itself, so check the type too.
+      const type = res.headers.get('content-type') || '';
+      if (!res.ok || type.startsWith('text/')) throw new Error(`${res.status} ${name}`);
       return res.arrayBuffer();
     })
-    .then((data) => new Promise((resolve, reject) => c.decodeAudioData(data, resolve, reject)));
+    .then((data) => c.decodeAudioData(data));
 }
 
 /*
