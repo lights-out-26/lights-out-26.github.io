@@ -12,6 +12,9 @@ import engineWorklet from './engine-worklet.js?url';
  */
 
 const BASE = `${import.meta.env.BASE_URL}sounds/`;
+/* global __SOUND_VERSION__ */
+/** Changes whenever a shipped sound does (vite.config.js), so browsers fetch the new file. */
+const VERSION = `?v=${__SOUND_VERSION__}`;
 const KEY = 'lo26-sound';
 
 let enabled = read();
@@ -109,7 +112,7 @@ function fetchBuffer(c, url, name) {
 function load(name) {
   if (!buffers.has(name)) {
     const c = context();
-    const own = () => fetchBuffer(c, `${BASE}${name}.mp3`, name);
+    const own = () => fetchBuffer(c, `${BASE}${name}.mp3${VERSION}`, name);
     buffers.set(
       name,
       (import.meta.env.DEV ? fetchBuffer(c, `${BASE}local/${name}.mp3`, name).catch(own) : own())
