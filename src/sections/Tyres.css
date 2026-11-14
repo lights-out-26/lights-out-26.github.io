@@ -1,0 +1,1086 @@
+/* ------------------------------------------------------------------
+   The tyres. Identity: the sidewall. Like the pit stop, colour here comes
+   from the thing itself, not the chrome: the paint on the rubber (soft red,
+   medium yellow, hard white, intermediate green, full wet blue), carried
+   into each tyre's badge, bars and figures.
+   ------------------------------------------------------------------ */
+
+.tyres {
+  --soft: #ff3b30;
+  --medium: #ffd23f;
+  --hard: #e9edf2;
+  --inter: #3ccf4e;
+  --wet: #2f8cff;
+  --asphalt: #0e0f12;
+  --card: linear-gradient(160deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.015));
+  --card-edge: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+
+  position: relative;
+  padding-block: clamp(88px, 11vw, 180px) clamp(56px, 7vw, 120px);
+  /* carries on from the pit lane's asphalt, then into the black of the next section */
+  background: linear-gradient(to bottom, var(--asphalt), var(--black) 55%);
+  overflow: hidden;
+}
+
+[data-tyre='soft'] { --band: var(--soft); }
+[data-tyre='medium'] { --band: var(--medium); }
+[data-tyre='hard'] { --band: var(--hard); }
+[data-tyre='inter'] { --band: var(--inter); }
+[data-tyre='wet'] { --band: var(--wet); }
+
+/* A real tyre rolling behind the heading as the section scrolls by: one tyre
+   made of five, a piece of each compound's sidewall opened out to a true circle
+   round a common hub, on a real wheel (scripts/prepare-tyres.py, set as --ring
+   by Tyres.jsx). */
+.tyres::before {
+  content: '';
+  position: absolute;
+  top: clamp(40px, 6vw, 110px);
+  right: -14vw;
+  width: min(54vw, 760px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  rotate: calc(var(--p, 0) * 720deg);
+  background: var(--ring) center / cover no-repeat;
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+/* ---- heading ---- */
+
+.tyres__head {
+  position: relative;
+  display: grid;
+  gap: clamp(18px, 2.4vw, 32px);
+  max-width: 62rem;
+  margin-bottom: clamp(40px, 6vw, 88px);
+}
+
+.tyres__kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* A tyre-wall label: black on white, with the five colours along its foot. */
+.tyres__tag {
+  padding: 0.3em 0.7em 0.35em;
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, var(--soft) 0 20%, var(--medium) 20% 40%, var(--hard) 40% 60%, var(--inter) 60% 80%, var(--wet) 80%) 0 100% / 100% 3px no-repeat,
+    var(--white);
+  color: #000;
+  font-size: var(--fs-micro);
+  font-weight: 900;
+  font-stretch: 110%;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tyres__title {
+  font-size: clamp(2.6rem, 7.6vw, 8.6rem);
+  text-shadow: 0 0.06em 0.3em rgb(0 0 0 / 0.6);
+}
+
+/* ---- the whole range, with a badge on each tyre ---- */
+
+.trange {
+  position: relative;
+  margin: 0;
+}
+
+.trange__frame {
+  position: relative;
+}
+
+.trange .photo__frame {
+  border-radius: 6px;
+  box-shadow: 0 40px 90px -24px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+html.js .trange .photo__frame > img {
+  transform: scale(1.08);
+  transition: opacity 0.6s linear, transform 2s var(--ease-out);
+}
+
+html.js .trange[data-inview='true'] .photo__frame > img {
+  transform: none;
+}
+
+.trange__tags li {
+  --b: clamp(26px, 2.7vw, 42px);
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* the badge's centre sits on the wheel's hub, the name runs off to the right */
+  translate: calc(var(--b) / -2) -50%;
+}
+
+html.js .trange__tags li {
+  opacity: 0;
+  transform: scale(0.4);
+}
+
+html.js .trange[data-inview='true'] .trange__tags li {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.3s linear calc(1s + var(--i) * 130ms), transform 0.7s var(--ease-back) calc(1s + var(--i) * 130ms);
+}
+
+.trange__tags b {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--b);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--band);
+  color: #000;
+  font-size: calc(var(--b) * 0.46);
+  font-weight: 900;
+  font-stretch: 110%;
+  box-shadow: 0 0 0 3px rgb(0 0 0 / 0.6), 0 0 26px color-mix(in srgb, var(--band) 55%, transparent);
+}
+
+/* A ring pinging out from each badge. */
+.trange__tags b::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--band);
+  animation: trange-ping 2.6s var(--ease-out) calc(1.6s + var(--i) * 0.35s) infinite both;
+}
+
+@keyframes trange-ping {
+  from { opacity: 0.9; transform: scale(1); }
+  70%, to { opacity: 0; transform: scale(2); }
+}
+
+.trange__tags span {
+  padding: 0.35em 0.7em 0.32em;
+  border-radius: 4px;
+  background: rgb(6 7 9 / 0.78);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  font-stretch: 90%;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+}
+
+.trange__cap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 20px;
+  margin-top: 12px;
+  font-size: var(--fs-small);
+  font-stretch: 82%;
+  color: var(--muted);
+}
+
+/* ---- a family of tyres ---- */
+
+.tgroup {
+  margin-top: clamp(80px, 11vw, 168px);
+}
+
+.tgroup__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(28px, 5vw, 96px);
+  margin-bottom: clamp(28px, 4vw, 56px);
+}
+
+.tgroup__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  font-stretch: 110%;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* The family's colours, as a short painted stripe. */
+.tgroup__label::before {
+  content: '';
+  width: 30px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--stripe, var(--hard));
+}
+
+.tgroup[data-kind='dry'],
+.tpanel--rules {
+  --stripe: linear-gradient(90deg, var(--soft) 0 33.3%, var(--medium) 33.3% 66.6%, var(--hard) 66.6%);
+}
+
+.tgroup[data-kind='wet'],
+.tcross {
+  --stripe: linear-gradient(90deg, var(--inter) 0 50%, var(--wet) 50%);
+}
+
+.tpanel--side { --stripe: var(--medium); }
+
+.tgroup__title {
+  margin-block: 14px 18px;
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  font-stretch: 118%;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+}
+
+.tgroup__text {
+  max-width: 38em;
+  color: var(--silver);
+  line-height: 1.55;
+}
+
+.tgroup__cap {
+  margin-bottom: 12px;
+  font-size: var(--fs-small);
+  font-stretch: 78%;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ---- C1 to C5, and the three at a race ---- */
+
+.cscale {
+  margin: 0;
+}
+
+.cscale__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.03);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.cscale__c {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 16px 4px 14px;
+  color: rgb(255 255 255 / 0.28);
+  transition: color 0.5s linear;
+}
+
+.cscale__c + .cscale__c {
+  box-shadow: -1px 0 0 var(--line);
+}
+
+.cscale__c[data-role='hard'] { color: var(--hard); }
+.cscale__c[data-role='medium'] { color: var(--medium); }
+.cscale__c[data-role='soft'] { color: var(--soft); }
+
+.cscale__c b {
+  font-size: clamp(1.35rem, 2.1vw, 2rem);
+  font-weight: 900;
+  font-stretch: 115%;
+  font-style: italic;
+  line-height: 1;
+}
+
+.cscale__c small {
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  font-stretch: 100%;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* A painted arc under each lit compound, like the stripe on its sidewall. */
+.cscale__c::after {
+  content: '';
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 6px;
+  height: 3px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.5s linear;
+}
+
+.cscale__c[data-role]::after {
+  opacity: 1;
+}
+
+/* The three at this race: a frame that slides along the five. */
+.cscale__pick {
+  position: absolute;
+  inset: -5px auto -5px 0;
+  width: 60%;
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.65), 0 18px 40px -18px rgb(0 0 0 / 0.9);
+  transform: translate3d(calc(var(--start) * 100% / 3), 0, 0);
+  transition: transform 0.8s var(--ease-in-out);
+}
+
+.cscale__ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  font-stretch: 82%;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.cscale__ends span:first-child::before { content: '← '; }
+.cscale__ends span:last-child::after { content: ' →'; }
+
+/* ---- dry to standing water ---- */
+
+.wscale {
+  margin: 0;
+}
+
+.wscale__bar {
+  display: grid;
+  grid-template-columns: 30fr 38fr 32fr;
+  height: 46px;
+  border-radius: 23px;
+  overflow: hidden;
+  /* the soft edges between the bands are the crossovers */
+  background: linear-gradient(90deg, var(--silver) 0 22%, var(--inter) 37% 58%, var(--wet) 74% 100%);
+}
+
+html.js .wscale__bar {
+  clip-path: inset(0 100% 0 0 round 23px);
+}
+
+html.js .wscale[data-inview='true'] .wscale__bar {
+  clip-path: inset(0 0 0 0 round 23px);
+  transition: clip-path 1.3s var(--ease-in-out) 0.4s;
+}
+
+.wscale__bar span {
+  display: grid;
+  place-items: center;
+  color: #000;
+  font-size: var(--fs-small);
+  font-weight: 800;
+  font-stretch: 92%;
+}
+
+.wscale__ticks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 12px;
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  font-stretch: 82%;
+  color: var(--muted);
+}
+
+.wscale__ticks li {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.wscale__ticks li:first-child { justify-items: start; text-align: left; }
+.wscale__ticks li:last-child { justify-items: end; text-align: right; }
+
+/* Raindrops, more of them as the track gets wetter. */
+.wscale__drops {
+  display: flex;
+  gap: 4px;
+  height: 10px;
+}
+
+.wscale__drops i {
+  width: 7px;
+  height: 7px;
+  margin-top: 2px;
+  border-radius: 0 50% 50% 50%;
+  background: var(--wet);
+  rotate: 45deg;
+}
+
+/* ---- the cards ---- */
+
+.tcards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 32px);
+}
+
+.tcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: var(--card-edge);
+  overflow: hidden;
+}
+
+/* The compound's colour drawn along the top edge as the card arrives. */
+.tcard::before {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: var(--band);
+  transform-origin: 0 50%;
+}
+
+html.js .tcard::before {
+  transform: scaleX(0);
+}
+
+html.js .tcard[data-inview='true']::before {
+  transform: none;
+  transition: transform 1s var(--ease-out) calc(0.5s + var(--i) * 120ms);
+}
+
+.tcard__photo {
+  position: relative;
+}
+
+.tcard .wipe {
+  --delay: calc(var(--i) * 120ms);
+}
+
+html.js .tcard .photo__frame > img {
+  transform: scale(1.14);
+  transition: opacity 0.6s linear, transform 1.8s var(--ease-out);
+}
+
+html.js .tcard[data-inview='true'] .photo__frame > img {
+  transform: none;
+}
+
+/* The photo darkens into the card at its foot, under the badge's colour. */
+.tcard__photo .photo__frame::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 30%;
+  background: linear-gradient(to top, rgb(11 12 14 / 0.75), transparent);
+  pointer-events: none;
+}
+
+/* A sidewall in miniature: two painted arcs that turn round the tyre's letter. */
+.tbadge {
+  position: absolute;
+  z-index: 2;
+  left: 14px;
+  bottom: 14px;
+  display: grid;
+  place-items: center;
+  width: clamp(52px, 4.8vw, 68px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #0b0c0e;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.12), 0 12px 30px -8px rgb(0 0 0 / 0.9);
+}
+
+.tbadge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle closest-side, #0b0c0e 0 60%, transparent 61% 79%, #0b0c0e 80%),
+    conic-gradient(from 200deg, var(--band) 0 105deg, rgb(255 255 255 / 0.08) 105deg 180deg, var(--band) 180deg 285deg, rgb(255 255 255 / 0.08) 285deg);
+  animation: spin 9s linear infinite;
+  animation-play-state: paused;
+}
+
+.tcard[data-inview='true'] .tbadge::before {
+  animation-play-state: running;
+}
+
+.tbadge b {
+  position: relative;
+  color: var(--band);
+  font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+  font-weight: 900;
+  font-stretch: 115%;
+  font-style: italic;
+}
+
+.tcard__copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: clamp(18px, 1.8vw, 26px);
+}
+
+.tcard__copy > .credit {
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.tcard__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  font-stretch: 110%;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--band);
+}
+
+.tcard__label i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--band);
+  box-shadow: 0 0 12px var(--band);
+}
+
+.tcard__name {
+  font-size: clamp(1.5rem, 9cqi, 3.1rem);
+  font-weight: 900;
+  font-stretch: 122%;
+  font-style: italic;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+.tcard__line {
+  font-weight: 700;
+  font-stretch: 92%;
+}
+
+.tcard__body {
+  color: var(--silver);
+  font-size: 0.97rem;
+  line-height: 1.55;
+}
+
+.tcard__use {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Uses as pit boards: a bar of the tyre's colour, condensed type. */
+.tcard__use li {
+  padding: 0.45em 0.9em 0.4em 0.8em;
+  border-left: 3px solid var(--band);
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.05);
+  font-size: var(--fs-small);
+  font-stretch: 82%;
+  font-weight: 700;
+}
+
+/* ---- grip and life ---- */
+
+.tmeter {
+  display: grid;
+  gap: 8px;
+  padding-block: 4px;
+}
+
+.tmeter > div {
+  display: grid;
+  grid-template-columns: 3.6em minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.tmeter dt {
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tmeter__bars {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.tmeter__bars i {
+  position: relative;
+  height: 8px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.1);
+  overflow: hidden;
+}
+
+.tmeter__bars i[data-on]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--band);
+  transform-origin: 0 50%;
+}
+
+html.js .tmeter__bars i[data-on]::after {
+  transform: scaleX(0);
+}
+
+html.js .tcard[data-inview='true'] .tmeter__bars i[data-on]::after {
+  transform: none;
+  transition: transform 0.45s var(--ease-out) calc(0.8s + var(--n) * 90ms);
+}
+
+/* ---- water cleared ---- */
+
+.twater {
+  display: grid;
+  gap: 10px;
+  padding-block: 4px;
+}
+
+.twater__fig {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.twater__fig strong {
+  font-size: clamp(2.1rem, 3.4vw, 3.3rem);
+  font-weight: 900;
+  font-stretch: 118%;
+  font-style: italic;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: var(--band);
+}
+
+.twater__fig span {
+  max-width: 16em;
+  font-size: var(--fs-small);
+  font-stretch: 82%;
+  font-weight: 600;
+  color: var(--silver);
+}
+
+.twater__bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.1);
+  overflow: hidden;
+}
+
+/* The share of a full wet's 85 litres, running like water. */
+.twater__bar i {
+  display: block;
+  width: calc(var(--share) * 100%);
+  height: 100%;
+  border-radius: 4px;
+  background: repeating-linear-gradient(110deg, var(--band) 0 10px, color-mix(in srgb, var(--band) 70%, #fff) 10px 14px) 0 0 / 28px 100%;
+  transform-origin: 0 50%;
+  animation: twater-flow 0.9s linear infinite;
+  animation-play-state: paused;
+}
+
+.tcard[data-inview='true'] .twater__bar i {
+  animation-play-state: running;
+}
+
+html.js .twater__bar i {
+  transform: scaleX(0);
+}
+
+html.js .tcard[data-inview='true'] .twater__bar i {
+  transform: none;
+  transition: transform 1.1s var(--ease-out) 0.8s;
+}
+
+@keyframes twater-flow {
+  to { background-position: 28px 0; }
+}
+
+/* ---- the crossover ---- */
+
+.tcross {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: clamp(18px, 1.8vw, 26px);
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: var(--card-edge);
+}
+
+.tcross {
+  container-type: inline-size;
+}
+
+.tcross__title {
+  font-size: clamp(1.5rem, 9cqi, 3.1rem);
+  font-weight: 900;
+  font-stretch: 122%;
+  font-style: italic;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+.tcross__chart {
+  margin: 6px 0 4px;
+}
+
+.tcross__chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--font);
+}
+
+.tcross__axis {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.tcross__line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+}
+
+.tcross__line--inter { stroke: var(--inter); }
+.tcross__line--slick { stroke: var(--hard); }
+
+html.js .tcross__line {
+  stroke-dashoffset: 1;
+}
+
+html.js .tcross[data-inview='true'] .tcross__line {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1.6s var(--ease-in-out) 0.2s;
+}
+
+.tcross__mark {
+  stroke: var(--white);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.tcross__dot {
+  fill: var(--white);
+}
+
+.tcross__tag {
+  fill: var(--white);
+  font-size: 13px;
+  font-weight: 800;
+  font-stretch: 110%;
+}
+
+.tcross__key {
+  font-size: 11px;
+  font-weight: 700;
+  font-stretch: 85%;
+}
+
+.tcross__key--inter { fill: var(--inter); }
+.tcross__key--slick { fill: var(--hard); }
+
+.tcross__axislabel {
+  fill: var(--muted);
+  font-size: 10px;
+  font-stretch: 80%;
+}
+
+html.js .tcross :is(.tcross__mark, .tcross__dot, .tcross__tag, .tcross__key) {
+  opacity: 0;
+}
+
+html.js .tcross[data-inview='true'] :is(.tcross__mark, .tcross__dot, .tcross__tag, .tcross__key) {
+  opacity: 1;
+  transition: opacity 0.5s linear 1.5s;
+}
+
+.tcross__body {
+  color: var(--silver);
+  font-size: 0.97rem;
+  line-height: 1.55;
+}
+
+/* ---- wear, the 2026 size, the rules ---- */
+
+.tmore {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: clamp(16px, 2vw, 32px);
+  margin-top: clamp(80px, 11vw, 168px);
+}
+
+.tpanel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.tpanel .photo {
+  margin-bottom: 8px;
+}
+
+.tpanel .photo__frame {
+  border-radius: 6px;
+  box-shadow: 0 30px 70px -24px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+.tpanel__title {
+  font-size: var(--fs-h3);
+  font-weight: 800;
+  font-stretch: 116%;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.tpanel__body {
+  color: var(--silver);
+  font-size: 0.97rem;
+  line-height: 1.55;
+}
+
+/* Where the size is moulded into the sidewall: a ring on it and the size in type. */
+.tside {
+  position: relative;
+}
+
+.tside__pin {
+  position: absolute;
+  z-index: 2;
+  translate: -50% -50%;
+}
+
+.tside__pin i {
+  display: block;
+  width: clamp(44px, 5vw, 70px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--medium), 0 0 0 7px rgb(0 0 0 / 0.35);
+}
+
+.tside__pin b {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 22px);
+  translate: 0 -50%;
+  padding: 0.35em 0.7em 0.3em;
+  border-radius: 4px;
+  background: var(--medium);
+  color: #000;
+  font-size: var(--fs-small);
+  font-weight: 900;
+  font-stretch: 105%;
+  white-space: nowrap;
+}
+
+.tside__pin b::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 22px;
+  height: 2px;
+  background: var(--medium);
+}
+
+html.js .tside__pin {
+  opacity: 0;
+  scale: 0.6;
+}
+
+html.js .tpanel--side[data-inview='true'] .tside__pin {
+  opacity: 1;
+  scale: 1;
+  transition: opacity 0.3s linear 1.1s, scale 0.7s var(--ease-back) 1.1s;
+}
+
+.tsizes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tsizes > div {
+  padding: 12px 14px;
+  border-left: 3px solid var(--medium);
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.05);
+}
+
+.tsizes dt {
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tsizes dd {
+  display: grid;
+  gap: 2px;
+  margin: 6px 0 0;
+}
+
+.tsizes strong {
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-weight: 900;
+  font-stretch: 112%;
+  font-style: italic;
+  line-height: 1;
+}
+
+.tsizes span {
+  font-size: var(--fs-micro);
+  font-stretch: 82%;
+  color: var(--muted);
+}
+
+.tpanel--rules {
+  padding: clamp(20px, 2vw, 30px);
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: var(--card-edge);
+}
+
+.trules {
+  display: grid;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.trules li {
+  display: grid;
+  grid-template-columns: 4.6rem minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+/* Each rule's figure, outlined like the pit stop's painted numbers. */
+.trules strong {
+  font-size: clamp(2.2rem, 3.2vw, 3rem);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-style: italic;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--white);
+}
+
+.trules span {
+  color: var(--silver);
+  font-size: 0.97rem;
+  line-height: 1.5;
+}
+
+/* ---- narrower screens ---- */
+
+@media (max-width: 1100px) {
+  .tcards,
+  .tmore {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tpanel--rules {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .tgroup__head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* only the letters on the range photo; the names would run into each other */
+  .trange__tags span {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .tcards,
+  .tmore {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tcard .photo__frame {
+    aspect-ratio: 1;
+  }
+
+  .tyres::before {
+    top: 24px;
+    right: -38vw;
+    width: 92vw;
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tyres::before,
+  .tbadge::before,
+  .trange__tags b::after,
+  .twater__bar i {
+    animation: none !important;
+    rotate: none !important;
+  }
+
+  html.js .tyres :is(.trange__tags li, .twater__bar i, .tside__pin, .tcross__mark, .tcross__dot, .tcross__tag, .tcross__key) {
+    opacity: 1 !important;
+    transform: none !important;
+    scale: none !important;
+    transition: none !important;
+  }
+
+  /* pseudo-elements cannot go inside :is() */
+  html.js .tyres .tcard::before,
+  html.js .tyres .tmeter__bars i[data-on]::after {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  html.js .tyres .wscale__bar {
+    clip-path: none !important;
+    transition: none !important;
+  }
+
+  html.js .tyres .tcross__line {
+    stroke-dashoffset: 0 !important;
+    transition: none !important;
+  }
+
+  .cscale__pick,
+  .cscale__c {
+    transition: none !important;
+  }
+}

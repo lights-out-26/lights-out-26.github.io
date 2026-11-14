@@ -92,6 +92,9 @@ function Step({ step, index, near }) {
  */
 const TOP_CAR = `${import.meta.env.BASE_URL}photos/pit/sf26-top.webp`;
 
+/** A real red-lettered tyre, side on: Pirelli's studio photo of a P Zero supersoft, cut out on a circle round its hub (see the credits). */
+const SOFT_TYRE = `${import.meta.env.BASE_URL}photos/pit/soft-tyre.webp`;
+
 export default function Pitstop() {
   const ref = useProgress('contain');
   const [headRef, headIn] = useInView();
@@ -120,7 +123,7 @@ export default function Pitstop() {
         <div className="pit__track scrub">
           <header className="pit__head" ref={headRef} data-inview={headIn ? 'true' : 'false'}>
             <span className="pit__tyre" aria-hidden="true">
-              <i />
+              <img src={SOFT_TYRE} alt="" width="900" height="900" loading="lazy" decoding="async" draggable={false} />
             </span>
             <p className="pit__kicker rise">
               <span className="pit__tag">Pit lane</span> Pit stop
