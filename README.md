@@ -23,7 +23,8 @@ Node 20 or newer. The build uses relative paths, so `dist/` can be hosted from a
 | Hero | A rolling shot: a real car brakes in with its discs glowing, holds station with the wheels turning while speed lines stream past, then launches off in a blur for the next team's car |
 | History | A pinned strip that scrolls sideways through six eras, with outlined years drifting behind the photographs |
 | Race weekend | One pinned screen that steps through practice, Q1, Q2, Q3 and the race while a 22-car grid thins out and launches |
-| Pit stop | The same sideways strip as the history section, through the five steps of a stop (the call, the pit lane, the crew, the wheel gun, the release), one real photograph each, with the figure that defines each step painted behind it: Box, 80 (km/h), 20 (people), 1 (nut a wheel), 2.0 (seconds) |
+| Pit stop | The same sideways strip as the history section, through the five steps of a stop (the call, the pit lane, the crew, the wheel gun, the release), one real photograph each, with the figure that defines each step painted behind it: Box, 80 (km/h), 20 (people), 1 (nut a wheel), 2.0 (seconds). Behind the heading a real tyre, Pirelli's studio photo of a red-lettered P Zero supersoft cut out on a circle, rolls round as you scroll |
+| Tyres | The five tyres a team has at a race, one real photograph each, with the badge, bars and figures in the colour painted on its sidewall: soft, medium and hard (grip and life compared), intermediate and full wet (the water each clears). C1 to C5 with the three brought to a race sliding along them, a dry-to-standing-water scale, a sketch of the crossover from intermediates to slicks, why tyres wear out, the 2026 size read off a real sidewall (280/705-18) and the rules. Behind the heading one real tyre made of five, a piece of each compound's sidewall opened out to a true circle round a common hub, on a real F1 wheel, rolls round as you scroll |
 | The machine | A blueprint of the car (edges and depth contours) that a scan line turns back into the photograph as you scroll, then callouts for each 2026 rule change |
 | Teams | Eleven slanted "garage doors" that swing open in the team's colours while the car rolls in and brakes |
 | Drivers | Cards that tilt toward the pointer, flood with colour and flip over |
@@ -93,11 +94,11 @@ Lenis smooths wheel and trackpad scrolling (touch keeps the native feel). GSAP's
 src/
   components/   GLCar, GLPhoto, GLSequence, PhotoCar, Photo, SplitText, Numbers, Cursor, Nav, Preloader, Transition, Footer
   gl/           the shared WebGL2 renderer and the car and photo shaders
-  sections/     Hero, History, Weekend, Pitstop, Machine, Teams, Drivers, Stats
+  sections/     Hero, History, Weekend, Pitstop, Tyres, Machine, Teams, Drivers, Stats
   pages/        Home, TeamPage
   hooks/        useInView, useProgress, usePointer (parallax and tilt), useReducedMotion
   lib/          smooth scrolling, scroll tracking, points maths, team styling helpers
-  data/         teams, drivers, season results, records, history, tech, photo credits, burst sequences
+  data/         teams, drivers, season results, records, history, tech, tyres, photo credits, burst sequences
   router/       a small hash router with animated page transitions
   styles/       tokens, base, motion primitives, team identities
 public/photos/  prepared images (cars, action, eras, seq) and their depth maps (depth)
@@ -123,6 +124,8 @@ It recomputes every driver's and team's points from the race results and fails i
 5. `python scripts/make-depth.py <model.onnx> <raw> <wheels.json> public/photos` writes the depth maps. It needs `onnxruntime`, `opencv-python`, `numpy` and `pillow`, and the Depth Anything V2 Small ONNX model from [onnx-community/depth-anything-v2-small](https://huggingface.co/onnx-community/depth-anything-v2-small) (`onnx/model_quantized.onnx` was used here).
 6. Add the credit to `src/data/credits.js`.
 
+The tyre photos are fixed crops of their originals (named at the top of the script): `python scripts/prepare-tyres.py <folder with the originals> public/photos`. It needs Pillow and NumPy.
+
 ## Burst sequences
 
 "Through the corner" on the team pages uses real bursts: one car photographed three times in a second or three, from the same spot on the outside of a slow corner at Zandvoort (Steffen Prößdorf, Friday 21 August 2026). Each car comes in heading right, turns towards the camera and leaves heading left. The sets are listed in `scripts/sequences.json`.
@@ -141,7 +144,7 @@ Team logos are trademarks and are not included; each team has a typographic mark
 
 ## Photo credits and licence
 
-All photographs come from Wikimedia Commons under Creative Commons licences. The full list, with a link to each original, is in `src/data/credits.js` and on the site's credits section.
+All photographs but two come from Wikimedia Commons under Creative Commons licences. The two exceptions are in the pit stop and are not freely licensed: the top-down Ferrari on its ruler (Ferrari's launch image, see above) and the tyre rolling behind its heading, Pirelli's studio photo of a P Zero supersoft, found on AUSmotive.com, cut out on a circle, darkened a little and with the white of its wheel made transparent (`scripts/prepare-tyres.py`). The full list, with a link to each original, is in `src/data/credits.js` and on the site's credits section.
 
 - 2026 cars: Lukas Raich, 2026 Austrian Grand Prix series, CC BY-SA 4.0
 - 2026 burst sequences: Steffen Prößdorf, 2026 Dutch Grand Prix series (STP 2292–2294, 2303–2305, 2311–2313, 2323–2325, 2330–2332), CC BY-SA 4.0
@@ -150,6 +153,7 @@ All photographs come from Wikimedia Commons under Creative Commons licences. The
 - McLaren MP4/4: Nic Redhead, CC BY-SA 2.0
 - Ferrari F2004 and Mercedes W05: emperornie, CC BY-SA 2.0
 - Pit stops: Curt Smith (Haas and Ferrari, 2017 United States GP), CC BY 2.0; Declan M Martin (Aston Martin, 2021 United States GP), public domain; Alberto-g-rovi (Red Bull, Barcelona testing 2015), CC BY-SA 4.0; Rich Jones (wheel gun), CC BY 2.0. No freely licensed photograph of a 2026 pit stop exists yet
+- Tyres: Steffen Prößdorf (soft, medium and hard, 2024 Dutch GP), Hullian111 (the range, the intermediate and the full wet, Formula 1 Exhibition, London 2025), TaurusEmerald (a 2026 medium) and Lukas Raich (a used hard tyre, 2024 Austrian GP), all CC BY-SA 4.0
 
 The images were resized and cropped; the 2026 car photos were also given depth maps, the side-on ones were cut out and levelled, and the burst frames were aligned on the car and matched for exposure and colour. Because the licences are ShareAlike, the adapted images and depth maps in `public/photos/` are offered under the same licence as their originals. If you publish the site, keep the credits section.
 

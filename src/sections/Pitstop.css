@@ -172,7 +172,10 @@
   to { background-position: -100% 0; }
 }
 
-/* A soft tyre, side on, rolling round as the strip moves: tread, sidewall, the compound's red band. */
+/* A red-lettered tyre, side on, rolling round as the strip moves: a real one,
+   Pirelli's studio photo of a P Zero supersoft, cut out on a circle centred on
+   the hub (scripts/prepare-tyres.py), so it turns true. The white of its wheel
+   is transparent, so the pit lane shows through. */
 .pit__tyre {
   position: absolute;
   top: 50%;
@@ -182,22 +185,25 @@
   border-radius: 50%;
   translate: 0 -50%;
   rotate: calc(var(--p, 0) * 900deg);
-  background:
-    radial-gradient(circle, transparent 0 41%, #2a2c31 41% 42%, #121316 42% 55.5%, var(--soft) 55.5% 57%, #121316 57% 66%, #1d1f23 66% 67%, transparent 67%),
-    repeating-conic-gradient(from 0deg, #191a1e 0 5deg, #0a0b0d 5deg 10deg);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06), 0 50px 120px -30px rgb(0 0 0 / 0.9);
+  overflow: hidden;
+  box-shadow: 0 50px 120px -30px rgb(0 0 0 / 0.9);
   opacity: 0.95;
 }
 
-/* The rim inside it: spokes and a wheel nut. */
-.pit__tyre i {
+.pit__tyre img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The hairline round its edge, over the photo. */
+.pit__tyre::after {
+  content: '';
   position: absolute;
-  inset: 30%;
+  inset: 0;
   border-radius: 50%;
-  background:
-    radial-gradient(circle, var(--hazard) 0 12%, #2b2e34 12% 15%, transparent 15%),
-    repeating-conic-gradient(from 8deg, #3a3e45 0 9deg, #15171a 9deg 36deg);
-  box-shadow: inset 0 0 0 3px #2b2e34, inset 0 0 30px rgb(0 0 0 / 0.8);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
 }
 
 /* ---- one step ---- */

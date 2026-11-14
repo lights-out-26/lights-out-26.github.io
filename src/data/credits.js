@@ -9,9 +9,12 @@
  * matched for exposure and colour. Under the ShareAlike terms, these adapted
  * images are offered under the same licence as the originals.
  *
- * One exception: the pit stop's top-down car is Ferrari's own 2026 launch
- * image (found on F1-Fansite), which is not freely licensed. It was cut out
- * of its background and its race number changed from 16 to 44.
+ * Two exceptions, both in the pit stop and neither freely licensed: the
+ * top-down car is Ferrari's own 2026 launch image (found on F1-Fansite), cut
+ * out of its background with its race number changed from 16 to 44; and the
+ * tyre rolling behind the heading is Pirelli's studio photo of a P Zero
+ * supersoft (found on AUSmotive.com), cut out on a circle, darkened a little and
+ * with the white of its wheel made transparent.
  */
 import SEQUENCES from './sequences.json';
 
@@ -50,6 +53,26 @@ const ARCHIVE = [
   ['pit/ferrari-2017', 'Kimi Raikkonen 2017 United States GP (37946719176).jpg', 'Curt Smith', BY_2, 'Ferrari pit crew, 2017 United States GP'],
 ];
 
+/**
+ * The tyre photos (scripts/prepare-tyres.py): [photo key, Commons file, author, licence, subject].
+ * The three slicks are crops of one photo, as are the intermediate and the full wet.
+ */
+const DUTCH_2024_TYRES = '2024-08-25 Motorsport, Formel 1, Großer Preis der Niederlande 2024 STP 3619 by Stepro.jpg';
+const LONDON_RAIN_TYRES = 'Pirelli Tyre Sets at Formula 1 Exhibition, London 03.jpg';
+const TYRE_PHOTOS = [
+  ['tyres/range', 'Pirelli Tyre Sets at Formula 1 Exhibition, London 04.jpg', 'Hullian111', BY_SA_4, 'The tyre range, Formula 1 Exhibition, London 2025'],
+  ['tyres/soft', DUTCH_2024_TYRES, 'Steffen Prößdorf', BY_SA_4, 'Soft tyre, 2024 Dutch GP'],
+  ['tyres/medium', DUTCH_2024_TYRES, 'Steffen Prößdorf', BY_SA_4, 'Medium tyre, 2024 Dutch GP'],
+  ['tyres/hard', DUTCH_2024_TYRES, 'Steffen Prößdorf', BY_SA_4, 'Hard tyre, 2024 Dutch GP'],
+  ['tyres/inter', LONDON_RAIN_TYRES, 'Hullian111', BY_SA_4, 'Intermediate tyre, Formula 1 Exhibition, London 2025'],
+  ['tyres/wet', LONDON_RAIN_TYRES, 'Hullian111', BY_SA_4, 'Full wet tyre, Formula 1 Exhibition, London 2025'],
+  ['tyres/sidewall', 'Pirelli P Zero Formula 1 Medium Slick Tyre 2026.jpg', 'TaurusEmerald', BY_SA_4, '2026 medium tyre and its sidewall'],
+  ['tyres/worn', 'FIA F1 Austria 2024 misc (tire rubber pickup).jpg', 'Lukas Raich', BY_SA_4, 'Used hard tyre, 2024 Austrian GP'],
+  // The tyre behind the tyres heading is made of pieces of these two photos.
+  ['tyres/ring-slicks', DUTCH_2024_TYRES, 'Steffen Prößdorf', BY_SA_4, 'Soft, medium and hard pieces of the tyre behind the tyres heading'],
+  ['tyres/ring-rain', LONDON_RAIN_TYRES, 'Hullian111', BY_SA_4, 'Intermediate and full wet pieces of the tyre behind the tyres heading'],
+];
+
 export const CREDITS = {
   ...Object.fromEntries(
     AUSTRIA_2026.map(([key, no, driver, frame]) => {
@@ -60,6 +83,10 @@ export const CREDITS = {
   ...Object.fromEntries(
     ARCHIVE.map(([key, file, author, licence, subject]) => [key, { file, author, licence, url: page(file), subject }])
   ),
+  // A note as well as a subject, so the credits list prints it as it is (see Footer.jsx).
+  ...Object.fromEntries(
+    TYRE_PHOTOS.map(([key, file, author, licence, subject]) => [key, { file, author, licence, url: page(file), subject, note: subject }])
+  ),
   // The pit stop's top-down car: Ferrari's launch image, not freely licensed.
   'pit/sf26-top': {
     file: null,
@@ -67,6 +94,15 @@ export const CREDITS = {
     licence: { name: 'not freely licensed', url: 'https://www.f1-fansite.com/f1-wallpaper/2026-ferrari-sf-26-f1-car-launch-photos/' },
     url: 'https://www.f1-fansite.com/f1-wallpaper/2026-ferrari-sf-26-f1-car-launch-photos/',
     subject: 'Ferrari SF-26 from above (pit stop marker; number changed from 16 to 44)',
+  },
+  // The tyre rolling behind the pit stop's heading: Pirelli's studio photo, not freely licensed.
+  'pit/soft-tyre': {
+    file: null,
+    author: 'Pirelli, studio photo (via AUSmotive.com)',
+    licence: { name: 'not freely licensed', url: 'https://www.ausmotive.com/' },
+    url: 'https://www.ausmotive.com/',
+    subject: 'Pirelli P Zero supersoft (pit stop heading; cut out on a circle)',
+    note: 'Pirelli P Zero supersoft (pit stop heading; cut out on a circle)',
   },
   // Steffen Prößdorf's bursts from the 2026 Dutch Grand Prix (scripts/sequences.json): aligned on the car and colour-matched.
   ...Object.fromEntries(

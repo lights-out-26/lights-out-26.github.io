@@ -4,12 +4,12 @@ import { TEAM_BY_ID } from '../data/teams';
 /**
  * A tiny hash router. Addresses are plain names so they survive any host:
  *   #home (or nothing)   the main page
- *   #about, #teams ...   the main page, scrolled to that section
+ *   #about, #tyres ...   the main page, scrolled to that section
  *   #team-ferrari        a team's own page
  *
  * navigate() plays a full-screen transition before swapping the page.
  */
-export const SECTIONS = ['about', 'teams', 'drivers', 'records', 'credits'];
+export const SECTIONS = ['about', 'tyres', 'teams', 'drivers', 'records', 'credits'];
 
 export function parse(hash) {
   const name = (hash || '').replace(/^#/, '');
