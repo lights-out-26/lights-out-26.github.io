@@ -7,6 +7,7 @@ import { soundCreditFor } from '../data/credits';
 import useProgress from '../hooks/useProgress';
 import useInView from '../hooks/useInView';
 import { isSoundOn, play, preloadSounds } from '../lib/sound';
+import { t } from '../lib/lang';
 import './Pitstop.css';
 
 // One step's sound at a time: the next one takes over from the last.
@@ -21,7 +22,7 @@ function SoundCredit({ name, label }) {
   if (!c) return null;
   return (
     <span className="credit">
-      {label}:{' '}
+      {t(label)}:{' '}
       <a className="link" href={c.url} target="_blank" rel="noreferrer">
         {c.author}
       </a>
@@ -47,7 +48,7 @@ function Step({ step, index, near }) {
         {step.mark}
       </span>
       <div className="pstep__photo">
-        <Photo id={step.photo} alt={step.caption} ratio="16 / 10" className="wipe" eager={near} />
+        <Photo id={step.photo} alt={t(step.caption)} ratio="16 / 10" className="wipe" eager={near} />
         {/* Painted pit box corners and the step's own graphic, laid over the photo. */}
         <i className="pstep__corners" aria-hidden="true" />
         <PitDeco kind={step.kind} />
@@ -60,17 +61,17 @@ function Step({ step, index, near }) {
       </div>
       <div className="pstep__copy">
         <p className="pstep__label rise" style={{ '--delay': '120ms' }}>
-          <span className="pstep__box t-num">{String(index + 1).padStart(2, '0')}</span> {step.label}
+          <span className="pstep__box t-num">{String(index + 1).padStart(2, '0')}</span> {t(step.label)}
         </p>
         <h3 className="pstep__title">
-          <SplitText text={step.title} styleName="rise" delay={180} />
+          <SplitText text={t(step.title)} styleName="rise" delay={180} />
         </h3>
         <p className="pstep__body rise" style={{ '--delay': '320ms' }}>
-          {step.body}
+          {t(step.body)}
         </p>
         <ul className="pstep__facts rise" style={{ '--delay': '420ms' }}>
           {step.fact.map((f) => (
-            <li key={f}>{f}</li>
+            <li key={f}>{t(f)}</li>
           ))}
         </ul>
       </div>
@@ -126,16 +127,16 @@ export default function Pitstop() {
               <img src={SOFT_TYRE} alt="" width="900" height="900" loading="lazy" decoding="async" draggable={false} />
             </span>
             <p className="pit__kicker rise">
-              <span className="pit__tag">Pit lane</span> Pit stop
+              <span className="pit__tag">{t('Pit lane')}</span> {t('Pit stop')}
             </p>
             <h2 id="pit-title" className="pit__title t-display" data-skew="">
               <SplitText text="Box, box" styleName="rise" />
             </h2>
             <p className="t-lead rise" style={{ '--delay': '400ms' }}>
-              Two words on the radio, and about twenty people have the car on four new tyres and back on its way in a little over two seconds. This is how.
+              {t('Two words on the radio, and about twenty people have the car on four new tyres and back on its way in a little over two seconds. This is how.')}
             </p>
             <p className="pit__hint rise" style={{ '--delay': '520ms' }}>
-              Keep scrolling. The car is coming in.
+              {t('Keep scrolling. The car is coming in.')}
             </p>
           </header>
           {STEPS.map((step, i) => (
@@ -148,7 +149,7 @@ export default function Pitstop() {
             {STEPS.map((step, i) => (
               <span key={step.label}>
                 <b className="t-num">{String(i + 1).padStart(2, '0')}</b>
-                {step.label}
+                {t(step.label)}
               </span>
             ))}
           </div>

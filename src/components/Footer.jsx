@@ -1,6 +1,7 @@
 import { CREDIT_GROUPS, SOUND_GROUPS } from '../data/credits';
 import { AS_OF } from '../data/season';
 import useInView from '../hooks/useInView';
+import { t } from '../lib/lang';
 import './Footer.css';
 
 /** Closing band: a running wordmark, the photo credits and the small print. */
@@ -21,14 +22,12 @@ export default function Footer() {
       <div className="footer__grid wrap">
         <section className="footer__credits" aria-labelledby="credits-title">
           <h2 id="credits-title" className="footer__h">
-            Photographs
+            {t('Photographs')}
           </h2>
           <p className="footer__p">
-            Every photograph here comes from Wikimedia Commons, under a Creative Commons licence or in the public domain. Each has been resized and cropped; the 2026 car photos also have depth
-            maps estimated from them, the side-on ones were cut out of their backgrounds and levelled, and the frames of each burst sequence were aligned on the car
-            and matched for exposure and colour. These adapted versions, depth maps included, are shared under the same licences as the originals. The two exceptions,
-            neither freely licensed, are both in the pit stop: the top-down Ferrari on its ruler, Ferrari's own 2026 launch image, cut out and with its number changed
-            from 16 to 44; and the tyre rolling behind its heading, Pirelli's studio photo of a P Zero supersoft, cut out on a circle.
+            {t(
+              "Every photograph here comes from Wikimedia Commons, under a Creative Commons licence or in the public domain. Each has been resized and cropped; the 2026 car photos also have depth maps estimated from them, the side-on ones were cut out of their backgrounds and levelled, and the frames of each burst sequence were aligned on the car and matched for exposure and colour. These adapted versions, depth maps included, are shared under the same licences as the originals. The two exceptions, neither freely licensed, are both in the pit stop: the top-down Ferrari on its ruler, Ferrari's own 2026 launch image, cut out and with its number changed from 16 to 44; and the tyre rolling behind its heading, Pirelli's studio photo of a P Zero supersoft, cut out on a circle."
+            )}
           </p>
           {CREDIT_GROUPS.map((g) => (
             <div key={`${g.author}-${g.licence.name}`} className="footer__group">
@@ -43,7 +42,7 @@ export default function Footer() {
                   <li key={item.key}>
                     <a className="link" href={item.url} target="_blank" rel="noreferrer">
                       {item.note || item.subject}
-                      {!item.note && g.items.length > 5 ? ` (${item.key.startsWith('action/') ? 'on track' : 'side'})` : ''}
+                      {!item.note && g.items.length > 5 ? ` (${t(item.key.startsWith('action/') ? 'on track' : 'side')})` : ''}
                     </a>
                   </li>
                 ))}
@@ -52,13 +51,12 @@ export default function Footer() {
           ))}
 
           <h2 id="sounds-title" className="footer__h footer__h--sub">
-            Sounds
+            {t('Sounds')}
           </h2>
           <p className="footer__p">
-            The engines at the start lights, in the history section and at the race start are real Formula 1 cars, and the pit stop's wheel guns come from a real
-            team's practice, all from recordings shared on Wikimedia Commons; those clips were cut, faded and levelled, and are shared under the same licences.
-            The pit stop radio is a clip from Myinstants, uploaded there with no source or licence stated. The start-light beeps and the flat-out engine on the team
-            pages are made in your browser. Sound is on from the start; the switch in the navigation turns it off.
+            {t(
+              "The engines at the start lights, in the history section and at the race start are real Formula 1 cars, and the pit stop's wheel guns come from a real team's practice, all from recordings shared on Wikimedia Commons; those clips were cut, faded and levelled, and are shared under the same licences. The pit stop radio is a clip from Myinstants, uploaded there with no source or licence stated. The start-light beeps and the flat-out engine on the team pages are made in your browser. Sound is on from the start; the switch in the navigation turns it off."
+            )}
           </p>
           {SOUND_GROUPS.map((g) => (
             <div key={`${g.author}-${g.licence.name}`} className="footer__group">
@@ -72,7 +70,7 @@ export default function Footer() {
                 {g.items.map((c) => (
                   <li key={c.key}>
                     <a className="link" href={c.url} target="_blank" rel="noreferrer">
-                      {c.car} ({c.where})
+                      {c.car} ({t(c.where)})
                     </a>
                   </li>
                 ))}
@@ -83,20 +81,23 @@ export default function Footer() {
 
         <section className="footer__about" aria-labelledby="about-title">
           <h2 id="about-title" className="footer__h">
-            About this site
+            {t('About this site')}
           </h2>
           <p className="footer__p">
-            Lights Out 26 is an unofficial fan project, built as a front-end portfolio piece. It is not affiliated with Formula 1, the FIA or any team. Team names, car
-            liveries and sponsor marks that appear in the photographs belong to their owners.
+            {t(
+              'Lights Out 26 is an unofficial fan project, built as a front-end portfolio piece. It is not affiliated with Formula 1, the FIA or any team. Team names, car liveries and sponsor marks that appear in the photographs belong to their owners.'
+            )}
           </p>
           <p className="footer__p">
-            Results, standings and records are as they stood after round {AS_OF.round} of {AS_OF.of}, the {AS_OF.race} on {AS_OF.date}, compiled from Wikipedia’s season
-            and records pages and checked against published standings.
+            {t(
+              'Results, standings and records are as they stood after round {round} of {of}, the {race} on {date}, compiled from Wikipedia’s season and records pages and checked against published standings.',
+              { round: AS_OF.round, of: AS_OF.of, race: t(AS_OF.race), date: t(AS_OF.date) }
+            )}
           </p>
           <p className="footer__p">
-            Built with React, GSAP and WebGL, with smooth scrolling by Lenis. The cars are the original photographs, drawn by small shaders that use each photo’s depth
-            map for parallax, relighting, wheel spin, motion blur and heat haze. The burst sequences on the team pages are real consecutive frames, blended by a shader
-            with motion blur between them. The depth maps were made with Depth Anything V2 Small (Apache License 2.0). Type is set in Archivo (SIL Open Font License).
+            {t(
+              'Built with React, GSAP and WebGL, with smooth scrolling by Lenis. The cars are the original photographs, drawn by small shaders that use each photo’s depth map for parallax, relighting, wheel spin, motion blur and heat haze. The burst sequences on the team pages are real consecutive frames, blended by a shader with motion blur between them. The depth maps were made with Depth Anything V2 Small (Apache License 2.0). Type is set in Archivo (SIL Open Font License).'
+            )}
           </p>
         </section>
       </div>

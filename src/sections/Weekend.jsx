@@ -5,6 +5,7 @@ import useProgress from '../hooks/useProgress';
 import { scrollToY } from '../lib/smooth';
 import { buildWeekend, towerAt, teamColour, lapText } from '../lib/session';
 import { isSoundOn, play, preloadSounds } from '../lib/sound';
+import { t } from '../lib/lang';
 import './Weekend.css';
 
 const SLOTS = Array.from({ length: 22 }, (_, i) => i + 1);
@@ -22,14 +23,14 @@ const sessionProgress = (local) => Math.min(1, Math.max(0, (local - 0.06) / 0.72
  * so a driver who improves visibly climbs past the others.
  */
 function Tower({ id, s }) {
-  const t = useMemo(() => towerAt(WEEKEND_DATA, id, s), [id, s]);
-  const byCode = useMemo(() => Object.fromEntries(t.rows.map((r) => [r.code, r])), [t]);
+  const tower = useMemo(() => towerAt(WEEKEND_DATA, id, s), [id, s]);
+  const byCode = useMemo(() => Object.fromEntries(tower.rows.map((r) => [r.code, r])), [tower]);
 
   // Remember each driver's last slot in this session, so a change of place shows an arrow.
   const moves = useRef({ id: null, rows: {} });
   if (moves.current.id !== id) moves.current = { id, rows: {} };
   const marks = moves.current.rows;
-  t.rows.forEach((r) => {
+  tower.rows.forEach((r) => {
     const m = marks[r.code];
     if (!m) marks[r.code] = { slot: r.slot, n: 0, dir: null };
     else if (m.slot !== r.slot) {
@@ -38,25 +39,25 @@ function Tower({ id, s }) {
   });
 
   return (
-    <div className="tower" data-done={t.done ? '' : undefined} data-session={id}>
+    <div className="tower" data-done={tower.done ? '' : undefined} data-session={id}>
       <div className="tower__head">
-        <span className="tower__session">{SESSION_NAME[id]}</span>
-        <span className="tower__clock t-num">{t.clock}</span>
-        <span className="tower__flag" title="Chequered flag" />
+        <span className="tower__session">{t(SESSION_NAME[id])}</span>
+        <span className="tower__clock t-num">{tower.clock}</span>
+        <span className="tower__flag" title={t('Chequered flag')} />
       </div>
-      <div className="tower__list" style={{ '--count': t.rows.length }}>
+      <div className="tower__list" style={{ '--count': tower.rows.length }}>
         {CODES.map((code) => {
           const r = byCode[code];
           const m = marks[code];
           const first = r.slot === 0 && r.state !== 'wait';
-          const time = r.time === undefined ? 'No time' : first || r.state === 'gone' ? lapText(r.time) : `+${(r.time - t.lead).toFixed(3)}`;
+          const time = r.time === undefined ? t('No time') : first || r.state === 'gone' ? lapText(r.time) : `+${(r.time - tower.lead).toFixed(3)}`;
           return (
             <div
               key={code}
               className="tower__row"
               data-state={r.state}
               data-alt={r.slot % 2 ? '' : undefined}
-              data-pole={id === 'q3' && t.done && r.slot === 0 ? '' : undefined}
+              data-pole={id === 'q3' && tower.done && r.slot === 0 ? '' : undefined}
               style={{ '--slot': r.slot, '--col': r.slot >= 11 ? 1 : 0, '--r': r.slot % 11, '--team-c': teamColour(code) }}
             >
               <span className="tower__pos t-num">{r.slot + 1}</span>
@@ -67,13 +68,13 @@ function Tower({ id, s }) {
             </div>
           );
         })}
-        {t.cut && (
-          <div className="tower__cut" style={{ '--slot': t.cut, '--col': t.cut >= 11 ? 1 : 0, '--r': t.cut % 11 }}>
-            <span>{CUT_LABEL[id]}</span>
+        {tower.cut && (
+          <div className="tower__cut" style={{ '--slot': tower.cut, '--col': tower.cut >= 11 ? 1 : 0, '--r': tower.cut % 11 }}>
+            <span>{t(CUT_LABEL[id])}</span>
           </div>
         )}
       </div>
-      <p className="tower__note">Illustrative session, simulated from the 2026 standings</p>
+      <p className="tower__note">{t('Illustrative session, simulated from the 2026 standings')}</p>
     </div>
   );
 }
@@ -123,32 +124,32 @@ export default function Weekend() {
         <div className="weekend__inner wrap">
           <div className="weekend__copy">
             <h2 id="weekend-title" className="weekend__kicker">
-              How a race weekend works
+              {t('How a race weekend works')}
             </h2>
 
             <div className="weekend__steps">
               {WEEKEND.map((st, i) => (
                 <article key={st.id} className="wstep" data-state={i === step ? 'on' : i < step ? 'past' : 'next'} aria-hidden={i !== step}>
-                  <p className="wstep__day">{st.day}</p>
+                  <p className="wstep__day">{t(st.day)}</p>
                   <h3 className="wstep__title t-display">
-                    <SplitText text={st.title} styleName="brake" inView={i === step} stagger={20} />
+                    <SplitText text={t(st.title)} styleName="brake" inView={i === step} stagger={20} />
                   </h3>
-                  <p className="wstep__lead">{st.lead}</p>
-                  <p className="wstep__body">{st.body}</p>
+                  <p className="wstep__lead">{t(st.lead)}</p>
+                  <p className="wstep__body">{t(st.body)}</p>
                   <p className="wstep__stat">
-                    <strong className="t-num">{st.stat[0]}</strong>
-                    <span>{st.stat[1]}</span>
+                    <strong className="t-num">{t(st.stat[0])}</strong>
+                    <span>{t(st.stat[1])}</span>
                   </p>
                 </article>
               ))}
             </div>
 
-            <ol className="weekend__rail" aria-label="Stages of the weekend">
+            <ol className="weekend__rail" aria-label={t('Stages of the weekend')}>
               {WEEKEND.map((st, i) => (
                 <li key={st.id}>
                   <button type="button" className="weekend__dot" aria-current={i === step ? 'step' : undefined} data-done={i < step ? '' : undefined} onClick={() => jump(i)}>
                     <i style={i === step && !racing ? { '--fill': s } : undefined} />
-                    <span>{SHORT[i]}</span>
+                    <span>{t(SHORT[i])}</span>
                   </button>
                 </li>
               ))}

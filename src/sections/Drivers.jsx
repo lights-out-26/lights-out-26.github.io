@@ -8,6 +8,7 @@ import { cumulative, driverSeason } from '../lib/points';
 import { teamVars, ABBR, fitSize } from '../lib/team';
 import useInView from '../hooks/useInView';
 import { useTilt } from '../hooks/usePointer';
+import { t, useLang } from '../lib/lang';
 import './Drivers.css';
 
 const TOP = 390; // the leader's points: every sparkline shares this scale
@@ -24,6 +25,7 @@ function sparkPath(values, w = 220, h = 44) {
 
 const DriverCard = memo(function DriverCard({ d, index }) {
   const [flipped, setFlipped] = useState(false);
+  useLang(); // memo'd, so it listens for the language itself
   const tilt = useTilt({ max: 11 });
   const team = TEAM_BY_ID[d.team];
   const season = useMemo(() => driverSeason(d.code), [d.code]);
@@ -43,7 +45,7 @@ const DriverCard = memo(function DriverCard({ d, index }) {
           </div>
           <p className="dcard__top">
             <span className="t-num">P{RANK[d.code]}</span>
-            <span className="t-num">{season.points} pts</span>
+            <span className="t-num">{t('{n} pts', { n: season.points })}</span>
           </p>
           <div className="dcard__id">
             <p className="dcard__first">{d.first}</p>
@@ -57,7 +59,7 @@ const DriverCard = memo(function DriverCard({ d, index }) {
               <span>
                 {team.name}
                 <br />
-                {d.nat}
+                {t(d.nat)}
               </span>
             </p>
           </div>
@@ -78,23 +80,29 @@ const DriverCard = memo(function DriverCard({ d, index }) {
               ['Points', c.points],
             ].map(([label, value]) => (
               <div key={label}>
-                <dt>{label}</dt>
+                <dt>{t(label)}</dt>
                 <dd className="t-num">{fmt(value)}</dd>
               </div>
             ))}
           </dl>
           {c.titles.length > 0 && (
             <p className="dcard__titles">
-              World Champion <span className="t-num">{c.titles.length > 3 ? `${c.titles.length} times, ${c.titles[0]} to ${c.titles[c.titles.length - 1]}` : c.titles.join(', ')}</span>
+              {t('World Champion')}{' '}
+              <span className="t-num">
+                {c.titles.length > 3 ? t('{n} times, {from} to {to}', { n: c.titles.length, from: c.titles[0], to: c.titles[c.titles.length - 1] }) : c.titles.join(', ')}
+              </span>
             </p>
           )}
-          <p className="dcard__note">{d.note}</p>
+          <p className="dcard__note">{t(d.note)}</p>
           <figure className="dcard__spark">
             <svg viewBox="0 -3 220 50" preserveAspectRatio="none" aria-hidden="true">
               <path d={path} pathLength="1" />
             </svg>
             <figcaption>
-              2026 points by round: <span className="t-num">{season.points}</span>, with {season.wins} {season.wins === 1 ? 'win' : 'wins'}
+              {t(season.wins === 1 ? '2026 points by round: {points}, with {wins} win' : '2026 points by round: {points}, with {wins} wins', {
+                points: <span className="t-num">{season.points}</span>,
+                wins: season.wins,
+              })}
             </figcaption>
           </figure>
         </div>
@@ -103,9 +111,9 @@ const DriverCard = memo(function DriverCard({ d, index }) {
         type="button"
         className="dcard__toggle"
         aria-pressed={flipped}
-        aria-label={`${name}, ${team.name}. ${flipped ? 'Turn the card back over' : 'Turn the card over for career figures'}`}
+        aria-label={`${name}, ${team.name}. ${t(flipped ? 'Turn the card back over' : 'Turn the card over for career figures')}`}
         data-cursor="view"
-        data-cursor-label={flipped ? 'Back' : 'Profile'}
+        data-cursor-label={t(flipped ? 'Back' : 'Profile')}
         onClick={() => setFlipped((f) => !f)}
       />
     </li>
@@ -166,30 +174,32 @@ export default function Drivers() {
     <section id="drivers" className="drivers" ref={ref} data-inview={inView ? 'true' : 'false'}>
       <header className="drivers__head wrap">
         <h2 className="t-display" data-skew="">
-          <SplitText text="Twenty-two drivers" styleName="focus" stagger={22} />
+          <SplitText text={t('Twenty-two drivers')} styleName="focus" stagger={22} />
         </h2>
         <div className="drivers__bar rise" style={{ '--delay': '300ms' }}>
           <p className="t-lead">
-            Five world champions, one full-season rookie, and a 20-year-old at the top of the standings. Career figures run to the end of round {AS_OF.round}. Turn a card
-            over for the detail.
+            {t(
+              'Five world champions, one full-season rookie, and a 20-year-old at the top of the standings. Career figures run to the end of round {round}. Turn a card over for the detail.',
+              { round: AS_OF.round }
+            )}
           </p>
           <div className="drivers__tools">
-            <div className="seg drivers__seg" role="group" aria-label="Order the drivers">
+            <div className="seg drivers__seg" role="group" aria-label={t('Order the drivers')}>
               {[
                 ['standing', 'By standing'],
                 ['team', 'By team'],
               ].map(([id, text]) => (
                 <button key={id} type="button" aria-pressed={order === id} onClick={() => { setOrder(id); rail.current && (rail.current.scrollLeft = 0); }}>
-                  {text}
+                  {t(text)}
                 </button>
               ))}
               <i aria-hidden="true" />
             </div>
             <div className="drivers__arrows">
-              <button type="button" onClick={() => step(-1)} aria-label="Earlier drivers">
+              <button type="button" onClick={() => step(-1)} aria-label={t('Earlier drivers')}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5l-7 7 7 7" /></svg>
               </button>
-              <button type="button" onClick={() => step(1)} aria-label="More drivers">
+              <button type="button" onClick={() => step(1)} aria-label={t('More drivers')}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5l7 7-7 7" /></svg>
               </button>
             </div>
@@ -202,9 +212,9 @@ export default function Drivers() {
         key={order}
         ref={rail}
         data-cursor="drag"
-        data-cursor-label="Drag"
+        data-cursor-label={t('Drag')}
         tabIndex={0}
-        aria-label="Drivers"
+        aria-label={t('Drivers')}
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}

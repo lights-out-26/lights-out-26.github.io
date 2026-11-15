@@ -1,5 +1,6 @@
 import { TEAM_BY_ID } from '../data/teams';
 import { CONSTRUCTORS } from '../data/season';
+import { getLang } from './lang';
 
 /**
  * The CSS custom properties that put a team "on stage": its colours and its
@@ -24,6 +25,7 @@ const STANDING = Object.fromEntries(CONSTRUCTORS.map(([id, pts], i) => [id, { po
 export const standing = (id) => STANDING[id];
 
 export const ordinal = (n) => {
+  if (getLang() === 'ko') return `${n}위`;
   const s = ['th', 'st', 'nd', 'rd'];
   const v = n % 100;
   return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;

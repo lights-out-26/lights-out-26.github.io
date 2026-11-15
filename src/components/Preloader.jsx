@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { carSrc } from './PhotoCar';
 import { isSoundOn, play, preloadSounds, startBeeps } from '../lib/sound';
+import { t } from '../lib/lang';
 import './Preloader.css';
 
 const LIGHTS = [0, 1, 2, 3, 4];
@@ -132,13 +133,13 @@ export default function Preloader({ onDone }) {
         </div>
         <p className="pre__name">Lights Out 26</p>
         {start ? (
-          <p className="pre__hint" role="status">Start procedure</p>
+          <p className="pre__hint" role="status">{t('Start procedure')}</p>
         ) : (
           <>
-            <button type="button" className="pre__start" onClick={go} autoFocus aria-label="Start the lights">
-              Start
+            <button type="button" className="pre__start" onClick={go} autoFocus aria-label={t('Start the lights')}>
+              {t('Start')}
             </button>
-            <p className="pre__hint">Press start when you are ready</p>
+            <p className="pre__hint">{t('Press start when you are ready')}</p>
           </>
         )}
       </div>

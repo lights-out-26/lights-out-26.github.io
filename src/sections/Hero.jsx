@@ -9,6 +9,7 @@ import { TEAMS } from '../data/teams';
 import { AS_OF } from '../data/season';
 import { preloadTextures } from '../gl/engine';
 import { teamVars, standing, ordinal } from '../lib/team';
+import { t } from '../lib/lang';
 import useProgress from '../hooks/useProgress';
 import useInView from '../hooks/useInView';
 import useReducedMotion from '../hooks/useReducedMotion';
@@ -87,7 +88,7 @@ function HeroCar({ slot, live, boost }) {
         ref={car}
         id={`${team.id}-a`}
         tint={team.colors.accent}
-        alt={phase === 'exit' ? '' : `The ${team.chassisFull}, photographed from the side at the 2026 Austrian Grand Prix`}
+        alt={phase === 'exit' ? '' : t('The {car}, photographed from the side at the 2026 Austrian Grand Prix', { car: team.chassisFull })}
         hd
         eager
         pad={CAR_PAD}
@@ -219,25 +220,26 @@ export default function Hero({ booted }) {
         <div className="hero__foot wrap scrub">
           <div className="hero__now" key={team.id}>
             <p className="hero__place">
-              <span>{ordinal(place.pos)} of 11 in the constructors’ standings</span>
+              <span>{t('{pos} of 11 in the constructors’ standings', { pos: ordinal(place.pos) })}</span>
             </p>
             <h2 className="hero__team t-team">
               <span>{team.name}</span>
             </h2>
             <p className="hero__spec">
-              <span>
-                {team.chassis}, {team.powerUnit} power
-              </span>
+              <span>{t('{chassis}, {engine} power', { chassis: team.chassis, engine: team.powerUnit })}</span>
             </p>
           </div>
 
           <div className="hero__side">
             <p className="hero__lead">
-              Eleven teams, twenty-two cars and a new rulebook. An unofficial tour of the 2026 grid as it stood after round {AS_OF.round} of {AS_OF.of}.
+              {t('Eleven teams, twenty-two cars and a new rulebook. An unofficial tour of the 2026 grid as it stood after round {round} of {of}.', {
+                round: AS_OF.round,
+                of: AS_OF.of,
+              })}
             </p>
             <div className="hero__actions">
-              <Link className="btn" to={`#team-${team.id}`} data-cursor="view" data-cursor-label="Open">
-                See the {team.short || team.name} page
+              <Link className="btn" to={`#team-${team.id}`} data-cursor="view" data-cursor-label={t('Open')}>
+                {t('See the {team} page', { team: team.short || team.name })}
               </Link>
               <Credit id={`${team.id}-a`} />
             </div>
@@ -245,19 +247,19 @@ export default function Hero({ booted }) {
 
           <ol
             className="hero__picker"
-            aria-label="Choose the car on stage"
+            aria-label={t('Choose the car on stage')}
             onPointerEnter={() => setHeld(true)}
             onPointerLeave={() => setHeld(false)}
             onFocus={() => setHeld(true)}
             onBlur={() => setHeld(false)}
           >
-            {TEAMS.map((t, i) => (
-              <li key={t.id}>
+            {TEAMS.map((tm, i) => (
+              <li key={tm.id}>
                 <button
                   type="button"
                   className="hero__pick"
-                  style={teamVars(t)}
-                  aria-label={`Show the ${t.name} car`}
+                  style={teamVars(tm)}
+                  aria-label={t('Show the {team} car', { team: tm.name })}
                   aria-pressed={i === current}
                   data-running={i === current && running ? '' : undefined}
                   onClick={() => show(i)}
@@ -269,8 +271,8 @@ export default function Hero({ booted }) {
           </ol>
         </div>
 
-        <Link className="hero__scroll scrub" to="#about" aria-label="Scroll to the next section">
-          <span>Scroll</span>
+        <Link className="hero__scroll scrub" to="#about" aria-label={t('Scroll to the next section')}>
+          <span>{t('Scroll')}</span>
           <i aria-hidden="true" />
         </Link>
       </div>

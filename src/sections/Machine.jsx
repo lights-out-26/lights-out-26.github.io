@@ -10,6 +10,7 @@ import { TEAMS, TEAM_BY_ID } from '../data/teams';
 import { teamVars } from '../lib/team';
 import useProgress from '../hooks/useProgress';
 import useInView from '../hooks/useInView';
+import { t } from '../lib/lang';
 import './Machine.css';
 
 const FIRST = 0.44; // scroll progress at which the first callout appears
@@ -64,10 +65,11 @@ export default function Machine() {
         <div className="machine__top wrap">
           <header className="machine__head">
             <h2 id="machine-title" className="t-h2" data-skew="">
-              The 2026 car, piece by piece
+              {t('The 2026 car, piece by piece')}
             </h2>
             <p className="machine__lead">
-              New chassis rules and new power unit rules arrived together for the first time. {glAvailable() ? 'Scroll to scan the car, then see what changed.' : 'Scroll on to see what changed.'}
+              {t('New chassis rules and new power unit rules arrived together for the first time.')}{' '}
+              {t(glAvailable() ? 'Scroll to scan the car, then see what changed.' : 'Scroll on to see what changed.')}
             </p>
           </header>
 
@@ -75,17 +77,17 @@ export default function Machine() {
             {part ? (
               <article className="mpart" key={part.id}>
                 <h3 className="mpart__title">
-                  <SplitText text={part.title} styleName="focus" inView />
+                  <SplitText text={t(part.title)} styleName="focus" inView />
                 </h3>
-                <p className="mpart__body">{part.body}</p>
+                <p className="mpart__body">{t(part.body)}</p>
                 <p className="mpart__figure">
-                  <strong className="t-num">{part.figure[0]}</strong>
-                  <span>{part.figure[1]}</span>
+                  <strong className="t-num">{t(part.figure[0])}</strong>
+                  <span>{t(part.figure[1])}</span>
                 </p>
               </article>
             ) : (
               <p className="machine__wait">
-                {glAvailable() ? 'A blueprint traced from the photograph’s edges and depth. Keep scrolling to scan it.' : 'Keep scrolling to see what changed.'}
+                {t(glAvailable() ? 'A blueprint traced from the photograph’s edges and depth. Keep scrolling to scan it.' : 'Keep scrolling to see what changed.')}
               </p>
             )}
           </div>
@@ -101,13 +103,13 @@ export default function Machine() {
                 ref={car}
                 id={`${carId}-a`}
                 tint={team.colors.accent}
-                alt={`The ${team.chassisFull} from the side, with the main parts of a 2026 car marked`}
+                alt={t('The {car} from the side, with the main parts of a 2026 car marked', { car: team.chassisFull })}
                 hd
                 pad={PAD}
                 initial={{ ...MODES[mode], scan: scan.current, blue: 1, tilt: 0.005 }}
               />
             </div>
-            <ol className="machine__hots" aria-label="Parts of the car">
+            <ol className="machine__hots" aria-label={t('Parts of the car')}>
               {PARTS.map((p, i) => (
                 <li
                   key={p.id}
@@ -129,7 +131,7 @@ export default function Machine() {
                     onPointerEnter={() => i <= reached && setPicked(i)}
                   >
                     <i aria-hidden="true" />
-                    <span>{p.label}</span>
+                    <span>{t(p.label)}</span>
                   </button>
                 </li>
               ))}
@@ -139,25 +141,27 @@ export default function Machine() {
 
         <div className="machine__bottom wrap" ref={dataRef} data-inview={dataIn ? 'true' : 'false'}>
           <div className="machine__controls">
-            <div className="seg" role="group" aria-label="Aerodynamic mode">
+            <div className="seg" role="group" aria-label={t('Aerodynamic mode')}>
               {[
                 ['corner', 'Corner mode'],
                 ['straight', 'Straight mode'],
               ].map(([id, text]) => (
                 <button key={id} type="button" aria-pressed={mode === id} onClick={() => setMode(id)}>
-                  {text}
+                  {t(text)}
                 </button>
               ))}
               <i aria-hidden="true" />
             </div>
             <p className="machine__modenote">
-              {mode === 'corner'
-                ? 'Flaps closed. The wings push the car into the road for grip.'
-                : 'Flaps open on both wings. Drag falls away and the car runs faster down the straight.'}
+              {t(
+                mode === 'corner'
+                  ? 'Flaps closed. The wings push the car into the road for grip.'
+                  : 'Flaps open on both wings. Drag falls away and the car runs faster down the straight.'
+              )}
             </p>
-            <div className="machine__teams" role="group" aria-label="Change the car shown">
-              {TEAMS.map((t) => (
-                <button key={t.id} type="button" style={teamVars(t)} aria-pressed={t.id === carId} aria-label={t.name} title={t.name} onClick={() => setCarId(t.id)} />
+            <div className="machine__teams" role="group" aria-label={t('Change the car shown')}>
+              {TEAMS.map((tm) => (
+                <button key={tm.id} type="button" style={teamVars(tm)} aria-pressed={tm.id === carId} aria-label={tm.name} title={tm.name} onClick={() => setCarId(tm.id)} />
               ))}
               <Credit id={`${carId}-a`} />
             </div>
@@ -166,31 +170,31 @@ export default function Machine() {
           <dl className="machine__dims">
             {DIMENSIONS.map((d) => (
               <div key={d.label}>
-                <dt>{d.label}</dt>
+                <dt>{t(d.label)}</dt>
                 <dd>
                   <Count to={d.value} className="machine__dimval" />
                   <span className="machine__unit">{d.unit}</span>
                   <span className="machine__was">
-                    was {d.was.toLocaleString('en-GB')}
+                    {t('was {v}', { v: d.was.toLocaleString('en-GB') })}
                   </span>
                 </dd>
               </div>
             ))}
           </dl>
 
-          <figure className="power" aria-label={`Peak power: about ${POWER.engine} kilowatts from the engine and ${POWER.electric} from the electric motor, up from ${POWER.electricBefore} before 2026`}>
-            <figcaption>Where the power comes from</figcaption>
+          <figure className="power" aria-label={t('Peak power: about {engine} kilowatts from the engine and {electric} from the electric motor, up from {before} before 2026', { engine: POWER.engine, electric: POWER.electric, before: POWER.electricBefore })}>
+            <figcaption>{t('Where the power comes from')}</figcaption>
             <div className="power__bar" aria-hidden="true">
               <span className="power__seg power__seg--engine" style={{ '--share': POWER.engine / total }}>
-                <b className="t-num">{POWER.engine} kW</b> engine
+                {t('{kw} engine', { kw: <b className="t-num">{POWER.engine} kW</b> })}
               </span>
               <span className="power__seg power__seg--electric" style={{ '--share': POWER.electric / total }}>
-                <b className="t-num">{POWER.electric} kW</b> electric
+                {t('{kw} electric', { kw: <b className="t-num">{POWER.electric} kW</b> })}
               </span>
             </div>
             <p className="power__note" aria-hidden="true">
               <i style={{ '--share': POWER.electricBefore / total }} />
-              Until 2025 the electric motor gave {POWER.electricBefore} kW
+              {t('Until 2025 the electric motor gave {kw} kW', { kw: POWER.electricBefore })}
             </p>
           </figure>
         </div>

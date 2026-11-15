@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { creditFor } from '../data/credits';
+import { t } from '../lib/lang';
 import './Photo.css';
 
 const BASE = `${import.meta.env.BASE_URL}photos/`;
@@ -10,7 +11,7 @@ export function Credit({ id, className = '' }) {
   if (!c) return null;
   return (
     <span className={`credit ${className}`}>
-      {c.kind === 'video' ? 'Video' : 'Photo'}:{' '}
+      {t(c.kind === 'video' ? 'Video' : 'Photo')}:{' '}
       <a className="link" href={c.url} target="_blank" rel="noreferrer">
         {c.author}
       </a>
@@ -39,7 +40,7 @@ export function Credits({ ids, className = '' }) {
   const kind = ids.every((id) => creditFor(id)?.kind === 'video') ? 'Video' : groups.length > 1 || ids.length > 1 ? 'Photos' : 'Photo';
   return (
     <span className={`credit ${className}`}>
-      {kind}:{' '}
+      {t(kind)}:{' '}
       {groups.map((g, gi) => (
         <span key={g.author}>
           {gi > 0 && '; '}
@@ -47,7 +48,7 @@ export function Credits({ ids, className = '' }) {
           {g.items.map((it, k) => (
             <span key={it.n}>
               {k > 0 && ', '}
-              <a className="link" href={it.url} target="_blank" rel="noreferrer" aria-label={`${it.label}, original on Wikimedia Commons`}>
+              <a className="link" href={it.url} target="_blank" rel="noreferrer" aria-label={t('{label}, original on Wikimedia Commons', { label: it.label })}>
                 {it.n}
               </a>
             </span>
@@ -92,7 +93,7 @@ function Photo({ id, alt, ratio = '16 / 10', eager = false, position = '50% 50%'
         )}
         {state === 'failed' && (
           <div className="photo__missing">
-            <strong>Photo unavailable</strong>
+            <strong>{t('Photo unavailable')}</strong>
             <span>{alt}</span>
           </div>
         )}

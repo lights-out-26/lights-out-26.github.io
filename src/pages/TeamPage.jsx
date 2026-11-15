@@ -21,6 +21,7 @@ import { usePointerParallax } from '../hooks/usePointer';
 import useReducedMotion from '../hooks/useReducedMotion';
 import { glAvailable } from '../gl/engine';
 import { engine as startEngine, isSoundOn } from '../lib/sound';
+import { t } from '../lib/lang';
 import './TeamPage.css';
 
 const RANK = Object.fromEntries(DRIVER_ORDER.map((code, i) => [code, i + 1]));
@@ -94,7 +95,7 @@ function TeamHero({ team }) {
               ref={car}
               id={`${team.id}-a`}
               tint={team.colors.accent}
-              alt={`The ${team.chassisFull}, photographed from the side at the 2026 Austrian Grand Prix`}
+              alt={t('The {car}, photographed from the side at the 2026 Austrian Grand Prix', { car: team.chassisFull })}
               hd
               eager
               pad={HERO_PAD}
@@ -105,13 +106,13 @@ function TeamHero({ team }) {
         </div>
 
         <div className="tph__top wrap scrub">
-          <Link className="tph__back" to="#teams" restore label="The grid">
+          <Link className="tph__back" to="#teams" restore label={t('The grid')}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5l-7 7 7 7" /></svg>
-            All teams
+            {t('All teams')}
           </Link>
           <p className="tph__place">
             <span className="mark" aria-hidden="true">{ABBR[team.id]}</span>
-            {ordinal(place.pos)} in the 2026 constructors’ standings, <span className="t-num">{place.points}</span> points
+            {t('{pos} in the 2026 constructors’ standings, {points} points', { pos: ordinal(place.pos), points: <span className="t-num">{place.points}</span> })}
           </p>
           <h1 className="tph__name t-team">
             <SplitText text={team.name} styleName="rise" inView stagger={24} delay={420} />
@@ -121,13 +122,13 @@ function TeamHero({ team }) {
 
         <dl className="tph__facts wrap scrub">
           {[
-            ['Base', team.base],
-            ['Licence', team.country],
+            ['Base', t(team.base)],
+            ['Licence', t(team.country)],
             ['Power unit', team.powerUnit],
-            ['In Formula 1', team.since],
+            ['In Formula 1', t(team.since)],
           ].map(([k, v], i) => (
             <div key={k} style={{ '--i': i }}>
-              <dt>{k}</dt>
+              <dt>{t(k)}</dt>
               <dd>{v}</dd>
             </div>
           ))}
@@ -139,14 +140,14 @@ function TeamHero({ team }) {
 
 function TeamStory({ team }) {
   return (
-    <Reveal as="section" className="tps wrap" aria-label={`About ${team.name}`}>
+    <Reveal as="section" className="tps wrap" aria-label={t('About {team}', { team: team.name })}>
       <p className="tps__intro">
-        <SplitText text={team.intro} styleName="focus" stagger={7} />
+        <SplitText text={t(team.intro)} styleName="focus" stagger={7} />
       </p>
       <div className="tps__story">
         {team.story.map((para, i) => (
           <p key={i} className="rise" style={{ '--delay': `${250 + i * 120}ms` }}>
-            {para}
+            {t(para)}
           </p>
         ))}
       </div>
@@ -266,9 +267,9 @@ function TeamSpeed({ team }) {
       <div className="tpv__pin">
         <div className="tpv__head wrap">
           <h2 id="tpv-title" className="t-h2" data-skew="">
-            The {team.chassis}, flat out
+            {t('The {chassis}, flat out', { chassis: team.chassis })}
           </h2>
-          <p>Scroll to take it from a standstill to about 340 km/h, roughly what these cars reach at the end of the longest straights.</p>
+          <p>{t('Scroll to take it from a standstill to about 340 km/h, roughly what these cars reach at the end of the longest straights.')}</p>
         </div>
         <div className="tpv__stage">
           <div className="tpv__road" ref={road} aria-hidden="true" />
@@ -279,7 +280,7 @@ function TeamSpeed({ team }) {
             <GLCar
               id={`${team.id}-a`}
               tint={team.colors.accent}
-              alt={`The ${team.chassisFull} at speed`}
+              alt={t('The {car} at speed', { car: team.chassisFull })}
               hd
               pad={SPEED_PAD}
               initial={{ heat: 0.25, sheen: 0.8, tilt: 0.006, velGain: 0, hold: 1 }}
@@ -295,12 +296,12 @@ function TeamSpeed({ team }) {
             <span>km/h</span>
           </p>
           <p className="tpv__gear">
-            <span>Gear</span>
+            <span>{t('Gear')}</span>
             <b className="t-num" ref={gearEl}>
               1
             </b>
           </p>
-          <p className="tpv__mode">Straight mode</p>
+          <p className="tpv__mode">{t('Straight mode')}</p>
           <div className="tpv__bar">
             <i ref={barEl} />
           </div>
@@ -326,13 +327,13 @@ function TeamAction({ team }) {
   }, []);
   const ref = useProgress('cover', onScroll);
   return (
-    <section className="tpa" ref={ref} data-timeline="cover" aria-label={`${team.name} on track`}>
+    <section className="tpa" ref={ref} data-timeline="cover" aria-label={t('{team} on track', { team: team.name })}>
       <div className="tpa__frame scrub">
         <GLPhoto
           ref={photo}
           id={key}
           depth={`depth/action-${team.id}`}
-          alt={`A ${team.chassisFull} at speed during the 2026 Austrian Grand Prix weekend`}
+          alt={t('A {car} at speed during the 2026 Austrian Grand Prix weekend', { car: team.chassisFull })}
           ratio="21 / 10"
           tint={team.colors.accent}
           initial={{ focus: 0.52, zoom: 1.32, dolly: 0.14, vignette: 0.4 }}
@@ -342,7 +343,7 @@ function TeamAction({ team }) {
         </p>
       </div>
       <p className="tpa__cap wrap">
-        <span>Red Bull Ring, Austrian Grand Prix, June 2026.</span> <Credit id={key} />
+        <span>{t('Red Bull Ring, Austrian Grand Prix, June 2026.')}</span> <Credit id={key} />
       </p>
     </section>
   );
@@ -376,17 +377,25 @@ function TeamSequence({ team, set }) {
     [n]
   );
   const ref = useProgress('contain', gl ? onScroll : undefined);
-  const alt = `${d.first} ${d.last}’s ${team.chassis}, car ${set.no}, photographed ${n} times from one spot as it comes through a corner at Zandvoort`;
-  const span = set.seconds ? `${set.seconds.toFixed(1)} seconds` : 'a few seconds';
+  const alt = t('{driver}’s {chassis}, car {no}, photographed {n} times from one spot as it comes through a corner at Zandvoort', {
+    driver: `${d.first} ${d.last}`,
+    chassis: team.chassis,
+    no: set.no,
+    n,
+  });
+  const span = set.seconds ? t('{s} seconds', { s: set.seconds.toFixed(1) }) : t('a few seconds');
 
   const head = (
     <div className="tpq__head wrap">
       <h2 id="tpq-title" className="t-h2" data-skew="">
-        Through the corner
+        {t('Through the corner')}
       </h2>
       <p>
-        {d.first} {d.last} at Zandvoort on 21 August 2026, photographed {n} times from one spot in {span}. The car arrives heading right, swings round towards the
-        lens and leaves heading left.{gl ? ' Scroll to take it round.' : ''}
+        {t(
+          '{driver} at Zandvoort on 21 August 2026, photographed {n} times from one spot in {span}. The car arrives heading right, swings round towards the lens and leaves heading left.',
+          { driver: `${d.first} ${d.last}`, n, span }
+        )}
+        {gl ? t(' Scroll to take it round.') : ''}
       </p>
     </div>
   );
@@ -398,9 +407,9 @@ function TeamSequence({ team, set }) {
         <ol className="tpq__strip wrap">
           {set.frames.map((f, i) => (
             <li key={f.src}>
-              <Photo id={f.src} alt={`${alt}: frame ${i + 1} of ${n}`} ratio="16 / 9" />
+              <Photo id={f.src} alt={t('{alt}: frame {i} of {n}', { alt, i: i + 1, n })} ratio="16 / 9" />
               <p className="tpq__label">
-                <span className="t-num">{i + 1}</span> {SEQ_STEPS[SEQUENCES.motion[i]]}
+                <span className="t-num">{i + 1}</span> {t(SEQ_STEPS[SEQUENCES.motion[i]])}
               </p>
             </li>
           ))}
@@ -444,7 +453,7 @@ function TeamSequence({ team, set }) {
               </p>
               <ol className="tpq__ticks" ref={ticksEl}>
                 {set.frames.map((f, i) => (
-                  <li key={f.src}>{SEQ_STEPS[SEQUENCES.motion[i]]}</li>
+                  <li key={f.src}>{t(SEQ_STEPS[SEQUENCES.motion[i]])}</li>
                 ))}
               </ol>
             </div>
@@ -479,7 +488,7 @@ function DriverRow({ code, team, flip }) {
         {d.no}
       </span>
       <div className="tpd__car scrub">
-        <PhotoCar id={d.car} alt={`${d.first} ${d.last}'s ${team.chassis}, car number ${d.no}`} />
+        <PhotoCar id={d.car} alt={t("{driver}'s {chassis}, car number {no}", { driver: `${d.first} ${d.last}`, chassis: team.chassis, no: d.no })} />
       </div>
       <div className="tpd__copy wrap">
         <p className="tpd__first rise">{d.first}</p>
@@ -487,31 +496,31 @@ function DriverRow({ code, team, flip }) {
           <SplitText text={d.last} styleName="brake" stagger={34} delay={80} />
         </h3>
         <p className="tpd__meta rise" style={{ '--delay': '200ms' }}>
-          {d.nat}, car number <span className="t-num">{d.no}</span>
+          {t('{nat}, car number {no}', { nat: t(d.nat), no: <span className="t-num">{d.no}</span> })}
         </p>
         <p className="tpd__note rise" style={{ '--delay': '280ms' }}>
-          {d.note}
+          {t(d.note)}
         </p>
         <dl className="tpd__stats rise" style={{ '--delay': '360ms' }}>
           <div className="tpd__group">
-            <dt>2026 so far</dt>
+            <dt>{t('2026 so far')}</dt>
             <dd>
               {[
                 ['Standing', `P${RANK[code]}`],
                 ['Points', s.points],
                 ['Wins', s.wins],
                 ['Podiums', s.podiums],
-                ['Best finish', s.best ? `P${s.best}` : 'n/a'],
+                ['Best finish', s.best ? `P${s.best}` : t('n/a')],
               ].map(([k, v]) => (
                 <span key={k}>
                   <b className="t-num">{v}</b>
-                  {k}
+                  {t(k)}
                 </span>
               ))}
             </dd>
           </div>
           <div className="tpd__group">
-            <dt>Career</dt>
+            <dt>{t('Career')}</dt>
             <dd>
               {[
                 ['Starts', c.starts],
@@ -522,7 +531,7 @@ function DriverRow({ code, team, flip }) {
               ].map(([k, v]) => (
                 <span key={k}>
                   <b className="t-num">{fmt(v)}</b>
-                  {k}
+                  {t(k)}
                 </span>
               ))}
             </dd>
@@ -558,10 +567,15 @@ function TeamResults({ team }) {
     <section className="tpr wrap" aria-labelledby="tpr-title">
       <Reveal className="tpr__head">
         <h2 id="tpr-title" className="t-h2" data-skew="">
-          <SplitText text="Honours and results" styleName="rise" />
+          <SplitText text={t('Honours and results')} styleName="rise" />
         </h2>
         <p className="rise" style={{ '--delay': '200ms' }}>
-          All-time figures run to the end of round {AS_OF.round} of 2026{team.titles.constructors || team.titles.drivers ? ', and count titles already settled this year' : ''}.
+          {t(
+            team.titles.constructors || team.titles.drivers
+              ? 'All-time figures run to the end of round {round} of 2026, and count titles already settled this year.'
+              : 'All-time figures run to the end of round {round} of 2026.',
+            { round: AS_OF.round }
+          )}
         </p>
       </Reveal>
 
@@ -569,27 +583,27 @@ function TeamResults({ team }) {
         {honours.map(([label, value], i) => (
           <div key={label} className="tpr__honour">
             <Odometer value={value} className="tpr__big" delay={i * 110} />
-            <p>{label}</p>
+            <p>{t(label)}</p>
           </div>
         ))}
       </Reveal>
 
       <Reveal className="tpr__season" options={{ threshold: 0.25 }}>
-        <h3 className="tpr__h3">2026, round by round</h3>
+        <h3 className="tpr__h3">{t('2026, round by round')}</h3>
         <dl className="tpr__figs">
           {season.map(([label, value], i) => (
             <div key={label} style={{ '--i': i }}>
               <dd>{typeof value === 'number' ? <Count to={value} delay={i * 60} duration={1200} /> : <span className="t-num">{value}</span>}</dd>
-              <dt>{label}</dt>
+              <dt>{t(label)}</dt>
             </div>
           ))}
         </dl>
 
-        <div className="strip" role="table" aria-label={`${team.name}: finishing position of each car in every Grand Prix of 2026`}>
+        <div className="strip" role="table" aria-label={t('{team}: finishing position of each car in every Grand Prix of 2026', { team: team.name })}>
           <div className="strip__row strip__row--head" role="row">
-            <span role="columnheader" className="strip__who">Car</span>
+            <span role="columnheader" className="strip__who">{t('Car')}</span>
             {ROUNDS.map((r) => (
-              <span key={r.code} role="columnheader" title={`${r.name} Grand Prix, ${r.place}`}>
+              <span key={r.code} role="columnheader" title={t('{name} Grand Prix, {place}', { name: t(r.name), place: t(r.place) })}>
                 {r.code}
               </span>
             ))}
@@ -601,11 +615,11 @@ function TeamResults({ team }) {
               </span>
               {rounds.map((entries, i) => {
                 const e = entries[seat];
-                if (!e) return <span key={i} role="cell" className="strip__cell" data-kind="none" style={{ '--i': i }} aria-label="No entry" />;
+                if (!e) return <span key={i} role="cell" className="strip__cell" data-kind="none" style={{ '--i': i }} aria-label={t('No entry')} />;
                 const kind = resultClass(e.pos);
                 const standIn = e.code !== team.drivers[seat];
-                const text = typeof e.pos === 'number' ? `finished ${ordinal(e.pos)}` : RESULT_WORDS[e.pos];
-                const tip = `${ROUNDS[i].name}: ${standIn ? `${e.code} (stand-in) ` : ''}${text}${e.sprint ? `, sprint ${ordinal(e.sprint)}` : ''}`;
+                const text = typeof e.pos === 'number' ? t('finished {pos}', { pos: ordinal(e.pos) }) : t(RESULT_WORDS[e.pos]);
+                const tip = `${t(ROUNDS[i].name)}: ${standIn ? `${e.code} (${t('stand-in')}) ` : ''}${text}${e.sprint ? t(', sprint {pos}', { pos: ordinal(e.sprint) }) : ''}`;
                 return (
                   <span key={i} role="cell" className="strip__cell t-num" data-kind={kind} data-standin={standIn ? '' : undefined} style={{ '--i': i }} data-tip={tip} aria-label={tip} tabIndex={0}>
                     {typeof e.pos === 'number' ? e.pos : e.pos === 'R' ? 'R' : '–'}
@@ -616,12 +630,12 @@ function TeamResults({ team }) {
           ))}
         </div>
         <ul className="strip__key" aria-hidden="true">
-          <li data-kind="win">Win</li>
-          <li data-kind="podium">Podium</li>
-          <li data-kind="points">Points</li>
-          <li data-kind="out">Outside the points</li>
-          <li data-kind="dnf">R: retired</li>
-          <li data-kind="standin">Stand-in driver</li>
+          <li data-kind="win">{t('Win')}</li>
+          <li data-kind="podium">{t('Podium')}</li>
+          <li data-kind="points">{t('Points')}</li>
+          <li data-kind="out">{t('Outside the points')}</li>
+          <li data-kind="dnf">{t('R: retired')}</li>
+          <li data-kind="standin">{t('Stand-in driver')}</li>
         </ul>
       </Reveal>
     </section>
@@ -633,7 +647,7 @@ function TeamStrengths({ team }) {
     <section className="tpt wrap" aria-labelledby="tpt-title">
       <Reveal className="tpt__head">
         <h2 id="tpt-title" className="t-h2" data-skew="">
-          <SplitText text="What defines this car" styleName="rise" />
+          <SplitText text={t('What defines this car')} styleName="rise" />
         </h2>
       </Reveal>
       <ul className="tpt__list">
@@ -642,11 +656,11 @@ function TeamStrengths({ team }) {
             <i className="tpt__rule draw-x" aria-hidden="true" />
             <h3 className="tpt__title t-team">
               <span className="mask-up">
-                <span>{title}</span>
+                <span>{t(title)}</span>
               </span>
             </h3>
             <p className="tpt__body rise" style={{ '--delay': '180ms' }}>
-              {body}
+              {t(body)}
             </p>
           </Reveal>
         ))}
@@ -660,10 +674,10 @@ function TeamNext({ team }) {
   const next = TEAMS[(i + 1) % TEAMS.length];
   const prev = TEAMS[(i + TEAMS.length - 1) % TEAMS.length];
   return (
-    <nav className="tpn" aria-label="More teams">
-      <Link className="tpn__next" to={`#team-${next.id}`} style={teamVars(next)} data-cursor="view" data-cursor-label="Next">
+    <nav className="tpn" aria-label={t('More teams')}>
+      <Link className="tpn__next" to={`#team-${next.id}`} style={teamVars(next)} data-cursor="view" data-cursor-label={t('Next')}>
         <span className="tpn__flood" aria-hidden="true" />
-        <span className="tpn__label">Next team, {ordinal(standing(next.id).pos)} in the standings</span>
+        <span className="tpn__label">{t('Next team, {pos} in the standings', { pos: ordinal(standing(next.id).pos) })}</span>
         <span className="tpn__name t-team">{next.name}</span>
         <span className="tpn__car" aria-hidden="true">
           <PhotoCar id={`${next.id}-a`} alt="" />
@@ -671,10 +685,10 @@ function TeamNext({ team }) {
       </Link>
       <div className="tpn__row wrap">
         <Link className="btn" to={`#team-${prev.id}`} style={teamVars(prev)}>
-          Previous: {prev.name}
+          {t('Previous: {team}', { team: prev.name })}
         </Link>
-        <Link className="btn" to="#teams" restore label="The grid">
-          All eleven teams
+        <Link className="btn" to="#teams" restore label={t('The grid')}>
+          {t('All eleven teams')}
         </Link>
       </div>
     </nav>
@@ -693,7 +707,7 @@ export default function TeamPage({ id }) {
       <section className="tpds" aria-labelledby="tpds-title">
         <Reveal className="tpds__head wrap">
           <h2 id="tpds-title" className="t-display" data-skew="">
-            <SplitText text="The drivers" styleName="brake" />
+            <SplitText text={t('The drivers')} styleName="brake" />
           </h2>
         </Reveal>
         {team.drivers.map((code, i) => (

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { TEAM_BY_ID } from '../data/teams';
+import { t } from '../lib/lang';
 
 /**
  * A tiny hash router. Addresses are plain names so they survive any host:
@@ -60,7 +61,7 @@ export function RouterProvider({ children }) {
       if (busy.current) return;
       busy.current = true;
       const team = next.page === 'team' ? next.id : opts.team || (prev.page === 'team' ? prev.id : null);
-      const label = opts.label || (next.page === 'team' ? TEAM_BY_ID[next.id].name : 'The grid');
+      const label = opts.label || (next.page === 'team' ? TEAM_BY_ID[next.id].name : t('The grid'));
       setTransition({ phase: 'cover', team, label });
       window.setTimeout(() => {
         commit();

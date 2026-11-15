@@ -9,6 +9,7 @@ import { cumulative, driverSeason } from '../lib/points';
 import { teamVars } from '../lib/team';
 import { Link } from '../router/router';
 import useInView from '../hooks/useInView';
+import { list, t } from '../lib/lang';
 import './Stats.css';
 
 const LEADERS = ['ANT', 'VER', 'RUS', 'HAM', 'LEC', 'NOR'];
@@ -80,7 +81,7 @@ function TitleFight() {
   return (
     <figure className="fight" ref={viewRef} data-inview={inView ? 'true' : 'false'}>
       <figcaption className="fight__cap">
-        <h3 className="stats__h3">The title fight, round by round</h3>
+        <h3 className="stats__h3">{t('The title fight, round by round')}</h3>
         <ul className="fight__legend">
           {series.map((s) => (
             <li key={s.code} style={teamVars(s.team)}>
@@ -100,7 +101,10 @@ function TitleFight() {
             height={H}
             role="img"
             tabIndex={0}
-            aria-label={`Line chart of championship points after each of ${ROUNDS.length} rounds. ${labels.map((l) => `${l.name} ${l.v}`).join(', ')}. Use the left and right arrow keys to step through the rounds.`}
+            aria-label={t('Line chart of championship points after each of {n} rounds. {list}. Use the left and right arrow keys to step through the rounds.', {
+              n: ROUNDS.length,
+              list: labels.map((l) => `${l.name} ${l.v}`).join(', '),
+            })}
             onPointerMove={onMove}
             onPointerLeave={() => setAt(null)}
             onKeyDown={onKey}
@@ -171,7 +175,7 @@ function TitleFight() {
         {at != null && (
           <div className="tip" style={{ left: x(at), top: m.t }} data-flip={flip ? '' : undefined} role="status">
             <p className="tip__title">
-              Round {at + 1}, {ROUNDS[at].name}
+              {t('Round {n}, {name}', { n: at + 1, name: t(ROUNDS[at].name) })}
             </p>
             <ul>
               {ranked.map((s) => (
@@ -194,13 +198,13 @@ function Constructors() {
   const top = CONSTRUCTORS[0][1];
   return (
     <div className="cons" ref={ref} data-inview={inView ? 'true' : 'false'}>
-      <h3 className="stats__h3">Constructors’ Championship</h3>
+      <h3 className="stats__h3">{t('Constructors’ Championship')}</h3>
       <ol className="cons__list">
         {CONSTRUCTORS.map(([id, pts], i) => {
           const team = TEAM_BY_ID[id];
           return (
             <li key={id} style={{ ...teamVars(team), '--i': i, '--share': pts / top }}>
-              <Link className="cons__row" to={`#team-${id}`} data-cursor="view" data-cursor-label="Open">
+              <Link className="cons__row" to={`#team-${id}`} data-cursor="view" data-cursor-label={t('Open')}>
                 <span className="cons__pos t-num">{i + 1}</span>
                 <span className="cons__name">{team.name}</span>
                 <span className="cons__track">
@@ -214,7 +218,7 @@ function Constructors() {
           );
         })}
       </ol>
-      <p className="stats__foot">Mercedes sealed the title at round 20. Select a team to open its page.</p>
+      <p className="stats__foot">{t('Mercedes sealed the title at round 20. Select a team to open its page.')}</p>
     </div>
   );
 }
@@ -227,11 +231,11 @@ function Records() {
   const top = Math.max(...set.rows.map((r) => r.value));
   return (
     <div className="recs" ref={ref} data-inview={inView ? 'true' : 'false'}>
-      <h3 className="stats__h3">All-time records</h3>
-      <div className="recs__tabs" role="tablist" aria-label="Record">
+      <h3 className="stats__h3">{t('All-time records')}</h3>
+      <div className="recs__tabs" role="tablist" aria-label={t('Record')}>
         {keys.map((k) => (
           <button key={k} type="button" role="tab" id={`rec-tab-${k}`} aria-selected={k === tab} aria-controls="rec-panel" onClick={() => setTab(k)}>
-            {RECORDS[k].label}
+            {t(RECORDS[k].label)}
           </button>
         ))}
       </div>
@@ -246,7 +250,7 @@ function Records() {
           </li>
         ))}
       </ol>
-      <p className="stats__foot">Bars in a team’s colour belong to drivers and teams still racing in 2026.</p>
+      <p className="stats__foot">{t('Bars in a team’s colour belong to drivers and teams still racing in 2026.')}</p>
     </div>
   );
 }
@@ -255,20 +259,20 @@ function StandingsTable() {
   return (
     <details className="table">
       <summary>
-        <span>Full drivers’ standings as a table</span>
+        <span>{t('Full drivers’ standings as a table')}</span>
       </summary>
       <div className="table__scroll">
         <table>
-          <caption className="sr-only">Drivers’ Championship after round {AS_OF.round}</caption>
+          <caption className="sr-only">{t('Drivers’ Championship after round {round}', { round: AS_OF.round })}</caption>
           <thead>
             <tr>
-              <th scope="col">Pos</th>
-              <th scope="col">Driver</th>
-              <th scope="col">Team</th>
-              <th scope="col" className="num">Wins</th>
-              <th scope="col" className="num">Podiums</th>
-              <th scope="col" className="num">Poles</th>
-              <th scope="col" className="num">Points</th>
+              <th scope="col">{t('Pos')}</th>
+              <th scope="col">{t('Driver')}</th>
+              <th scope="col">{t('Team')}</th>
+              <th scope="col" className="num">{t('Wins')}</th>
+              <th scope="col" className="num">{t('Podiums')}</th>
+              <th scope="col" className="num">{t('Poles')}</th>
+              <th scope="col" className="num">{t('Points')}</th>
             </tr>
           </thead>
           <tbody>
@@ -285,7 +289,7 @@ function StandingsTable() {
                   <td>
                     <i className="table__chip" aria-hidden="true" />
                     {team.name}
-                    {STAND_IN[code] ? ' (stand-in)' : ''}
+                    {STAND_IN[code] ? ` (${t('stand-in')})` : ''}
                   </td>
                   <td className="num t-num">{s.wins}</td>
                   <td className="num t-num">{s.podiums}</td>
@@ -313,11 +317,15 @@ export default function Stats() {
       <div className="wrap">
         <header className="stats__head" ref={headRef} data-inview={headIn ? 'true' : 'false'}>
           <h2 className="t-display" data-skew="">
-            <SplitText text="The numbers" styleName="rise" />
+            <SplitText text={t('The numbers')} styleName="rise" />
           </h2>
           <p className="t-lead rise" style={{ '--delay': '260ms' }}>
-            The 2026 standings after round {AS_OF.round} of {AS_OF.of}, the {AS_OF.race}, with {REMAINING.map((r) => r.name).join(', ').replace(/, ([^,]*)$/, ' and $1')} still to
-            run. Both titles are already decided.
+            {t('The 2026 standings after round {round} of {of}, the {race}, with {left} still to run. Both titles are already decided.', {
+              round: AS_OF.round,
+              of: AS_OF.of,
+              race: t(AS_OF.race),
+              left: list(REMAINING.map((r) => t(r.name))),
+            })}
           </p>
         </header>
 
@@ -333,7 +341,7 @@ export default function Stats() {
           {MILESTONES.map((mile, i) => (
             <div key={mile.label} className="miles__item">
               <Count to={mile.value} className="miles__value" delay={i * 120} duration={1800} />
-              <p className="miles__label">{mile.label}</p>
+              <p className="miles__label">{t(mile.label)}</p>
               <p className="miles__who">{mile.who}</p>
             </div>
           ))}
@@ -341,26 +349,26 @@ export default function Stats() {
 
         <div className="stats__pair stats__pair--text">
           <div>
-            <h3 className="stats__h3">Youngest and oldest</h3>
+            <h3 className="stats__h3">{t('Youngest and oldest')}</h3>
             <dl className="ages">
               {AGES.map((a) => (
                 <div key={a.label}>
-                  <dt>{a.label}</dt>
+                  <dt>{t(a.label)}</dt>
                   <dd>
-                    <b className="t-num">{a.value}</b>
-                    <span>{a.who}</span>
+                    <b className="t-num">{t(a.value)}</b>
+                    <span>{t(a.who)}</span>
                   </dd>
                 </div>
               ))}
             </dl>
           </div>
           <div>
-            <h3 className="stats__h3">What 2026 added to the record books</h3>
+            <h3 className="stats__h3">{t('What 2026 added to the record books')}</h3>
             <ul className="firsts">
               {FIRSTS_2026.map(([place, text]) => (
                 <li key={place}>
-                  <b>{place}</b>
-                  <span>{text}</span>
+                  <b>{t(place)}</b>
+                  <span>{t(text)}</span>
                 </li>
               ))}
             </ul>

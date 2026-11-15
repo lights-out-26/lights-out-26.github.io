@@ -4,6 +4,7 @@ import { TEAM_BY_ID } from './data/teams';
 import { refresh } from './lib/scroll';
 import { initSmoothScroll, scrollToEl, scrollToY, refreshTriggers } from './lib/smooth';
 import { armSound } from './lib/sound';
+import { t, useLang } from './lib/lang';
 import Preloader from './components/Preloader';
 import Cursor from './components/Cursor';
 import Nav from './components/Nav';
@@ -13,6 +14,7 @@ import TeamPage from './pages/TeamPage';
 
 function Shell() {
   const { route } = useRouter();
+  useLang(); // a language switch re-renders everything below
   const [booted, setBooted] = useState(false);
   const previous = useRef(null);
   const onBoot = useCallback(() => setBooted(true), []);
@@ -53,7 +55,7 @@ function Shell() {
   return (
     <>
       <a className="skip" href="#main">
-        Skip to content
+        {t('Skip to content')}
       </a>
       <Nav />
       <main id="main">

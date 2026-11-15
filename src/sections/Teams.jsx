@@ -10,6 +10,7 @@ import { teamVars, standing, ordinal, ABBR } from '../lib/team';
 import useInView from '../hooks/useInView';
 import { useTilt } from '../hooks/usePointer';
 import useReducedMotion from '../hooks/useReducedMotion';
+import { t } from '../lib/lang';
 import './Teams.css';
 
 const SLAT_PAD = { t: 0.1, r: 0.3, b: 0.16, l: 0.04 };
@@ -66,9 +67,7 @@ function Slat({ team, index, on, onPick, onHover }) {
               <span className="mark" aria-hidden="true">
                 {ABBR[team.id]}
               </span>
-              <span>
-                {ordinal(place.pos)} in the standings, <span className="t-num">{place.points}</span> points
-              </span>
+              <span>{t('{pos} in the standings, {points} points', { pos: ordinal(place.pos), points: <span className="t-num">{place.points}</span> })}</span>
             </p>
             <h3 className="slat__title t-team">
               <SplitText text={team.name} styleName="rise" inView={on} stagger={18} delay={160} />
@@ -76,19 +75,19 @@ function Slat({ team, index, on, onPick, onHover }) {
             <p className="slat__entrant">{team.entrant}</p>
             <dl className="slat__facts">
               <div>
-                <dt>Country</dt>
-                <dd>{team.country}</dd>
+                <dt>{t('Country')}</dt>
+                <dd>{t(team.country)}</dd>
               </div>
               <div>
-                <dt>Base</dt>
-                <dd>{team.base}</dd>
+                <dt>{t('Base')}</dt>
+                <dd>{t(team.base)}</dd>
               </div>
               <div>
-                <dt>Power unit</dt>
+                <dt>{t('Power unit')}</dt>
                 <dd>{team.powerUnit}</dd>
               </div>
               <div>
-                <dt>Drivers</dt>
+                <dt>{t('Drivers')}</dt>
                 <dd>
                   {team.drivers.map((code) => {
                     const d = DRIVER_BY_CODE[code];
@@ -101,9 +100,9 @@ function Slat({ team, index, on, onPick, onHover }) {
                 </dd>
               </div>
             </dl>
-            <p className="slat__intro">{team.intro}</p>
-            <Link className="btn slat__link" to={`#team-${team.id}`} tabIndex={on ? 0 : -1} data-cursor="view" data-cursor-label="Open">
-              Open the {team.short || team.name} page
+            <p className="slat__intro">{t(team.intro)}</p>
+            <Link className="btn slat__link" to={`#team-${team.id}`} tabIndex={on ? 0 : -1} data-cursor="view" data-cursor-label={t('Open')}>
+              {t('Open the {team} page', { team: team.short || team.name })}
             </Link>
           </div>
 
@@ -112,7 +111,7 @@ function Slat({ team, index, on, onPick, onHover }) {
               ref={car}
               id={`${team.id}-a`}
               tint={team.colors.accent}
-              alt={`The ${team.chassisFull}`}
+              alt={t('The {car}', { car: team.chassisFull })}
               active={on}
               hd={wide()}
               pad={SLAT_PAD}
@@ -154,11 +153,13 @@ export default function Teams() {
     <section id="teams" className="teams" style={teamVars(TEAMS[active])} ref={ref} data-inview={inView ? 'true' : 'false'}>
       <header className="teams__head wrap">
         <h2 className="t-display" data-skew="">
-          <SplitText text="Eleven teams" styleName="brake" />
+          <SplitText text={t('Eleven teams')} styleName="brake" />
         </h2>
         <p className="t-lead rise" style={{ '--delay': '250ms' }}>
-          Ten became eleven in 2026, which puts 22 cars on the grid for the first time in a decade. They are shown here in championship order after round{' '}
-          {AS_OF.round}.
+          {t(
+            'Ten became eleven in 2026, which puts 22 cars on the grid for the first time in a decade. They are shown here in championship order after round {round}.',
+            { round: AS_OF.round }
+          )}
         </p>
       </header>
 

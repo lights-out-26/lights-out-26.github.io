@@ -5,6 +5,8 @@
  * the release light with the stationary time.
  */
 
+import { t } from '../lib/lang';
+
 const BARS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
 /**
@@ -43,7 +45,7 @@ function Radio() {
     <div className="pdeco pdeco--radio">
       <p className="pdeco__head">
         <i className="pdeco__dot" />
-        Team radio
+        {t('Team radio')}
         <span className="pdeco__wave">
           {BARS.map((i) => (
             <b key={i} style={{ '--b': i }} />
@@ -52,7 +54,7 @@ function Radio() {
       </p>
       <p className="pdeco__quote">“Box, box.”</p>
       <p className="pdeco__reply">
-        <span>Driver</span> Copy.
+        <span>{t('Driver')}</span> {t('Copy.')}
       </p>
     </div>
   );
@@ -61,7 +63,7 @@ function Radio() {
 function SpeedSign() {
   return (
     <div className="pdeco pdeco--sign">
-      <span className="pdeco__plate">Pit lane</span>
+      <span className="pdeco__plate">{t('Pit lane')}</span>
       <span className="pdeco__disc">
         <b className="t-num">80</b>
         <small>km/h</small>
@@ -83,10 +85,10 @@ function CrewPlan() {
         ))}
       </div>
       <p className="pdeco__legend">
-        <span data-role="wheel">12 on the wheels</span>
-        <span data-role="jack">3 on the jacks</span>
-        <span data-role="side">4 on the car</span>
-        <span data-role="release">1 on the release</span>
+        <span data-role="wheel">{t('12 on the wheels')}</span>
+        <span data-role="jack">{t('3 on the jacks')}</span>
+        <span data-role="side">{t('4 on the car')}</span>
+        <span data-role="release">{t('1 on the release')}</span>
       </p>
     </div>
   );
@@ -101,7 +103,7 @@ function Wheel() {
         <i className="pdeco__nut" />
       </span>
       <span className="pdeco__caption">
-        <b className="t-num">1</b> nut, one turn of the gun
+        {t('{n} nut, one turn of the gun', { n: <b className="t-num">1</b> })}
       </span>
     </div>
   );
@@ -116,7 +118,7 @@ function Release() {
       </span>
       <p className="pdeco__board">
         <b className="t-num">2.0</b>
-        <span>Seconds stationary</span>
+        <span>{t('Seconds stationary')}</span>
       </p>
     </div>
   );

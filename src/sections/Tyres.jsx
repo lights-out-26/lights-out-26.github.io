@@ -5,6 +5,7 @@ import { TYRES, COMPOUNDS, SIZES, RULES } from '../data/tyres';
 import useInView from '../hooks/useInView';
 import useProgress from '../hooks/useProgress';
 import useReducedMotion from '../hooks/useReducedMotion';
+import { t } from '../lib/lang';
 import './Tyres.css';
 
 const ROLE = ['hard', 'medium', 'soft'];
@@ -35,14 +36,14 @@ function Meters({ grip, life }) {
         ['Life', life],
       ].map(([label, value]) => (
         <div key={label}>
-          <dt>{label}</dt>
+          <dt>{t(label)}</dt>
           <dd>
             <span className="tmeter__bars" aria-hidden="true">
               {[1, 2, 3, 4, 5].map((n) => (
                 <i key={n} data-on={n <= value ? '' : undefined} style={{ '--n': n }} />
               ))}
             </span>
-            <span className="sr-only">{`${value} out of 5`}</span>
+            <span className="sr-only">{t('{n} out of 5', { n: value })}</span>
           </dd>
         </div>
       ))}
@@ -57,7 +58,7 @@ function Water({ water }) {
     <div className="twater">
       <p className="twater__fig">
         <strong className="t-num">{water.join('–')}</strong>
-        <span>litres of water a second, per tyre, at 300 km/h</span>
+        <span>{t('litres of water a second, per tyre, at 300 km/h')}</span>
       </p>
       <span className="twater__bar" aria-hidden="true">
         <i style={{ '--share': top / 85 }} />
@@ -71,28 +72,28 @@ function TyreCard({ tyre, index }) {
   return (
     <article className="tcard" ref={ref} data-tyre={tyre.id} data-inview={inView ? 'true' : 'false'} style={{ '--i': index }} aria-labelledby={`tyre-${tyre.id}`}>
       <div className="tcard__photo">
-        <Photo id={`tyres/${tyre.photo}`} alt={tyre.caption} ratio="4 / 5" className="wipe" />
+        <Photo id={`tyres/${tyre.photo}`} alt={t(tyre.caption)} ratio="4 / 5" className="wipe" />
         <Badge letter={tyre.letter} />
       </div>
       <div className="tcard__copy">
         <p className="tcard__label rise" style={{ '--delay': '200ms' }}>
-          <i aria-hidden="true" /> {tyre.colour}
+          <i aria-hidden="true" /> {t(tyre.colour)}
         </p>
         <h4 id={`tyre-${tyre.id}`} className="tcard__name">
-          <SplitText text={tyre.name} styleName="rise" delay={240} />
+          <SplitText text={t(tyre.name)} styleName="rise" delay={240} />
         </h4>
         <p className="tcard__line rise" style={{ '--delay': '320ms' }}>
-          {tyre.line}
+          {t(tyre.line)}
         </p>
         <p className="tcard__body rise" style={{ '--delay': '380ms' }}>
-          {tyre.body}
+          {t(tyre.body)}
         </p>
         <div className="rise" style={{ '--delay': '440ms' }}>
           {tyre.water ? <Water water={tyre.water} /> : <Meters grip={tyre.grip} life={tyre.life} />}
         </div>
         <ul className="tcard__use rise" style={{ '--delay': '500ms' }}>
           {tyre.use.map((u) => (
-            <li key={u}>{u}</li>
+            <li key={u}>{t(u)}</li>
           ))}
         </ul>
         <Credit id={`tyres/${tyre.photo}`} />
@@ -118,9 +119,9 @@ function CompoundScale() {
 
   return (
     <figure className="cscale" ref={ref} data-inview={inView ? 'true' : 'false'}>
-      <figcaption className="tgroup__cap">Five compounds, three at each race</figcaption>
+      <figcaption className="tgroup__cap">{t('Five compounds, three at each race')}</figcaption>
       <p className="sr-only">
-        From C1, the hardest, to C5, the softest. At a race where Pirelli brings C2, C3 and C4, C2 is the hard, C3 the medium and C4 the soft.
+        {t('From C1, the hardest, to C5, the softest. At a race where Pirelli brings C2, C3 and C4, C2 is the hard, C3 the medium and C4 the soft.')}
       </p>
       <div className="cscale__row" aria-hidden="true" style={{ '--start': start }}>
         {COMPOUNDS.map((c, i) => {
@@ -128,15 +129,15 @@ function CompoundScale() {
           return (
             <span key={c} className="cscale__c" data-role={role}>
               <b className="t-num">{c}</b>
-              <small>{role || ' '}</small>
+              <small>{role ? t(role) : ' '}</small>
             </span>
           );
         })}
         <i className="cscale__pick" />
       </div>
       <p className="cscale__ends" aria-hidden="true">
-        <span>Hardest</span>
-        <span>Softest</span>
+        <span>{t('Hardest')}</span>
+        <span>{t('Softest')}</span>
       </p>
     </figure>
   );
@@ -147,21 +148,21 @@ function WetScale() {
   const [ref, inView] = useInView({ threshold: 0.4 });
   return (
     <figure className="wscale" ref={ref} data-inview={inView ? 'true' : 'false'}>
-      <figcaption className="tgroup__cap">From dry to standing water</figcaption>
+      <figcaption className="tgroup__cap">{t('From dry to standing water')}</figcaption>
       <div className="wscale__bar">
-        <span data-t="slick">Slicks</span>
-        <span data-t="inter">Intermediate</span>
-        <span data-t="wet">Full wet</span>
+        <span data-t="slick">{t('Slicks')}</span>
+        <span data-t="inter">{t('Intermediate')}</span>
+        <span data-t="wet">{t('Full wet')}</span>
       </div>
       <ol className="wscale__ticks">
-        {['Dry', 'Damp', 'Wet', 'Standing water'].map((t, i) => (
-          <li key={t} style={{ '--drops': i }}>
+        {['Dry', 'Damp', 'Wet', 'Standing water'].map((w, i) => (
+          <li key={w} style={{ '--drops': i }}>
             <span className="wscale__drops" aria-hidden="true">
               {Array.from({ length: i }, (_, k) => (
                 <i key={k} />
               ))}
             </span>
-            {t}
+            {t(w)}
           </li>
         ))}
       </ol>
@@ -174,12 +175,12 @@ function Crossover() {
   const [ref, inView] = useInView({ threshold: 0.35 });
   return (
     <article className="tcross" ref={ref} data-inview={inView ? 'true' : 'false'} aria-labelledby="tyres-cross">
-      <p className="tgroup__label">The big call</p>
+      <p className="tgroup__label">{t('The big call')}</p>
       <h4 id="tyres-cross" className="tcross__title">
-        The crossover
+        {t('The crossover')}
       </h4>
       <figure className="tcross__chart">
-        <svg viewBox="0 0 320 178" role="img" aria-label="A sketch of lap times as a track dries: on intermediates they improve slowly, on slicks they start far slower and improve quickly, and the two lines cross">
+        <svg viewBox="0 0 320 178" role="img" aria-label={t('A sketch of lap times as a track dries: on intermediates they improve slowly, on slicks they start far slower and improve quickly, and the two lines cross')}>
           <line className="tcross__axis" x1="16" y1="8" x2="16" y2="158" />
           <line className="tcross__axis" x1="16" y1="158" x2="308" y2="158" />
           <path className="tcross__line tcross__line--inter" pathLength="1" d="M16 78 C 110 92, 200 104, 304 96" />
@@ -187,25 +188,26 @@ function Crossover() {
           <line className="tcross__mark" x1="167.6" y1="96" x2="167.6" y2="158" />
           <circle className="tcross__dot" cx="167.6" cy="96" r="5" />
           <text className="tcross__tag" x="174" y="86">
-            Switch
+            {t('Switch')}
           </text>
           <text className="tcross__key tcross__key--inter" x="24" y="68">
-            Intermediates
+            {t('Intermediates')}
           </text>
           <text className="tcross__key tcross__key--slick" x="300" y="141" textAnchor="end">
-            Slicks
+            {t('Slicks')}
           </text>
           <text className="tcross__axislabel" x="22" y="16">
-            ↑ Slower laps
+            {t('↑ Slower laps')}
           </text>
           <text className="tcross__axislabel" x="308" y="174" textAnchor="end">
-            Laps, as the track dries →
+            {t('Laps, as the track dries →')}
           </text>
         </svg>
       </figure>
       <p className="tcross__body">
-        As a wet track dries, a dry line appears and the intermediates start to overheat on it. Soon slicks would be faster: that lap is the crossover. Stop a lap too early and the
-        car slides around on slicks on a damp track; a lap too late and the time is gone. When the rain comes, the same call runs the other way.
+        {t(
+          'As a wet track dries, a dry line appears and the intermediates start to overheat on it. Soon slicks would be faster: that lap is the crossover. Stop a lap too early and the car slides around on slicks on a damp track; a lap too late and the time is gone. When the rain comes, the same call runs the other way.'
+        )}
       </p>
     </article>
   );
@@ -257,40 +259,43 @@ export default function Tyres() {
       <div className="wrap">
         <header className="tyres__head" ref={headRef} data-inview={headIn ? 'true' : 'false'}>
           <p className="tyres__kicker rise">
-            <span className="tyres__tag">Tyres</span> What the crew bolts on
+            <span className="tyres__tag">{t('Tyres')}</span> {t('What the crew bolts on')}
           </p>
           <h2 id="tyres-title" className="tyres__title t-display" data-skew="">
-            <SplitText text="Grip has a colour" styleName="rise" />
+            <SplitText text={t('Grip has a colour')} styleName="rise" />
           </h2>
           <p className="t-lead rise" style={{ '--delay': '300ms' }}>
-            Every car runs on the same Pirelli tyres, and the colour on the sidewall says which one it is: three slicks for a dry track, two treaded tyres for the rain. Choosing when
-            to change from one to another is most of a race strategy.
+            {t(
+              'Every car runs on the same Pirelli tyres, and the colour on the sidewall says which one it is: three slicks for a dry track, two treaded tyres for the rain. Choosing when to change from one to another is most of a race strategy.'
+            )}
           </p>
         </header>
 
         <figure className="trange" ref={rangeRef} data-inview={rangeIn ? 'true' : 'false'}>
           <div className="trange__frame">
-            <Photo id="tyres/range" alt="The five tyres side by side at the Formula 1 Exhibition in London, 2025: soft, medium, hard, intermediate and full wet" ratio="2 / 1" className="wipe" />
+            <Photo id="tyres/range" alt={t('The five tyres side by side at the Formula 1 Exhibition in London, 2025: soft, medium, hard, intermediate and full wet')} ratio="2 / 1" className="wipe" />
             <ol className="trange__tags" aria-hidden="true">
-              {TYRES.map((t, i) => (
-                <li key={t.id} data-tyre={t.id} style={{ left: `${t.hub[0]}%`, top: `${t.hub[1]}%`, '--i': i }}>
-                  <b>{t.letter}</b>
-                  <span>{t.name}</span>
+              {TYRES.map((ty, i) => (
+                <li key={ty.id} data-tyre={ty.id} style={{ left: `${ty.hub[0]}%`, top: `${ty.hub[1]}%`, '--i': i }}>
+                  <b>{ty.letter}</b>
+                  <span>{t(ty.name)}</span>
                 </li>
               ))}
             </ol>
           </div>
           <figcaption className="trange__cap">
-            <span>The whole range. The colours are the same in 2026; the tyres themselves are a little smaller.</span>
+            <span>{t('The whole range. The colours are the same in 2026; the tyres themselves are a little smaller.')}</span>
             <Credit id="tyres/range" />
           </figcaption>
         </figure>
 
         <Group
           kind="dry"
-          label="Slicks"
-          title="For a dry track"
-          text="No tread at all, so as much rubber as possible touches the road. Pirelli makes five compounds for 2026, from C1, the hardest, to C5, the softest, and brings three of them to each race. The softest of the three is marked red, the middle one yellow and the hardest white, so the colour always means the same thing, even when the compound under it changes."
+          label={t('Slicks')}
+          title={t('For a dry track')}
+          text={t(
+            'No tread at all, so as much rubber as possible touches the road. Pirelli makes five compounds for 2026, from C1, the hardest, to C5, the softest, and brings three of them to each race. The softest of the three is marked red, the middle one yellow and the hardest white, so the colour always means the same thing, even when the compound under it changes.'
+          )}
           aside={<CompoundScale />}
         >
           {dry.map((t, i) => (
@@ -300,9 +305,11 @@ export default function Tyres() {
 
         <Group
           kind="wet"
-          label="Treaded"
-          title="For a wet track"
-          text="On standing water a slick rides up on a film of water and loses its grip: aquaplaning. These two have a tread, grooves that push the water out from under the tyre so the rubber can still reach the track. They are for the wet only; on a dry track the tread overheats and wears away fast."
+          label={t('Treaded')}
+          title={t('For a wet track')}
+          text={t(
+            'On standing water a slick rides up on a film of water and loses its grip: aquaplaning. These two have a tread, grooves that push the water out from under the tyre so the rubber can still reach the track. They are for the wet only; on a dry track the tread overheats and wears away fast.'
+          )}
           aside={<WetScale />}
         >
           {wet.map((t, i) => (
@@ -313,21 +320,22 @@ export default function Tyres() {
 
         <div className="tmore">
           <article className="tpanel tpanel--worn" ref={wornRef} data-inview={wornIn ? 'true' : 'false'} aria-labelledby="tyres-worn">
-            <Photo id="tyres/worn" alt="A used hard tyre on a Haas after the 2024 Austrian Grand Prix, coated in rubber picked up from the track" ratio="4 / 3" className="wipe" />
-            <p className="tgroup__label rise">Why they stop</p>
+            <Photo id="tyres/worn" alt={t('A used hard tyre on a Haas after the 2024 Austrian Grand Prix, coated in rubber picked up from the track')} ratio="4 / 3" className="wipe" />
+            <p className="tgroup__label rise">{t('Why they stop')}</p>
             <h3 id="tyres-worn" className="tpanel__title">
-              Grip wears out
+              {t('Grip wears out')}
             </h3>
             <p className="tpanel__body rise" style={{ '--delay': '150ms' }}>
-              A tyre is at its best for only so many laps. Heat, the load through the corners and wheelspin wear the rubber away, and the lap times slowly drop off: degradation. Once
-              old tyres are losing more time than a stop costs in the pit lane, the driver is called in. A used tyre comes back coated in rubber it has picked up off the track.
+              {t(
+                'A tyre is at its best for only so many laps. Heat, the load through the corners and wheelspin wear the rubber away, and the lap times slowly drop off: degradation. Once old tyres are losing more time than a stop costs in the pit lane, the driver is called in. A used tyre comes back coated in rubber it has picked up off the track.'
+              )}
             </p>
             <Credit id="tyres/worn" />
           </article>
 
           <article className="tpanel tpanel--side" ref={sideRef} data-inview={sideIn ? 'true' : 'false'} aria-labelledby="tyres-size">
             <div className="tside">
-              <Photo id="tyres/sidewall" alt="A 2026 medium tyre on a car, its size, 280/705-18, moulded into the sidewall" ratio="1 / 1" className="wipe" />
+              <Photo id="tyres/sidewall" alt={t('A 2026 medium tyre on a car, its size, 280/705-18, moulded into the sidewall')} ratio="1 / 1" className="wipe" />
               {/* Where the size is moulded into the rubber (scripts/prepare-tyres.py). */}
               <span className="tside__pin" aria-hidden="true" style={{ left: '21.8%', top: '30%' }}>
                 <i />
@@ -336,19 +344,20 @@ export default function Tyres() {
             </div>
             <p className="tgroup__label rise">2026</p>
             <h3 id="tyres-size" className="tpanel__title">
-              Read the sidewall
+              {t('Read the sidewall')}
             </h3>
             <p className="tpanel__body rise" style={{ '--delay': '150ms' }}>
-              The size is moulded into the rubber: 280 mm wide and 705 mm across, on an 18-inch wheel. That is a 2026 front tyre. Both ends are narrower and smaller than in 2022 to 2025,
-              and a set of four weighs 1.6 kg less.
+              {t(
+                'The size is moulded into the rubber: 280 mm wide and 705 mm across, on an 18-inch wheel. That is a 2026 front tyre. Both ends are narrower and smaller than in 2022 to 2025, and a set of four weighs 1.6 kg less.'
+              )}
             </p>
             <dl className="tsizes rise" style={{ '--delay': '250ms' }}>
               {SIZES.map((s) => (
                 <div key={s.axle}>
-                  <dt>{s.axle}</dt>
+                  <dt>{t(s.axle)}</dt>
                   <dd>
                     <strong className="t-num">{s.now.join('/')}</strong>
-                    <span className="t-num">was {s.was.join('/')}</span>
+                    <span className="t-num">{t('was {v}', { v: s.was.join('/') })}</span>
                   </dd>
                 </div>
               ))}
@@ -357,15 +366,15 @@ export default function Tyres() {
           </article>
 
           <article className="tpanel tpanel--rules" ref={rulesRef} data-inview={rulesIn ? 'true' : 'false'} aria-labelledby="tyres-rules">
-            <p className="tgroup__label rise">The rules</p>
+            <p className="tgroup__label rise">{t('The rules')}</p>
             <h3 id="tyres-rules" className="tpanel__title">
-              Two compounds, every dry race
+              {t('Two compounds, every dry race')}
             </h3>
             <ol className="trules">
               {RULES.map((r, i) => (
                 <li key={r.figure} className="rise" style={{ '--delay': `${150 + i * 110}ms` }}>
                   <strong className="t-num">{r.figure}</strong>
-                  <span>{r.text}</span>
+                  <span>{t(r.text)}</span>
                 </li>
               ))}
             </ol>

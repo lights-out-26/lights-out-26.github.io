@@ -236,3 +236,22 @@
     animation: none;
   }
 }
+
+/* Language switch: a round button beside the sound toggle, naming the language it switches to. */
+.soundtoggle.langtoggle {
+  justify-content: center;
+  width: 44px;
+  padding: 0;
+}
+
+.menu__lang {
+  margin-top: 0.4rem;
+  text-align: left;
+}
+
+/* Phones have no room left in the bar, so there the switch lives in the menu only. */
+@media (max-width: 600px) {
+  .soundtoggle.langtoggle {
+    display: none;
+  }
+}

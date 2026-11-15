@@ -1,4 +1,5 @@
 import { setSound, useSound } from '../lib/sound';
+import { t } from '../lib/lang';
 import './SoundToggle.css';
 
 /** On/off for the engine sounds. Off until the viewer turns it on. */
@@ -9,8 +10,8 @@ export default function SoundToggle({ className = '' }) {
       type="button"
       className={`soundtoggle ${className}`}
       aria-pressed={on}
-      aria-label={on ? 'Turn engine sound off' : 'Turn engine sound on'}
-      title={on ? 'Sound on' : 'Sound off'}
+      aria-label={t(on ? 'Turn engine sound off' : 'Turn engine sound on')}
+      title={t(on ? 'Sound on' : 'Sound off')}
       onClick={() => setSound(!on)}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -24,7 +25,7 @@ export default function SoundToggle({ className = '' }) {
           <path className="soundtoggle__wave" d="M15.5 9.5l5 5m0-5l-5 5" />
         )}
       </svg>
-      <span className="soundtoggle__text">{on ? 'Sound on' : 'Sound off'}</span>
+      <span className="soundtoggle__text">{t(on ? 'Sound on' : 'Sound off')}</span>
     </button>
   );
 }
