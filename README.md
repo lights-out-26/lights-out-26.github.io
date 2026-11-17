@@ -8,6 +8,18 @@ An unofficial, animation-led tour of the 2026 Formula 1 grid: eleven teams, twen
 
 Not affiliated with Formula 1, the FIA or any team.
 
+## 외주 작업 / Work with me
+
+DamianoX7이 외주 포트폴리오로 만든 비공식 팬 사이트입니다. 이 사이트에서 보여 드린 것처럼 이런 작업을 맡겨 주실 수 있습니다.
+
+- 실제 제품 사진이 움직이고 빛이 바뀌는 인터랙티브 소개 사이트(WebGL)
+- 스크롤에 따라 장면이 바뀌는 브랜드·캠페인 페이지
+- 사운드가 들어간 몰입형 페이지
+- 한국어·영어 두 언어 사이트
+- 모바일 대응과 모션 줄이기 기본 포함
+
+Built by DamianoX7 as a portfolio piece for freelance work: interactive product showcases with real photography brought to life in WebGL, scroll-driven brand and campaign pages, immersive pages with sound, and bilingual Korean/English sites.
+
 ## Highlights
 
 - **Real photographs that move.** Every car is a real photograph with a depth map estimated offline (Depth Anything V2). A WebGL2 shader turns it into a scene: depth parallax, relighting that follows the pointer, spinning wheels, motion blur, brake glow and heat haze.
