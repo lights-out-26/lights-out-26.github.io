@@ -1,8 +1,24 @@
 # Lights Out 26
 
+**Live:** https://lights-out-26.github.io/ · English and 한국어
+
+![The Ferrari team page: the real SF-26, cut out and relit in WebGL](docs/ferrari.jpg)
+
 An unofficial, animation-led tour of the 2026 Formula 1 grid: eleven teams, twenty-two cars and a new rulebook. Built with React, CSS, GSAP and WebGL as a front-end portfolio piece.
 
 Not affiliated with Formula 1, the FIA or any team.
+
+## Highlights
+
+- **Real photographs that move.** Every car is a real photograph with a depth map estimated offline (Depth Anything V2). A WebGL2 shader turns it into a scene: depth parallax, relighting that follows the pointer, spinning wheels, motion blur, brake glow and heat haze.
+- **Scenes written as timelines.** The renderer exposes a plain state object per car; GSAP tweens it and the shader reads it every frame, so a car braking in is an ordinary GSAP timeline.
+- **Scroll as the throttle.** Pinned, scroll-driven scenes (CSS scroll timelines with a JavaScript fallback), including a team-page sequence where scrolling takes the car from 0 to 340 km/h.
+- **Sound designed for the page.** Real Formula 1 recordings at the start lights and in the history section, and a turbo V6 synthesised sample by sample in an AudioWorklet that revs with the scroll.
+- **Eleven team pages**, each with its own colours, type and pattern.
+- **Checked data.** A script recomputes every driver's and team's points from the race results and fails if they do not match the published standings.
+- **Two languages and reduced motion.** The whole site switches between English and Korean, and `prefers-reduced-motion` swaps every effect for its still end state.
+
+The rest of this README explains how it works.
 
 ## Run it
 
